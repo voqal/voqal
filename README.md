@@ -1,4 +1,4 @@
-![](.github/media/logo-horizontal-text.svg)
+<img src='.github/media/logo-horizontal-text.svg' width='250'>
 
 ![Build](https://github.com/voqal/voqal-plugin/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
