@@ -1,25 +1,23 @@
 <img src='.github/media/logo-horizontal-text.svg' width='250'>
 
 ![Build](https://github.com/voqal/voqal-plugin/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/23086-voqal--vocal-software-development.svg)](https://plugins.jetbrains.com/plugin/23086-voqal--vocal-software-development)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal--vocal-software-development.svg)](https://plugins.jetbrains.com/plugin/23086-voqal--vocal-software-development)
 
 ## Introduction
 
 <!-- Plugin description -->
 
-Voqal (pronounced vocal) is a vocal pair programming assistant.
+Voqal (pronounced vocal) is a voice-controlled pair programming assistant.
 Voqal allows you to program in IntelliJ using OpenAI's GPT4 without copy/pasting code.
 Using Voqal, you can simply ask for code to be explained or modified using natural spoken language.
-No context switch necessary. Voqal is also useful for creating multiple sections of code simultaneously.
-While you are writing a function you can ask Vocal to create entire classes and functions that will be waiting for you
-before you finish typing.
+No context switching necessary
 
 <!-- Plugin description end -->
 
 ## Configuration
 
-To use Voqal you need a valid OpenAI key and PicoVoice key.
+To use Voqal you need valid [Picovoice](https://picovoice.ai) & [OpenAI](https://openai.com) keys.
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
 
