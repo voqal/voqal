@@ -9,7 +9,7 @@
 <!-- Plugin description -->
 
 Voqal (pronounced vocal) is a vocal programming assistant.
-Voqal allows you to program in IntelliJ with OpenAI's GPT4 using only voice.
+Voqal allows you to program in IntelliJ with OpenAI's GPT4 using only your voice.
 Using Voqal, you can simply ask for code to be explained or modified using natural spoken language.
 No more copy/pasting to ChatGPT!
 
