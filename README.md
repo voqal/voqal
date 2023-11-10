@@ -8,7 +8,7 @@
 
 <!-- Plugin description -->
 
-Voqal (pronounced vocal) is a dictation driven software development tool.
+Voqal (pronounced vocal) is a vocal pair programming assistant.
 Voqal allows you to program in IntelliJ using OpenAI's GPT4 without copy/pasting code.
 Using Voqal, you can simply ask for code to be explained or modified using natural spoken language.
 No context switch necessary. Voqal is also useful for creating multiple sections of code simultaneously.
