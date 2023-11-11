@@ -1,4 +1,2 @@
-package example
-
 class NiceifyComments {
 }

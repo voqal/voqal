@@ -2,7 +2,6 @@
  * Ask Voqal to rewrite this code so that "callFibImplementation" calls
  * either "slowFib" or "fastFib" by adding a new param called "goFast".
  */
-package example
 
 val slowResult = callFibImplementation(10)
 val fastResult = callFibImplementation(10)

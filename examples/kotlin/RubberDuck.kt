@@ -1,3 +1,7 @@
+/**
+ * This code has an error, see if Voqal can help you find and fix it.
+ */
+
 fun binarySearch(sortedList: List<Int>, target: Int): Int {
     var low = 0
     var high = sortedList.size - 1

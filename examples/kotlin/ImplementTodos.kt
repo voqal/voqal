@@ -1,5 +1,3 @@
-package example
-
 class ImplementTodos {
 
     fun add(a: Int, b: Int): Int {

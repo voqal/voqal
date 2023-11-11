@@ -1,7 +1,6 @@
 /**
  * Exercise: highlight different sections of the code and ask Voqal "what does this do?"
  */
-package example
 
 fun add(a: Int, b: Int): Int {
     return a + b
