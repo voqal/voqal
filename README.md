@@ -1,6 +1,5 @@
 <img src='.github/media/logo-horizontal-text.svg' width='250'>
 
-![Build](https://github.com/voqal/voqal-plugin/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/23086-voqal--vocal-software-development.svg)](https://plugins.jetbrains.com/plugin/23086-voqal--vocal-software-development)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal--vocal-software-development.svg)](https://plugins.jetbrains.com/plugin/23086-voqal--vocal-software-development)
 
