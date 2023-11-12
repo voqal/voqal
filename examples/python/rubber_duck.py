@@ -1,5 +1,3 @@
-# This code has an error, see if Voqal can help you find and fix it.
-
 def binary_search(sorted_list, target):
     low = 0
     high = len(sorted_list) - 1
