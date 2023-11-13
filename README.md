@@ -14,6 +14,10 @@ No more copy/pasting to ChatGPT!
 
 <!-- Plugin description end -->
 
+## Overview
+
+<img src='.github/media/bring_your_own_ai.svg' width='600'>
+
 ## Configuration
 
 To use Voqal you need valid [Picovoice](https://picovoice.ai) & [OpenAI](https://openai.com) keys.
