@@ -18,14 +18,10 @@ No more copy/pasting to ChatGPT!
 
 <img src='.github/media/bring_your_own_ai.svg' width='600'>
 
-## Demonstration
-
-<video src="https://github.com/voqal/voqal/assets/150201955/43b6dc68-e691-400c-81f2-0fb28c90fceb" width="400">
-
 ## Configuration
 
 To use Voqal you need valid [Picovoice](https://picovoice.ai) & [OpenAI](https://openai.com) keys.
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
+## Demonstration
 
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+<video src="https://github.com/voqal/voqal/assets/150201955/43b6dc68-e691-400c-81f2-0fb28c90fceb" width="500" />
