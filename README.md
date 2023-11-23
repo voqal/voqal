@@ -14,7 +14,7 @@ No more copy/pasting to ChatGPT!
 
 <!-- Plugin description end -->
 
-## Architecture
+## Overview
 
 <img src='.github/media/bring_your_own_ai.svg' width='600'>
 
