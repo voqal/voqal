@@ -16,7 +16,7 @@ No more copy/pasting to ChatGPT!
 
 ## Overview
 
-<img src='.github/media/bring_your_own_ai.svg' width='600'>
+<img src='.github/media/fully_configurable.svg' width='600'>
 
 ## Demonstration
 
