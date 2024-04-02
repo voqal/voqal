@@ -25,7 +25,7 @@ data. Voqal collects no personal data, audio recordings, or source code.
 
 ## Natural Oral Programming
 
-<video src="https://github.com/voqal/voqal/assets/150201955/43b6dc68-e691-400c-81f2-0fb28c90fceb" width="500">
+<video src="https://github.com/voqal/voqal/assets/3278877/2783f724-5b51-46a8-b804-ec46f1dd374c" width="500">
 </video>
 
 ## Natural Written Programming
