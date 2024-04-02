@@ -20,7 +20,7 @@ data. Voqal collects no personal data, audio recordings, or source code.
 ## Overview
 
 <p align="center">
-  <img src=".github/media/fully_configurable.svg" />
+  <img src=".github/media/fully_configurable.svg" width="600" />
 </p>
 
 ## Natural Oral Programming
