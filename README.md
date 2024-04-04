@@ -14,7 +14,6 @@ improve your focus and productivity. By typing with Voqal, you can quickly trans
 snippets, saving you time and effort. Voqal is [fully configurable](https://docs.voqal.dev/prompting/overview)
 and [privacy-focused](https://docs.voqal.dev/privacy), allowing you to customize your experience and control your
 data. Voqal collects no personal data, audio recordings, or source code.
-For more information, see the [documentation](https://docs.voqal.dev).
 
 <!-- Plugin description end -->
 
