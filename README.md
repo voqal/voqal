@@ -7,7 +7,7 @@
 
 <!-- Plugin description -->
 
-The Voqal Assistant is a programming assistant built for software developers looking to enhance their productivity with
+Voqal is a programming assistant built for software developers looking to enhance their productivity with
 natural language programming. Using Voqal, you can navigate, write, run, and debug software in JetBrains IDEs using both
 oral and written speech. You can write code faster by voice coding with Voqal, reduce repetitive strain injuries, and
 improve your focus and productivity. By typing with Voqal, you can quickly translate plain English into accurate code
