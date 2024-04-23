@@ -7,13 +7,12 @@
 
 <!-- Plugin description -->
 
-Voqal is a programming assistant built for software developers looking to enhance their productivity with
-natural language programming. Using Voqal, you can navigate, write, run, and debug software in JetBrains IDEs using both
-oral and written speech. You can write code faster by voice coding with Voqal, reduce repetitive strain injuries, and
-improve your focus and productivity. By typing with Voqal, you can quickly translate plain English into accurate code
-snippets, saving you time and effort. Voqal is [promptable](https://docs.voqal.dev/prompting/overview)
-and [privacy-focused](https://docs.voqal.dev/privacy), allowing you to customize your experience and control your
-data. Voqal collects no personal data, audio recordings, or source code.
+Voqal is a programming assistant built for software developers looking to enhance their productivity with natural speech
+programming. Using Voqal, you can navigate, write, run, and debug software in JetBrains IDEs using your voice. Write
+code faster, reduce repetitive strain injuries, and improve focus and productivity. Voqal
+is [promptable](https://docs.voqal.dev/prompting/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
+allowing you to customize your experience and control your data. Voqal collects no personal data, audio recordings, or
+source code.
 
 <!-- Plugin description end -->
 
