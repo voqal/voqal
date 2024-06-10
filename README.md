@@ -22,12 +22,7 @@ source code.
   <img src=".github/media/fully_configurable.svg" width="600" />
 </p>
 
-## Natural Oral Programming
+## Demonstration
 
-<video src="https://github.com/voqal/voqal/assets/3278877/2783f724-5b51-46a8-b804-ec46f1dd374c" width="500">
-</video>
-
-## Natural Written Programming
-
-<video src="https://github.com/voqal/voqal/assets/3278877/1752758a-e63d-4710-bdd9-36e0200ce65d" width="500">
+<video src="https://github.com/voqal/voqal/assets/3278877/47547dd0-9614-4f51-87de-ecd6bd484d33" width="500">
 </video>
