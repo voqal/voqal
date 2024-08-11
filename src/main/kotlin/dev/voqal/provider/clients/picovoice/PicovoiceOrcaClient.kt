@@ -1,0 +1,122 @@
+package dev.voqal.provider.clients.picovoice
+
+import com.aallam.openai.api.audio.SpeechRequest
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
+import com.sun.jna.Pointer
+import com.sun.jna.ptr.IntByReference
+import com.sun.jna.ptr.PointerByReference
+import dev.voqal.provider.TtsProvider
+import dev.voqal.provider.clients.picovoice.natives.OrcaNative
+import dev.voqal.provider.clients.picovoice.natives.PicovoiceNative
+import dev.voqal.services.VoqalConfigService
+import dev.voqal.services.getVoqalLogger
+import io.ktor.utils.io.*
+import org.apache.commons.lang3.SystemUtils
+import java.io.File
+import java.nio.ByteBuffer
+
+class PicovoiceOrcaClient(
+    private val project: Project,
+    picovoiceKey: String
+) : TtsProvider {
+
+    companion object {
+        @JvmStatic
+        val VOICES = arrayOf("female", "male")
+    }
+
+    private val native: OrcaNative
+    private val orca: Pointer
+    private var synthesizeParams: Pointer
+    private var validCharacters: Array<String>
+    private var invalidCharactersRegex: Regex
+
+    init {
+        val log = project.getVoqalLogger(this::class)
+
+        NativesExtractor.extractNatives(project)
+        val pvorcaLibraryPath = if (SystemUtils.IS_OS_WINDOWS) {
+            File(
+                NativesExtractor.workingDirectory,
+                "pvorca/lib/windows/amd64/libpv_orca.dll".replace("/", "\\")
+            )
+        } else if (SystemUtils.IS_OS_LINUX) {
+            File(NativesExtractor.workingDirectory, "pvorca/lib/linux/x86_64/libpv_orca.so")
+        } else {
+            val arch = NativesExtractor.getMacArchitecture()
+            File(NativesExtractor.workingDirectory, "pvorca/lib/mac/$arch/libpv_orca.dylib")
+        }
+        val voice = project.service<VoqalConfigService>().getConfig().textToSpeechSettings.voice
+        val orcaModelPath = File(
+            NativesExtractor.workingDirectory,
+            "pvorca/lib/common/orca_params_$voice.pv".replace("/", File.separator)
+        )
+
+        native = OrcaNative.getINSTANCE(pvorcaLibraryPath)
+        log.debug("Orca version: " + native.pv_orca_version())
+
+        val orcaRef = PointerByReference()
+        val status = native.pv_orca_init(
+            picovoiceKey,
+            orcaModelPath.absolutePath,
+            orcaRef
+        )
+        PicovoiceNative.throwIfError(log, native, status)
+        orca = orcaRef.value
+
+        val synthesizeParamsRef = PointerByReference()
+        PicovoiceNative.throwIfError(
+            log, native, native.pv_orca_synthesize_params_init(synthesizeParamsRef)
+        )
+        synthesizeParams = synthesizeParamsRef.value
+
+        val validCharactersRef = PointerByReference()
+        val numCharactersRef = IntByReference()
+        PicovoiceNative.throwIfError(
+            log, native, native.pv_orca_valid_characters(orca, numCharactersRef, validCharactersRef)
+        )
+
+        validCharacters = validCharactersRef.value.getStringArray(0, numCharactersRef.value)
+        native.pv_orca_valid_characters_delete(validCharactersRef.value)
+        invalidCharactersRegex = "[^${validCharacters.joinToString("")}]".toRegex()
+    }
+
+    override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
+        val log = project.getVoqalLogger(this::class)
+        val sampleRateRef = IntByReference()
+        val pcmRef = PointerByReference()
+        val numAlignmentsRef = IntByReference()
+        val alignmentsRef = PointerByReference()
+        val status = native.pv_orca_synthesize(
+            orca,
+            request.input,
+            synthesizeParams,
+            sampleRateRef,
+            pcmRef,
+            numAlignmentsRef,
+            alignmentsRef
+        )
+        PicovoiceNative.throwIfError(log, native, status)
+
+        val pcm = pcmRef.value
+        val numSamples = sampleRateRef.value
+        val pcmBytes = pcm.getByteArray(0, numSamples * 2)
+        native.pv_orca_pcm_delete(pcm)
+        native.pv_orca_word_alignments_delete(numAlignmentsRef.value, alignmentsRef.value)
+        return TtsProvider.RawAudio(
+            ByteReadChannel(ByteBuffer.wrap(pcmBytes)),
+            22050f,
+            16,
+            1
+        )
+    }
+
+    override fun isWavOutput() = true
+    override fun isRawOutput() = true
+
+    override fun dispose() {
+        native.pv_orca_delete(orca)
+        native.pv_orca_synthesize_params_delete(synthesizeParams)
+    }
+}

@@ -1,0 +1,88 @@
+<idea-plugin>
+    <id>dev.voqal</id>
+    <name>Voqal Assistant</name>
+    <vendor>voqal.dev</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>messages.VoqalBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Voqal" anchor="right" icon="/icons/iconToolWindow.svg" canCloseContents="true"
+                    factoryClass="dev.voqal.ide.ui.toolwindow.VoqalToolWindowFactory"/>
+        <postStartupActivity implementation="dev.voqal.VoqalProjectActivity"/>
+        <projectConfigurable
+                instance="dev.voqal.config.configurable.VoqalConfigurable"
+                groupId="tools"
+                id="Voqal"
+                displayName="Voqal"/>
+        <projectConfigurable
+                instance="dev.voqal.config.configurable.SpeechToTextConfigurable"
+                groupId="tools"
+                id="Voqal.SpeechToText"
+                displayName="Speech-to-Text"
+                parentId="Voqal"/>
+        <projectConfigurable
+                instance="dev.voqal.config.configurable.LanguageModelsConfigurable"
+                groupId="tools"
+                id="Voqal.LanguageModels"
+                displayName="Language Models"
+                parentId="Voqal"/>
+        <projectConfigurable
+                instance="dev.voqal.config.configurable.PromptLibraryConfigurable"
+                groupId="tools"
+                id="Voqal.PromptLibrary"
+                displayName="Prompt Library"
+                parentId="Voqal.LanguageModels"/>
+        <projectConfigurable
+                instance="dev.voqal.config.configurable.TextToSpeechConfigurable"
+                groupId="tools"
+                id="Voqal.TextToSpeech"
+                displayName="Text-to-Speech"
+                parentId="Voqal"/>
+        <statusBarWidgetFactory implementation="dev.voqal.status.VoqalStatusWidgetFactory" id="dev.voqal.widget"/>
+        <notificationGroup id="Voqal Notification"
+                           displayType="BALLOON"/>
+        <iconMapper mappingFile="VoqalIconMappings.json"/>
+    </extensions>
+
+    <actions>
+        <action id="voqal.ToggleEditMode"
+                class="dev.voqal.ide.actions.mode.ToggleEditModeAction"
+                text="Toggle Edit Mode" description="Edit Mode">
+            <keyboard-shortcut first-keystroke="alt c" keymap="$default"/>
+        </action>
+        <action id="voqal.enableVoqal"
+                class="dev.voqal.ide.actions.EnableVoqalAction"
+                text="Enable Voqal" description="Enable Voqal">
+            <override-text place="MainMenu" text="Enable Voqal"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action id="voqal.disableVoqal" use-shortcut-of="voqal.enableVoqal"
+                class="dev.voqal.ide.actions.DisableVoqalAction"
+                text="Disable Voqal" description="Disable Voqal">
+            <override-text place="MainMenu" text="Disable Voqal"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action id="voqal.viewPrompt"
+                class="dev.voqal.ide.actions.ViewPromptAction"
+                text="View Prompt" description="View Prompt">
+            <override-text place="MainMenu" text="View Prompt"/>
+            <override-text place="popup" use-text-of-place="MainMenu"/>
+        </action>
+        <action id="voqal.openPromptLibrarySettings"
+                class="dev.voqal.ide.actions.OpenPromptLibraryAction"
+                text="Open Prompt Library" description="Open Prompt Library">
+        </action>
+
+        <group id="voqal.enabled.statusBarPopup">
+            <reference id="voqal.openPromptLibrarySettings"/>
+            <reference id="voqal.viewPrompt"/>
+            <separator/>
+            <reference id="voqal.disableVoqal"/>
+        </group>
+        <group id="voqal.disabled.statusBarPopup">
+            <reference id="voqal.enableVoqal"/>
+        </group>
+    </actions>
+</idea-plugin>

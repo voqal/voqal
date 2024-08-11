@@ -1,0 +1,99 @@
+name: Run Benchmarks
+on:
+  workflow_dispatch:
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+
+jobs:
+
+  langTest:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        modelName:
+          - "gpt-4o-2024-08-06"
+          - "gpt-4o-mini"
+#          - "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+          - "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+          - "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
+          - "gemini-1.5-flash-latest"
+          - "gemini-1.5-pro-latest"
+#          - "gemini-1.5-pro-exp-0801"
+#          - "claude-3-5-sonnet-20240620"
+#          - "claude-3-sonnet-20240229"
+#          - "codestral-latest"
+#          - "open-mistral-nemo"
+        lang:
+          - "JAVA"
+          - "kotlin"
+          - "Python"
+          - "go"
+          - "JavaScript"
+#        markdownTools:
+#          - "true"
+#          - "false"
+
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Setup Environment
+        run: |
+          if [[ ${{ matrix.modelName }} =~ ^mistral ]]; then
+            echo "VQL_MODEL_PROVIDER=mistralai" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.MISTRAL_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^open-mistral ]]; then
+            echo "VQL_MODEL_PROVIDER=mistralai" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.MISTRAL_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^codestral ]]; then
+            echo "VQL_MODEL_PROVIDER=mistralai" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.MISTRAL_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^gemini ]]; then
+            echo "VQL_MODEL_PROVIDER=google_api" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.GOOGLE_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^meta ]]; then
+            echo "VQL_MODEL_PROVIDER=togetherai" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.TOGETHERAI_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^llama ]]; then
+            echo "VQL_MODEL_PROVIDER=groq" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.GROQ_API_KEY }}" >> $GITHUB_ENV
+          elif [[ ${{ matrix.modelName }} =~ ^claude ]]; then
+            echo "VQL_MODEL_PROVIDER=anthropic" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> $GITHUB_ENV
+          else
+            echo "VQL_MODEL_PROVIDER=openai" >> $GITHUB_ENV
+            echo "VQL_MODEL_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run Benchmark (${{ matrix.modelName }} - ${{ matrix.lang }})
+        run: ./gradlew --scan :test -PrunSpecificTests='benchmark/**'
+        env:
+          VQL_LANG: ${{ matrix.lang }}
+          VQL_BENCHMARK_VERSION: ${{ github.sha }}
+          VQL_MODEL_NAME: ${{ matrix.modelName }}
+          VQL_BENCHMARK_MODE: true
+          VQL_OBSERVABILITY_PROVIDER: Helicone
+          VQL_OBSERVABILITY_KEY: ${{ secrets.HELICONE_API_KEY }}
+          VQL_OBSERVABILITY_USER_ID: benchmark
+          VQL_EDIT_FORMAT: FULL_TEXT
+#          VQL_MARKDOWN_TOOLS: ${{ matrix.markdownTools }}
+
+      - name: Output log
+        run: cat /tmp/voqal-test.log
+        if: always()

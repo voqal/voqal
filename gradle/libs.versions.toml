@@ -1,0 +1,73 @@
+[versions]
+# libraries
+annotations = "24.1.0"
+ktor = "2.3.12"
+vertx = "4.5.9"
+openai-client = "3.8.2"
+protobuf = "2.3.12"
+jlayer = "1.0.1"
+okio = "3.9.0"
+jackson-databind = "2.17.2"
+joor = "0.9.15"
+commons-text = "1.12.0"
+pebble = "3.2.2"
+flexmark = "0.64.8"
+hutool-core = "5.8.30"
+github-core = "2.1.5"
+jtokkit = "1.1.0"
+libfvad-jni = "1.0.0"
+vertexai = "1.7.0"
+jPowerShell = "3.1.1"
+kotlin-stdlib = "1.9.25"
+mockito-kotlin = "5.4.0"
+junit4 = "4.13.2"
+
+# plugins
+kotlin = "1.9.25"
+changelog = "2.2.1"
+intelliJPlatform = "2.0.1"
+qodana = "0.1.13"
+kover = "0.7.6"
+
+[libraries]
+annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+vertx-core = { module = "io.vertx:vertx-core", version.ref="vertx" }
+vertx-lang-kotlin-coroutines = { module = "io.vertx:vertx-lang-kotlin-coroutines", version.ref="vertx" }
+vertx-junit5 = { module = "io.vertx:vertx-junit5", version.ref="vertx" }
+ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref="ktor" }
+ktor-client-java-jvm = { module = "io.ktor:ktor-client-java-jvm", version.ref="ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref="ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref="ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref="ktor" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref="ktor" }
+ktor-serialization-kotlinx = { module = "io.ktor:ktor-serialization-kotlinx", version.ref="ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor" }
+ktor-websocket-serialization-jvm = { module = "io.ktor:ktor-websocket-serialization-jvm", version.ref="ktor" }
+ktor-serialization-kotlinx-protobuf = { module = "io.ktor:ktor-serialization-kotlinx-protobuf", version.ref="protobuf" }
+
+openai-core = { module = "com.aallam.openai:openai-core", version.ref="openai-client" }
+openai-client = { module = "com.aallam.openai:openai-client", version.ref="openai-client" }
+
+jlayer = { module = "javazoom:jlayer", version.ref="jlayer" }
+okio = { module = "com.squareup.okio:okio-jvm", version.ref="okio" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref="jackson-databind" }
+joor = { module = "org.jooq:joor", version.ref="joor" }
+commons-text = { module = "org.apache.commons:commons-text", version.ref="commons-text" }
+pebble = { module = "io.pebbletemplates:pebble", version.ref="pebble" }
+flexmark = { module = "com.vladsch.flexmark:flexmark", version.ref="flexmark" }
+hutool-core = { module = "cn.hutool:hutool-core", version.ref="hutool-core" }
+github-core = { module = "org.eclipse.mylyn.github:org.eclipse.egit.github.core", version.ref="github-core" }
+jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
+libfvad-jni = { module = "io.github.givimad:libfvad-jni", version.ref="libfvad-jni" }
+vertexai = { module = "com.google.cloud:google-cloud-vertexai", version.ref="vertexai" }
+jPowerShell = { module = "com.profesorfalken:jPowerShell", version.ref="jPowerShell" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref="kotlin-stdlib" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref="mockito-kotlin" }
+junit4 = { module = "junit:junit", version.ref="junit4" }
+
+[plugins]
+changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
+intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }

@@ -1,0 +1,12 @@
+{
+  "icons": {
+    "expui": {
+      "action": {
+        "send.svg": "icons/send.svg"
+      },
+      "toolWindow": {
+        "toolWindow.svg": "icons/iconToolWindow.svg"
+      }
+    }
+  }
+}

@@ -1,0 +1,93 @@
+package dev.voqal.assistant.tool.ide
+
+import com.aallam.openai.api.chat.Tool
+import com.aallam.openai.api.core.Parameters
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.ThrowableComputable
+import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.focus.DetectedIntent
+import dev.voqal.assistant.focus.SpokenTranscript
+import dev.voqal.assistant.tool.VoqalTool
+import dev.voqal.services.VoqalStatusService
+import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.scope
+import dev.voqal.utils.WordsToNumbersUtil
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.launch
+
+class SelectLinesTool : VoqalTool() {
+
+    companion object {
+        const val NAME = "select_lines"
+    }
+
+    override val name = NAME
+
+    override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
+        val project = directive.project
+        val log = project.getVoqalLogger(this::class)
+        val startLine = args.getString("startLine").toString().toInt()
+        val endLine = args.getString("endLine").toString().toInt()
+        log.debug("Triggering select lines $startLine to $endLine")
+
+        val editor = directive.ide.editor
+        if (editor == null) {
+            log.warn("No editor found")
+            project.service<VoqalStatusService>().updateText("No editor found")
+            return
+        }
+
+        WriteCommandAction.runWriteCommandAction(editor.project, ThrowableComputable {
+            val document = editor.document
+            val lineStart = document.getLineStartOffset(startLine - 1)
+            val lineEnd = document.getLineEndOffset(endLine - 1)
+            editor.selectionModel.setSelection(lineStart, lineEnd)
+            project.scope.launch {
+                project.service<VoqalStatusService>().updateText("Selected lines: $startLine to $endLine")
+            }
+        })
+    }
+
+    override suspend fun getTranscriptIntent(project: Project, transcript: SpokenTranscript): DetectedIntent? {
+        return attemptIntentExtract(transcript.cleanTranscript)?.let { (intent, args) ->
+            DetectedIntent(intent, args, transcript, this)
+        }
+    }
+
+    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+        val parsedText = WordsToNumbersUtil.convertTextualNumbersInDocument(rawString)
+
+        //needs to be in "select lines x to y" format (ignore casing and punctuation)
+        val regex = Regex("^select(?: the)? lines? (\\d+) to (\\d+)$", RegexOption.IGNORE_CASE)
+        val match = regex.find(parsedText)
+        if (match != null) {
+            val startLine = match.groupValues[1]
+            val endLine = match.groupValues[2]
+            return Pair(NAME, mapOf("startLine" to startLine, "endLine" to endLine))
+        } else {
+            return null
+        }
+    }
+
+    override fun asTool(directive: VoqalDirective) = Tool.function(
+        name = NAME,
+        description = "Select text between the specified lines.",
+        parameters = Parameters.fromJsonString(JsonObject().apply {
+            put("type", "object")
+            put("properties", JsonObject().apply {
+                put("startLine", JsonObject().apply {
+                    put("type", "integer")
+                    put("description", "The starting line number to select.")
+                })
+                put("endLine", JsonObject().apply {
+                    put("type", "integer")
+                    put("description", "The ending line number to select.")
+                })
+            })
+            put("required", JsonArray().add("startLine").add("endLine"))
+        }.toString())
+    )
+}

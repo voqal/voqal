@@ -1,0 +1,64 @@
+JFDML JFormDesigner: "8.2.1.0.348" Java: "17.0.10" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+			"$columnCount": 1
+			"$rowCount": 4
+		} ) {
+			name: "myPanel"
+			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
+				name: "myServersLabel"
+				"text": "Configured language models:"
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"anchor": 8
+				"hSizePolicy": 0
+				"vSizePolicy": 0
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "myServersPanel"
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 1
+				"anchor": 1
+				"fill": 1
+				"preferredSize": new java.awt.Dimension( 0, 50 )
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.CardLayout ) ) {
+				name: "myRepositoryEditor"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+					name: "myEmptyPanel"
+					"border": new javax.swing.border.TitledBorder( new javax.swing.border.EmptyBorder( 100, 220, 100, 220 ), "" )
+					add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
+						name: "bLabel1"
+						"horizontalAlignment": 0
+						"text": "No language model selected"
+						auxiliary() {
+							"JavaCodeGenerator.variableLocal": true
+						}
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Card1"
+				} )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 3
+				"fill": 3
+				"vSizePolicy": 7
+			} )
+			add( new FormComponent( "com.intellij.openapi.ui.Splitter" ) {
+				name: "mySplitter"
+				"firstComponent": new FormReference( "myServersPanel" )
+				"orientation": true
+				"secondComponent": new FormReference( "myRepositoryEditor" )
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 2
+				"fill": 3
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 602, 295 )
+		} )
+	}
+}

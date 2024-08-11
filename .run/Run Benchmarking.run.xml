@@ -1,0 +1,36 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Benchmarking" type="GradleRunConfiguration" factoryName="Gradle">
+    <log_file alias="voqal-test.log" path="$USER_HOME$/AppData/Local/Temp/voqal-test.log" />
+    <ExternalSystemSettings>
+      <option name="env">
+        <map>
+          <entry key="VQL_BENCHMARK_MODE" value="true" />
+          <entry key="VQL_LANG" value="kotlin" />
+          <entry key="VQL_MODEL_KEY" value="YOUR_OPENAI_KEY" />
+          <entry key="VQL_MODEL_NAME" value="gpt-4o-mini" />
+          <entry key="VQL_MODEL_PROVIDER" value="openai" />
+        </map>
+      </option>
+      <option name="executionName" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="-PrunSpecificTests='benchmark/**'" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value=":test" />
+          <option value="--tests" />
+          <option value="&quot;*&quot;" />
+        </list>
+      </option>
+      <option name="vmOptions" />
+    </ExternalSystemSettings>
+    <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <RunAsTest>true</RunAsTest>
+    <method v="2" />
+  </configuration>
+</component>

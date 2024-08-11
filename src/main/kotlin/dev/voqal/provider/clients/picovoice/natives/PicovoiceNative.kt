@@ -1,0 +1,43 @@
+package dev.voqal.provider.clients.picovoice.natives
+
+import com.sun.jna.Library
+import com.sun.jna.Native
+import com.sun.jna.Pointer
+import com.sun.jna.ptr.IntByReference
+import com.sun.jna.ptr.PointerByReference
+import org.slf4j.Logger
+
+@Suppress("FunctionName")
+interface PicovoiceNative : Library {
+
+    companion object {
+        fun throwIfError(log: Logger, native: PicovoiceNative, status: Int) {
+            if (status != 0) {
+                var errorMessage = native.pv_status_to_string(status)
+                log.warn(errorMessage)
+
+                val messageStackRef = PointerByReference()
+                val messageStackDepthRef = IntByReference()
+                val errorStatus = native.pv_get_error_stack(messageStackRef, messageStackDepthRef)
+                if (errorStatus == 0) {
+                    val messageStack = messageStackRef.value
+                    val messageStackDepth = messageStackDepthRef.value
+                    for (i in 0 until messageStackDepth) {
+                        val message = messageStack.getPointer((i * Native.POINTER_SIZE).toLong()).getString(0)
+                        errorMessage += ", $message"
+                    }
+                    native.pv_free_error_stack(messageStack)
+                } else {
+                    log.error("Error getting error stack, status: $errorStatus")
+                }
+
+                throw IllegalStateException("Failed to init: $errorMessage")
+            }
+        }
+    }
+
+    fun pv_status_to_string(status: Int): String
+    fun pv_free_error_stack(pointer: Pointer)
+    fun pv_get_error_stack(): Pointer
+    fun pv_get_error_stack(messageStack: PointerByReference, messageStackDepth: IntByReference): Int
+}

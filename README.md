@@ -16,13 +16,39 @@ source code.
 
 <!-- Plugin description end -->
 
-## Overview
-
-<p align="center">
-  <img src=".github/media/fully_configurable.svg" width="600" />
-</p>
-
 ## Demonstration
 
-<video src="https://github.com/voqal/voqal/assets/3278877/47547dd0-9614-4f51-87de-ecd6bd484d33" width="500">
+<video src="https://github.com/user-attachments/assets/e8541786-3ff5-4a75-ae1e-31ffc09bc52c" width="500">
 </video>
+
+## Code Structure
+
+The codebase is structured as follows:
+
+- `assistant` internal logic which controls the assistant
+    - `context` data used to populate the prompts sent to the LLM
+    - `memory` holds the assistant's memory
+    - `processing` logic used to parse LLMs responses
+    - `template` extension functions for templating prompts
+    - `tool` contains the tools the assistant uses to interact with the IDE
+- `ide` contains IDE-specific implementations
+- `provider` interfaces with the supported AI providers
+- `services` contains the services used to interact with the assistant
+- `status` holds the status of the assistant
+- `utils` various utility functions
+
+## Benchmarks
+
+The following benchmarks were produced via these [suites](./src/test/kotlin/benchmark/suites).
+
+![](.github/media/vb-scatter-dark.svg#gh-dark-mode-only)
+![](.github/media/vb-scatter-light.svg#gh-light-mode-only)
+
+### Commentary
+
+The benchmarks show that the Voqal Assistant works best with `Meta-Llama-3.1-405B-Instruct-Turbo` but requires a
+bit more time to process the response. `gemini-1.5-flash-latest` is the cheapest and fastest model with high accuracy,
+but may require more follow-up messages to get the desired result. Further work needs to be done to break down
+performance by specific modes (e.g. idle, edit, search). Further work also needs to be done to improve the performance
+of the unified diff format-based editing as diff-based editing enables faster and more cost-effective editing.
+Diff-based editing is currently disabled as it is not yet production-ready.
