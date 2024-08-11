@@ -23,7 +23,7 @@ mockito-kotlin = "5.4.0"
 junit4 = "4.13.2"
 
 # plugins
-kotlin = "1.9.25"
+kotlin = "2.0.10"
 changelog = "2.2.1"
 intelliJPlatform = "2.0.1"
 qodana = "0.1.13"
