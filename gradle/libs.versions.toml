@@ -16,7 +16,7 @@ jtokkit = "1.1.0"
 libfvad-jni = "1.0.0"
 vertexai = "1.7.0"
 jPowerShell = "3.1.1"
-kotlin-stdlib = "1.9.25"
+kotlin-stdlib = "2.0.10"
 mockito-kotlin = "5.4.0"
 junit4 = "4.13.2"
 
