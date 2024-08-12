@@ -60,8 +60,6 @@ dependencies {
     implementation(libs.joor)
     implementation(libs.commons.text)
     implementation(libs.pebble)
-    implementation(libs.flexmark)
-    implementation(libs.hutool.core)
     implementation(libs.github.core)
     implementation(libs.jtokkit)
     implementation(libs.libfvad.jni)

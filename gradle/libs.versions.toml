@@ -11,8 +11,6 @@ jackson-databind = "2.17.2"
 joor = "0.9.15"
 commons-text = "1.12.0"
 pebble = "3.2.2"
-flexmark = "0.64.8"
-hutool-core = "5.8.31"
 github-core = "2.1.5"
 jtokkit = "1.1.0"
 libfvad-jni = "1.0.0"
@@ -54,8 +52,6 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 joor = { module = "org.jooq:joor", version.ref="joor" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref="commons-text" }
 pebble = { module = "io.pebbletemplates:pebble", version.ref="pebble" }
-flexmark = { module = "com.vladsch.flexmark:flexmark", version.ref="flexmark" }
-hutool-core = { module = "cn.hutool:hutool-core", version.ref="hutool-core" }
 github-core = { module = "org.eclipse.mylyn.github:org.eclipse.egit.github.core", version.ref="github-core" }
 jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
 libfvad-jni = { module = "io.github.givimad:libfvad-jni", version.ref="libfvad-jni" }
