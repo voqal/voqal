@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.9.0] - 2024-08-12
+
 ### Added
 
 - Viewing code problems to `Idle Mode`
@@ -476,7 +478,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.8.4...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.9.0...HEAD
+[2024.9.0]: https://github.com/voqal/voqal/compare/v2024.8.4...v2024.9.0
 [2024.8.4]: https://github.com/voqal/voqal/compare/v2024.8.3...v2024.8.4
 [2024.8.3]: https://github.com/voqal/voqal/compare/v2024.8.2...v2024.8.3
 [2024.8.2]: https://github.com/voqal/voqal/compare/v2024.8.1...v2024.8.2
