@@ -43,6 +43,8 @@ The following benchmarks were produced via these [suites](./src/test/kotlin/benc
 ![](.github/media/vb-scatter-dark.svg#gh-dark-mode-only)
 ![](.github/media/vb-scatter-light.svg#gh-light-mode-only)
 
+> Legend: X-axis: Time (ms), Y-axis: Accuracy (%), Size: Cost ($)
+
 ### Commentary
 
 The benchmarks show that the Voqal Assistant works best with `Meta-Llama-3.1-405B-Instruct-Turbo` but requires a
