@@ -8,6 +8,7 @@ import benchmark.model.context.VirtualFileContext
 import benchmark.model.metadata.SupportLanguages
 import benchmark.suites.edit.*
 import benchmark.suites.idle.AddBreakpointsSuite
+import benchmark.suites.idle.GotoSuite
 import benchmark.suites.idle.OpenFileSuite
 import com.aallam.openai.api.audio.Transcription
 import com.intellij.openapi.components.service
@@ -55,6 +56,7 @@ class VoqalBenchmarking : JBTest() {
         //idle mode
         runBenchmarkSuite(AddBreakpointsSuite(), benchmarkVersion, config, benchmarkPromises)
         runBenchmarkSuite(OpenFileSuite(), benchmarkVersion, config, benchmarkPromises)
+        runBenchmarkSuite(GotoSuite(), benchmarkVersion, config, benchmarkPromises)
 
         //edit mode
         runBenchmarkSuite(AddFieldSuite(), benchmarkVersion, config, benchmarkPromises)

@@ -44,15 +44,22 @@ interface BenchmarkSuite {
 
     fun checkTextContains(
         check: List<String>,
-        virtualFile: VirtualFile,
+        text: String,
         it: BenchmarkPromise
     ) {
-        val text = virtualFile.getDocument().text
         if (check.any { text.contains(it) }) {
             it.success(check.toString())
         } else {
             it.fail(check.toString())
         }
+    }
+
+    fun checkTextContains(
+        check: List<String>,
+        virtualFile: VirtualFile,
+        it: BenchmarkPromise
+    ) {
+        checkTextContains(check, virtualFile.getDocument().text, it)
     }
 
     fun checkTextContains(
