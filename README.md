@@ -17,7 +17,7 @@ allowing you to customize your experience and control your data.
 
 ## Demonstration
 
-<video src="https://github.com/user-attachments/assets/cf83da85-0786-4869-af4e-ab8559ac1168" width="500">
+<video src="https://github.com/user-attachments/assets/c964e671-5111-4b13-b8fa-8be7d69104ee" width="500">
 </video>
 
 ## Code Structure
