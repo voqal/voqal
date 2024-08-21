@@ -308,7 +308,11 @@ class SharedAudioCapture(private val project: Project) {
         } catch (e: LineUnavailableException) {
             log.warn("Line unavailable: ${e.message}")
         } catch (e: Exception) {
-            log.error("Error while capturing audio: ${e.message}", e)
+            if (e.message?.startsWith("Line unsupported") == true) {
+                log.warn(e.message)
+            } else {
+                log.error("Error while capturing audio: ${e.message}", e)
+            }
         }
     }
 

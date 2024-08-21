@@ -4,9 +4,10 @@
 
 ## [Unreleased]
 
-### Changed
+### Fixed
 
-- Re-added product descriptor to plugin.xml
+- Marketplace version not updating
+- Error on microphone line unsupported
 
 ## [2024.9.0] - 2024-08-12
 
