@@ -2,6 +2,7 @@
     <id>dev.voqal</id>
     <name>Voqal Assistant</name>
     <vendor>voqal.dev</vendor>
+    <product-descriptor code="PVOQAL" release-date="20240821" release-version="20249"/>
 
     <depends>com.intellij.modules.platform</depends>
 

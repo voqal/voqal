@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Re-added product descriptor to plugin.xml
+
 ## [2024.9.0] - 2024-08-12
 
 ### Added
