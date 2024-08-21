@@ -40,7 +40,7 @@ class PreviousTabTool : VoqalTool() {
         var index = 0
         // find the current tab index and shift
         for (i in 0 until window.tabCount) {
-            val editor = window.editors[i]
+            val editor = window.allComposites[i]
             if (editor == window.selectedComposite) {
                 index = i
             }
@@ -56,13 +56,13 @@ class PreviousTabTool : VoqalTool() {
         // catch over/underflow
         var newIndex = index
         if (index < 0) {
-            newIndex = window.editors.size - 1
+            newIndex = window.allComposites.size - 1
         }
-        if (index >= window.editors.size) {
+        if (index >= window.allComposites.size) {
             newIndex = 0
         }
         // switch tab
-        window.setSelectedEditor(window.editors[newIndex], true)
+        window.setSelectedComposite(window.allComposites[newIndex], true)
     }
 
     override suspend fun getTranscriptIntent(project: Project, transcript: SpokenTranscript): DetectedIntent? {
