@@ -4,7 +4,7 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 
-class TextExtractorTest {
+class TextSearcherTest {
 
     @Test
     fun findText() {
@@ -32,18 +32,18 @@ class TextExtractorTest {
             ```
         """.trimIndent()
         val needle = CodeExtractor.extractCodeBlock(codeBlock)
-        assertNotNull(TextExtractor.findText(needle, text))
+        assertNotNull(TextSearcher.findText(needle, text))
     }
 
     @Test
     fun cancelVuiInteraction() {
         val responseCode = "```{\"cancel\": true}```"
-        assertTrue(TextExtractor.checkForVuiInteraction("cancel", responseCode))
+        assertTrue(TextSearcher.checkForVuiInteraction("cancel", responseCode))
     }
 
     @Test
     fun cancelVuiInteraction2() {
         val responseCode = "```{\"cancel\": true}```\n"
-        assertTrue(TextExtractor.checkForVuiInteraction("cancel", responseCode))
+        assertTrue(TextSearcher.checkForVuiInteraction("cancel", responseCode))
     }
 }
