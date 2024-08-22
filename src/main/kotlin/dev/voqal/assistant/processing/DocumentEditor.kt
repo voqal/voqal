@@ -167,7 +167,7 @@ object DocumentEditor {
         defaultCodeBlock
     )
 
-    fun doStrictExtractCodeBlock(code: String): String? {
+    private fun doStrictExtractCodeBlock(code: String): String? {
         for (pattern in codeBlockPatterns) {
             val matcher = pattern.matcher(code)
             if (matcher.find()) {

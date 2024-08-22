@@ -22,7 +22,7 @@ class DocumentEditorTest {
         ```
         """.trimIndent()
 
-        val extractedCode = DocumentEditor.doStrictExtractCodeBlock(code)
+        val extractedCode = DocumentEditor.extractCodeBlock(code)
         assertEquals(solution, extractedCode)
     }
 
@@ -38,7 +38,7 @@ class DocumentEditorTest {
         ```
         """.trimIndent()
 
-        val extractedCode = DocumentEditor.doStrictExtractCodeBlock(code)
+        val extractedCode = DocumentEditor.extractCodeBlock(code)
         assertEquals(solution, extractedCode)
     }
 
@@ -62,7 +62,7 @@ class DocumentEditorTest {
         """.trimIndent()
         val jsonObject = JsonObject(json)
 
-        val extractedCode = DocumentEditor.doStrictExtractCodeBlock(
+        val extractedCode = DocumentEditor.extractCodeBlock(
             jsonObject.getJsonArray("choices").getJsonObject(0).getJsonObject("message").getString("content")
         )
         assertEquals(
