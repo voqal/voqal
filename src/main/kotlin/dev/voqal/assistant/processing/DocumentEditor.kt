@@ -118,6 +118,10 @@ object DocumentEditor {
     //todo: took from EditTextTool, may be necessary
     //val regex = Regex("```(?:[a-zA-Z0-9]+)?\\n((?:(?!```)[\\s\\S])+)\\n```")
     fun extractCodeBlock(text: String): String {
+        val extraBacktickHeaderErrCodeBlock = doStrictExtractCodeBlockExtraBacktickHeaderError(text)
+        if (extraBacktickHeaderErrCodeBlock != null) {
+            return extraBacktickHeaderErrCodeBlock
+        }
         val doubleBacktickErrCodeBlock = doStrictExtractCodeBlockDoubleBacktickError(text)
         if (doubleBacktickErrCodeBlock != null) {
             return doubleBacktickErrCodeBlock
@@ -166,6 +170,30 @@ object DocumentEditor {
             else -> theText
         }
         return finalText
+    }
+
+    /**
+     * Extracts code block with erroneous extra backtick header.
+     * Example:
+     * ```
+     * ```java
+     * <code>
+     * ```
+     */
+    private fun doStrictExtractCodeBlockExtraBacktickHeaderError(code: String): String? {
+        val pattern = Pattern.compile("```\\n```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```")
+        val matcher = pattern.matcher(code)
+        return if (matcher.find()) {
+            val text = matcher.group(1)
+            val textLines = text.split("\n")
+            if (textLines.getOrNull(0) == "") {
+                textLines.drop(1).joinToString("\n")
+            } else {
+                text
+            }
+        } else {
+            null
+        }
     }
 
     /**

@@ -247,11 +247,24 @@ class DocumentEditorTest {
 
     @Test
     fun `test extract code2`() {
-        val code = DocumentEditor.extractCodeBlock("""
+        val responseCode = """
             ```python
             print(i, "is odd")
             ```
-        """.trimIndent())
+        """.trimIndent()
+        val code = DocumentEditor.extractCodeBlock(responseCode)
+        assertEquals("print(i, \"is odd\")", code)
+    }
+
+    @Test
+    fun `test erroneous backticks header`() {
+        val responseCode = """
+            ```
+            ```python
+            print(i, "is odd")
+            ```
+        """.trimIndent()
+        val code = DocumentEditor.extractCodeBlock(responseCode)
         assertEquals("print(i, \"is odd\")", code)
     }
 }
