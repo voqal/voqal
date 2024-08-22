@@ -10,7 +10,7 @@
 
 - Marketplace version not updating
 - Error on microphone line unsupported
-- Improved code block extraction for GPT4-mini
+- Improved code block extraction for GPT-4o mini
 - Issue reverting code changes in RustRover
 
 ## [2024.9.0] - 2024-08-12
