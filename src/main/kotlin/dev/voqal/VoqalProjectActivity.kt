@@ -32,8 +32,10 @@ class VoqalProjectActivity : ProjectActivity {
         log.info("Voqal initialized. Version: $pluginVersion")
 
         val configService = project.service<VoqalConfigService>()
+        var pluginEnabled = configService.getConfig().pluginSettings.enabled
         var pauseOnFocusLost = configService.getConfig().pluginSettings.pauseOnFocusLost
         configService.onConfigChange(project.service<ProjectScopedService>()) {
+            pluginEnabled = it.pluginSettings.enabled
             if (pauseOnFocusLost != it.pluginSettings.pauseOnFocusLost) {
                 pauseOnFocusLost = it.pluginSettings.pauseOnFocusLost
                 if (!pauseOnFocusLost) {
@@ -53,14 +55,14 @@ class VoqalProjectActivity : ProjectActivity {
             }
             window?.addWindowFocusListener(object : WindowFocusListener {
                 override fun windowGainedFocus(e: WindowEvent?) {
-                    if (pauseOnFocusLost && !project.isDisposed) {
+                    if (pluginEnabled && pauseOnFocusLost && !project.isDisposed) {
                         log.trace("IDE gained focus")
                         project.audioCapture.resume()
                     }
                 }
 
                 override fun windowLostFocus(e: WindowEvent?) {
-                    if (pauseOnFocusLost && !project.isDisposed) {
+                    if (pluginEnabled && pauseOnFocusLost && !project.isDisposed) {
                         log.trace("IDE lost focus")
                         project.audioCapture.pause()
                     }
