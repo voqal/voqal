@@ -4,8 +4,6 @@
 
 ## [Unreleased]
 
-## [2024.9.1] - 2024-08-22
-
 ### Fixed
 
 - Marketplace version not updating
