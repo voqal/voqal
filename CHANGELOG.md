@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Groq distil-whisper-large-v3-en model
+
+### Changed
+
+- Upgrade Picovoice Orca to 1.0.0
+
 ## [2024.9.1] - 2024-08-22
 
 ### Fixed
