@@ -33,7 +33,7 @@ import com.intellij.refactoring.rename.RenameProcessor
 import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
-import dev.voqal.assistant.processing.DocumentEditor
+import dev.voqal.assistant.processing.TextExtractor
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.assistant.tool.system.LooksGoodTool
@@ -91,12 +91,12 @@ class EditTextTool : VoqalTool() {
         responseCode = responseCode.replace("↕", "") //remove any carets
 
         //check for vui interactions
-        if (DocumentEditor.checkForVuiInteraction("cancel", responseCode)) {
+        if (TextExtractor.checkForVuiInteraction("cancel", responseCode)) {
             log.debug("Cancelling editing")
             project.service<VoqalToolService>().blindExecute(CancelTool())
             project.service<VoqalStatusService>().updateText("Editing cancelled", response)
             return
-        } else if (DocumentEditor.checkForVuiInteraction("accept", responseCode)) {
+        } else if (TextExtractor.checkForVuiInteraction("accept", responseCode)) {
             log.debug("Accepting editing")
             project.service<VoqalToolService>().blindExecute(LooksGoodTool())
             project.service<VoqalStatusService>().updateText("Editing accepted", response)

@@ -7,7 +7,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import dev.voqal.assistant.VoqalDirective
-import dev.voqal.assistant.processing.DocumentEditor
+import dev.voqal.assistant.processing.TextExtractor
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.VoqalStatusService
@@ -42,7 +42,7 @@ class GotoTextTool : VoqalTool() {
                     ?.toString()?.toInt()?.let { it + 1 } ?: 0
                 forward = args.getString("direction") == "next"
             }
-            val textRange = DocumentEditor.findText(text, documentText, startOffset, forward)
+            val textRange = TextExtractor.findText(text, documentText, startOffset, forward)
             if (textRange != null) {
                 val offset = textRange.startOffset
                 memoryService.putLongTermUserData("goto_text_last_offset", offset)

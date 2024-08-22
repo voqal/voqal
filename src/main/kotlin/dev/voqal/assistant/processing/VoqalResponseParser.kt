@@ -34,7 +34,7 @@ object VoqalResponseParser {
         } else {
             messageContent.toString()
         }
-        val codeBlock = DocumentEditor.extractCodeBlock(textContent)
+        val codeBlock = CodeExtractor.extractCodeBlock(textContent)
 
         //remove line numbers (if present)
         val codeBlockWithoutLineNumbers = if (codeBlock.lines().all { lineNumberRegex.containsMatchIn(it) }) {
@@ -108,7 +108,7 @@ object VoqalResponseParser {
                     val json = try {
                         JsonObject(message.content)
                     } catch (_: Exception) {
-                        JsonObject(DocumentEditor.extractCodeBlock(message.content!!))
+                        JsonObject(CodeExtractor.extractCodeBlock(message.content!!))
                     }
                     if (json.size() == 1 && json.containsKey("answer")) {
                         val toolCalls = listOf(
@@ -170,7 +170,7 @@ object VoqalResponseParser {
                                     val json = try {
                                         JsonObject(jsonBlock)
                                     } catch (_: Exception) {
-                                        JsonObject(DocumentEditor.extractCodeBlock(jsonBlock))
+                                        JsonObject(CodeExtractor.extractCodeBlock(jsonBlock))
                                     }
                                     if (json.containsKey("name") && json.containsKey("parameters")) {
                                         toolCalls.add(
@@ -207,7 +207,7 @@ object VoqalResponseParser {
                         val jsonArray = try {
                             JsonArray(message.content)
                         } catch (_: Exception) {
-                            JsonArray(DocumentEditor.extractCodeBlock(message.content!!))
+                            JsonArray(CodeExtractor.extractCodeBlock(message.content!!))
                         }
                         val toolCalls = jsonArray.map {
                             val tool = it as JsonObject
@@ -346,7 +346,7 @@ object VoqalResponseParser {
             JsonArray(input).toString().contains("directive")
         } catch (_: Exception) {
             try {
-                JsonArray(DocumentEditor.extractCodeBlock(input)).toString().contains("directive")
+                JsonArray(CodeExtractor.extractCodeBlock(input)).toString().contains("directive")
             } catch (_: Exception) {
                 false
             }

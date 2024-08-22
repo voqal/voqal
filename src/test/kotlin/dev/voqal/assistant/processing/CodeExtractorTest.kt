@@ -2,9 +2,10 @@ package dev.voqal.assistant.processing
 
 import io.vertx.core.json.JsonObject
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 
-class DocumentEditorTest {
+class CodeExtractorTest {
 
     private val solution = """
         class Solution:
@@ -22,7 +23,7 @@ class DocumentEditorTest {
         ```
         """.trimIndent()
 
-        val extractedCode = DocumentEditor.extractCodeBlock(code)
+        val extractedCode = CodeExtractor.extractCodeBlock(code)
         assertEquals(solution, extractedCode)
     }
 
@@ -38,7 +39,7 @@ class DocumentEditorTest {
         ```
         """.trimIndent()
 
-        val extractedCode = DocumentEditor.extractCodeBlock(code)
+        val extractedCode = CodeExtractor.extractCodeBlock(code)
         assertEquals(solution, extractedCode)
     }
 
@@ -62,7 +63,7 @@ class DocumentEditorTest {
         """.trimIndent()
         val jsonObject = JsonObject(json)
 
-        val extractedCode = DocumentEditor.extractCodeBlock(
+        val extractedCode = CodeExtractor.extractCodeBlock(
             jsonObject.getJsonArray("choices").getJsonObject(0).getJsonObject("message").getString("content")
         )
         assertEquals(
@@ -81,14 +82,14 @@ class DocumentEditorTest {
     @Test
     fun mixtralStyle1() {
         val text = "`for (int i = 0; i < 100; i++) {`"
-        val extractedCode = DocumentEditor.extractCodeBlock(text)
+        val extractedCode = CodeExtractor.extractCodeBlock(text)
         assertEquals("for (int i = 0; i < 100; i++) {", extractedCode)
     }
 
     @Test
     fun gemmaStyle1() {
         val text = "```kotlin\nfor (i in 0 until 100) {\n\n}\n```"
-        val extractedCode = DocumentEditor.extractCodeBlock(text)
+        val extractedCode = CodeExtractor.extractCodeBlock(text)
         assertEquals("for (i in 0 until 100) {\n\n}", extractedCode)
     }
 
@@ -99,7 +100,7 @@ class DocumentEditorTest {
                 "\n" +
                 "}\n" +
                 "```"
-        val extractedCode = DocumentEditor.extractCodeBlock(text)
+        val extractedCode = CodeExtractor.extractCodeBlock(text)
         assertEquals("task installWindows(type: Copy) {\n\n}", extractedCode)
     }
 
@@ -109,37 +110,8 @@ class DocumentEditorTest {
                 "def doSomething():\n" +
                 "    pass\n" +
                 "```"
-        val extractedCode = DocumentEditor.extractCodeBlock(text)
+        val extractedCode = CodeExtractor.extractCodeBlock(text)
         assertEquals("def doSomething():\n    pass", extractedCode)
-    }
-
-    @Test
-    fun findText() {
-        val text = """
-            public class Main {
-
-                public void aFunction() {
-                    printHelloWorld();
-                }
-
-                public void printHelloWorld() {
-                    System.out.println("Hello World");
-                }
-
-                public void anotherFunction() {
-                    printHelloWorld();
-                }
-            }
-        """.trimIndent()
-        val codeBlock = """
-            ```
-            public void printHelloWorld() {
-                System.out.println("Hello World");
-            }
-            ```
-        """.trimIndent()
-        val needle = DocumentEditor.extractCodeBlock(codeBlock)
-        assertNotNull(DocumentEditor.findText(needle, text))
     }
 
     @Test
@@ -151,20 +123,8 @@ class DocumentEditorTest {
             }
             ```
         """.trimIndent()
-        val extractedCode = DocumentEditor.extractCodeBlock(codeBlock)
+        val extractedCode = CodeExtractor.extractCodeBlock(codeBlock)
         assertEquals("class NewClass {\n\n}", extractedCode)
-    }
-
-    @Test
-    fun cancelVuiInteraction() {
-        val responseCode = "```{\"cancel\": true}```"
-        assertTrue(DocumentEditor.checkForVuiInteraction("cancel", responseCode))
-    }
-
-    @Test
-    fun cancelVuiInteraction2() {
-        val responseCode = "```{\"cancel\": true}```\n"
-        assertTrue(DocumentEditor.checkForVuiInteraction("cancel", responseCode))
     }
 
     @Test
@@ -189,14 +149,14 @@ class DocumentEditorTest {
         val lastTab = fixedResponseCode.lastIndexOf("\t")
         fixedResponseCode = fixedResponseCode.substring(0, lastTab) + fixedResponseCode.substring(lastTab + 1)
 
-        val extractedCode = DocumentEditor.extractCodeBlock(fixedResponseCode)
+        val extractedCode = CodeExtractor.extractCodeBlock(fixedResponseCode)
         assertTrue(extractedCode.startsWith("\t"))
     }
 
     @Test
     fun languageNameOnNewLine() {
         val responseCode = "```\njava\npublic class Test {\n\n}\n```"
-        val extractedCode = DocumentEditor.extractCodeBlock(responseCode)
+        val extractedCode = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals(
             "public class Test {\n\n}",
             extractedCode
@@ -206,7 +166,7 @@ class DocumentEditorTest {
     @Test
     fun packageNameOnNewLine() {
         val responseCode = "```\npackage main\n\nimport \"fmt\"\n\ntype RemoveMethod struct{}\n```"
-        val extractedCode = DocumentEditor.extractCodeBlock(responseCode)
+        val extractedCode = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals(
             "package main\n\nimport \"fmt\"\n\ntype RemoveMethod struct{}",
             extractedCode
@@ -226,7 +186,7 @@ class DocumentEditorTest {
             ```
             ```
         """.trimIndent()
-        val extractedCode = DocumentEditor.extractCodeBlock(responseCode)
+        val extractedCode = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals(
             "public class RemoveMethod {\n" +
                     "    public int add(int x, int y) {\n" +
@@ -244,7 +204,7 @@ class DocumentEditorTest {
             print(i, "is odd")
             ```
         """.trimIndent()
-        val code = DocumentEditor.extractCodeBlock(responseCode)
+        val code = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals("print(i, \"is odd\")", code)
     }
 
@@ -256,7 +216,7 @@ class DocumentEditorTest {
             print(i, "is odd")
             ```
         """.trimIndent()
-        val code = DocumentEditor.extractCodeBlock(responseCode)
+        val code = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals("print(i, \"is odd\")", code)
     }
 }

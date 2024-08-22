@@ -10,7 +10,7 @@ import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
-import dev.voqal.assistant.processing.DocumentEditor
+import dev.voqal.assistant.processing.CodeExtractor
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.VoqalStatusService
@@ -348,7 +348,7 @@ class EditTextToolTest : JBTest() {
         }
         errorOnTimeout(testContext)
 
-        val codeBlock = DocumentEditor.extractCodeBlock(responseCode)
+        val codeBlock = CodeExtractor.extractCodeBlock(responseCode)
         assertTrue(editor.document.text.contains(codeBlock))
 
         EditorFactory.getInstance().releaseEditor(editor)
@@ -393,7 +393,7 @@ class EditTextToolTest : JBTest() {
         errorOnTimeout(testContext)
         EditorFactory.getInstance().releaseEditor(editor)
 
-        val codeBlock = DocumentEditor.extractCodeBlock(responseCode)
+        val codeBlock = CodeExtractor.extractCodeBlock(responseCode)
         val indentedCodeBlock = codeBlock.lines().joinToString("\n") { "    $it" }
         assertTrue(editor.document.text.contains(indentedCodeBlock))
     }
@@ -437,7 +437,7 @@ class EditTextToolTest : JBTest() {
         errorOnTimeout(testContext)
         EditorFactory.getInstance().releaseEditor(editor)
 
-        val codeBlock = DocumentEditor.extractCodeBlock(responseCode)
+        val codeBlock = CodeExtractor.extractCodeBlock(responseCode)
         val indentedCodeBlock = codeBlock.lines().joinToString("\n") { "\t$it" }
         assertTrue(editor.document.text.contains(indentedCodeBlock))
     }
