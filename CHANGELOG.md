@@ -485,8 +485,7 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.9.1...HEAD
-[2024.9.1]: https://github.com/voqal/voqal/compare/v2024.9.0...v2024.9.1
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.9.0...HEAD
 [2024.9.0]: https://github.com/voqal/voqal/compare/v2024.8.4...v2024.9.0
 [2024.8.4]: https://github.com/voqal/voqal/compare/v2024.8.3...v2024.8.4
 [2024.8.3]: https://github.com/voqal/voqal/compare/v2024.8.2...v2024.8.3
