@@ -2,10 +2,8 @@ package dev.voqal.assistant.tool.system
 
 import com.aallam.openai.api.chat.Tool
 import com.aallam.openai.api.core.Parameters
-import com.intellij.history.core.revisions.Revision
-import com.intellij.history.integration.LocalHistoryImpl
-import com.intellij.history.integration.ui.models.DirectoryHistoryDialogModel
-import com.intellij.history.integration.ui.models.RevisionItem
+import com.intellij.history.Label
+import com.intellij.history.LocalHistoryAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
@@ -15,7 +13,10 @@ import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.ide.UnselectTool
 import dev.voqal.assistant.tool.text.EditTextTool.Companion.VOQAL_HIGHLIGHTERS
-import dev.voqal.services.*
+import dev.voqal.services.VoqalMemoryService
+import dev.voqal.services.VoqalStatusService
+import dev.voqal.services.VoqalToolService
+import dev.voqal.services.getVoqalLogger
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
 
@@ -51,48 +52,11 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
         if (statusService.getStatus() == VoqalStatus.SEARCHING) {
             //nop
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
-            val vcs = LocalHistoryImpl.getInstanceImpl().facade
-            val gateway = LocalHistoryImpl.getInstanceImpl().gateway
-            val baseDir = project.service<VoqalSearchService>().getProjectRoot()
-            val memoryId = memory.id
-            log.debug("Reverting changes from memory slice: $memoryId")
-
-            val historyModel = DirectoryHistoryDialogModel(project, gateway, vcs, baseDir)
-            val currentRevision = historyModel.currentRevision
-            val revertRevision = historyModel.revisions.lastOrNull {
-                it.labels.any { label -> label.label == "voqal.edit.$memoryId" } ||
-                        it.revision.changeSetName == "voqal.edit.$memoryId"
-            }
-            log.debug("Current revision: $currentRevision - Revert revision: $revertRevision")
-
-            var revisionBeforeRevert: RevisionItem? = null
-            historyModel.revisions.forEachIndexed { index, revision ->
-                if (revision == revertRevision) {
-                    revisionBeforeRevert = historyModel.revisions.getOrNull(index - 1)
-                }
-            }
-            if (revertRevision == null) {
-                log.warn("No revision found for memory slice: $memoryId")
-            } else {
-                log.debug("Reverting to revision: ${revertRevision.revision}")
-            }
-
-            val diffs = revisionBeforeRevert?.revision?.let {
-                Revision.getDifferencesBetween(it, currentRevision)
-            } ?: emptyList()
-            if (diffs.isNotEmpty()) {
-                project.invokeLater {
-                    val reverter = historyModel.createRevisionReverter(diffs)
-                    if (reverter == null || reverter.checkCanRevert().isNotEmpty()) {
-                        log.warn("Failed to revert changes")
-                    } else {
-                        reverter.revert()
-                        log.info("Changes reverted successfully")
-                    }
-                }
-            } else {
-                log.info("Found no changes to revert")
-            }
+            log.info("Reverting changes to: ${memory.id}")
+            val action = memoryService.removeLongTermUserData("voqal.edit.action.${memory.id}") as LocalHistoryAction?
+            action?.finish()
+            val label = memoryService.removeLongTermUserData("voqal.edit.${memory.id}") as Label?
+            label?.revert(project, editor!!.virtualFile)
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
         }

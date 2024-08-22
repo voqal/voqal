@@ -67,7 +67,15 @@ class VoqalMemoryService(private val project: Project) : Disposable {
     fun saveEditLabel(memoryId: String) {
         if (savedLabels.contains(memoryId)) return
         savedLabels.add(memoryId)
-        LocalHistory.getInstance().putSystemLabel(project, "voqal.edit.$memoryId")
+
+        putLongTermUserData(
+            "voqal.edit.$memoryId",
+            LocalHistory.getInstance().putSystemLabel(project, "voqal.edit.$memoryId")
+        )
+        putLongTermUserData(
+            "voqal.edit.action.$memoryId",
+            LocalHistory.getInstance().startAction("voqal.edit.action.$memoryId")
+        )
     }
 
     fun putUserData(key: String, data: Any) {
@@ -86,6 +94,10 @@ class VoqalMemoryService(private val project: Project) : Disposable {
 
     fun getLongTermUserData(key: String): Any? {
         return longTermUserData[key]
+    }
+
+    fun removeLongTermUserData(key: String): Any? {
+        return longTermUserData.remove(key)
     }
 
     override fun dispose() {
