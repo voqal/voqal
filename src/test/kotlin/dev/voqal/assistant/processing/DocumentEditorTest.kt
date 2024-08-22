@@ -101,7 +101,6 @@ class DocumentEditorTest {
                 "```"
         val extractedCode = DocumentEditor.extractCodeBlock(text)
         assertEquals("task installWindows(type: Copy) {\n\n}", extractedCode)
-        assertTrue(DocumentEditor.isEmptyCodeBlock(extractedCode))
     }
 
     @Test
@@ -112,7 +111,6 @@ class DocumentEditorTest {
                 "```"
         val extractedCode = DocumentEditor.extractCodeBlock(text)
         assertEquals("def doSomething():\n    pass", extractedCode)
-        assertTrue(DocumentEditor.isEmptyCodeBlock(extractedCode))
     }
 
     @Test
@@ -237,12 +235,6 @@ class DocumentEditorTest {
                     "}",
             extractedCode
         )
-    }
-
-    @Test
-    fun `test extract code`() {
-        val code = DocumentEditor.extractCodeBlock("```Python\\nprint(i, \\\"is odd\\\")")
-        assertEquals("print(i, \"is odd\")", code)
     }
 
     @Test

@@ -101,180 +101,114 @@ object DocumentEditor {
         return null
     }
 
-    fun isEmptyCodeBlock(text: String): Boolean {
-        //general, just empty curly braces
-        val check1 = Regex("""(.+)\s*\{\s*}""")
-        val match1 = check1.matches(text)
-        if (match1) return true
-
-        //python, just pass inside
-        val check2 = Regex("(.+)\\n\\s+pass$")
-        val match2 = check2.matches(text)
-        if (match2) return true
-
-        return false
-    }
-
-    //todo: took from EditTextTool, may be necessary
-    //val regex = Regex("```(?:[a-zA-Z0-9]+)?\\n((?:(?!```)[\\s\\S])+)\\n```")
     fun extractCodeBlock(text: String): String {
-        val extraBacktickHeaderErrCodeBlock = doStrictExtractCodeBlockExtraBacktickHeaderError(text)
-        if (extraBacktickHeaderErrCodeBlock != null) {
-            return extraBacktickHeaderErrCodeBlock
-        }
-        val doubleBacktickErrCodeBlock = doStrictExtractCodeBlockDoubleBacktickError(text)
-        if (doubleBacktickErrCodeBlock != null) {
-            return doubleBacktickErrCodeBlock
-        }
-        val errCodeBlock = doStrictExtractCodeBlockNewLineError(text)
-        if (errCodeBlock != null) {
-            return errCodeBlock
-        }
-        val codeBlock = doStrictExtractCodeBlock(text)
-        if (codeBlock != null) {
-            return codeBlock
-        }
-        val codeSnippet = doStrictExtractCodeSnippet(text)
-        if (codeSnippet != null) {
-            return codeSnippet
-        }
-
-        var theText = text.replace("\r\n", "\n")
-        if (theText.contains("\\n")) { //todo: more robust check if code is escaped
-            theText = theText.replace("\\n", "\n")
+        var escapedText = text.replace("\r\n", "\n")
+        if (escapedText.contains("\\n")) { //todo: more robust check if code is escaped
+            escapedText = escapedText.replace("\\n", "\n")
                 .replace("\\t", "\t")
                 .replace("\\\"", "\"")
         }
-        var trimmedText = theText.trim()
-        if (trimmedText.startsWith("```") && !trimmedText.endsWith("```")) {
-            trimmedText += "\n```"
+
+        val codeBlock = doStrictExtractCodeBlock(escapedText)
+        if (codeBlock != null) {
+            return codeBlock
         }
-
-        val finalText = when {
-            trimmedText.startsWith("```") && trimmedText.endsWith("```") -> {
-                val startIndex = "```".length
-                val endIndex = "```".length
-                val codeBlock = trimmedText.substring(startIndex, trimmedText.length - endIndex)
-                val language = codeBlock.takeWhile { it != '\n' }
-                println("Language: $language")
-                val codeLines = codeBlock.split("\n").drop(1)
-                val cleanedLines = codeLines.dropWhile { it.isBlank() }.filter { it.isNotBlank() }
-                cleanedLines.joinToString("\n")
-            }
-
-            trimmedText.startsWith("`") && trimmedText.endsWith("`") -> {
-                val count = trimmedText.takeWhile { it == '`' }.length
-                trimmedText.substring(count, trimmedText.length - count).trimStart()
-            }
-
-            else -> theText
+        val codeSnippet = doStrictExtractCodeSnippet(escapedText)
+        if (codeSnippet != null) {
+            return codeSnippet
         }
-        return finalText
+        return escapedText
     }
 
     /**
-     * Extracts code block with erroneous extra backtick header.
-     * Example:
-     * ```
-     * ```java
-     * <code>
-     * ```
+     * ````
+     *```
+     *```(java)
+     *<code>
+     *```
+     * ````
      */
-    private fun doStrictExtractCodeBlockExtraBacktickHeaderError(code: String): String? {
-        val pattern = Pattern.compile("```\\n```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```")
-        val matcher = pattern.matcher(code)
-        return if (matcher.find()) {
-            val text = matcher.group(1)
-            val textLines = text.split("\n")
-            if (textLines.getOrNull(0) == "") {
-                textLines.drop(1).joinToString("\n")
-            } else {
-                text
-            }
-        } else {
-            null
-        }
-    }
+    private val extraBacktickHeaderBlock = Pattern.compile("```\\n```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```")
 
     /**
-     * Extracts code block with erroneous double backticks lines.
-     * Example:
-     * ```
-     * ```java
-     * <code>
-     * ```
-     * ```
+     * ````
+     *```
+     *```(java)
+     *<code>
+     *```
+     *```
+     * ````
      */
-    private fun doStrictExtractCodeBlockDoubleBacktickError(code: String): String? {
-        val pattern = Pattern.compile("```\\n```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```\\n```")
-        val matcher = pattern.matcher(code)
-        return if (matcher.find()) {
-            val text = matcher.group(1)
-            val textLines = text.split("\n")
-            if (textLines.getOrNull(0) == "") {
-                textLines.drop(1).joinToString("\n")
-            } else {
-                text
-            }
-        } else {
-            null
-        }
-    }
+    private val doubleBacktickBlock = Pattern.compile("```\\n```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```\\n```")
 
     /**
-     * Extracts code block with erroneous language name on new line.
-     * Example:
-     * ```
-     * java
-     * <code>
-     * ```
+     * ````
+     *```
+     *java
+     *<code>
+     *```
+     *````
      */
-    private fun doStrictExtractCodeBlockNewLineError(code: String): String? {
-        val pattern = Pattern.compile("```\\n(?:[\\w]+)\\n([\\s\\S]*?)\\s*?```")
-        val matcher = pattern.matcher(code)
-        return if (matcher.find()) {
-            val text = matcher.group(1)
-            val textLines = text.split("\n")
-            if (textLines.getOrNull(0) == "") {
-                textLines.drop(1).joinToString("\n")
-            } else {
-                text
-            }
-        } else {
-            null
-        }
-    }
+    private val langOnNewLineBlock = Pattern.compile("```\\n(?:[\\w]+)\\n([\\s\\S]*?)\\s*?```")
 
     /**
-     * Extracts code block with optional language name.
-     * Example:
-     * ```(optional)
-     * <code>
-     * ```
+     * ````
+     *```(java)
+     *<code>
+     *```
+     *````
      */
+    private val defaultCodeBlock = Pattern.compile("```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```")
+
+    private val codeBlockPatterns = listOf(
+        extraBacktickHeaderBlock,
+        doubleBacktickBlock,
+        langOnNewLineBlock,
+        defaultCodeBlock
+    )
+
     fun doStrictExtractCodeBlock(code: String): String? {
-        val pattern = Pattern.compile("```(?:[\\w ]+)?[\\n\\r\\s]([\\s\\S]*?)\\s*?```")
-        val matcher = pattern.matcher(code)
-        return if (matcher.find()) {
-            val text = matcher.group(1)
-            val textLines = text.split("\n")
-            if (textLines.getOrNull(0) == "") {
-                textLines.drop(1).joinToString("\n")
-            } else {
-                text
+        for (pattern in codeBlockPatterns) {
+            val matcher = pattern.matcher(code)
+            if (matcher.find()) {
+                val text = matcher.group(1)
+                val textLines = text.split("\n")
+                return if (textLines.getOrNull(0) == "") {
+                    textLines.drop(1).joinToString("\n")
+                } else {
+                    text
+                }
             }
-        } else {
-            null
         }
+        return null
     }
+
+    /**
+     * ````
+     *```<code>```
+     * ````
+     */
+    private val tripleTickSnippet = Pattern.compile("^```([\\s\\S]*?)```\$")
+
+    /**
+     * ```
+     *`<code>`
+     * ```
+     */
+    private val singleTickSnippet = Pattern.compile("^`([\\s\\S]*?)`$")
+
+    private val codeSnippetPatterns = listOf(
+        tripleTickSnippet,
+        singleTickSnippet
+    )
 
     private fun doStrictExtractCodeSnippet(code: String): String? {
-        val pattern = Pattern.compile("^```([\\s\\S]*?)```\$")
-        val matcher = pattern.matcher(code)
-        return if (matcher.find()) {
-            matcher.group(1)
-        } else {
-            null
+        for (pattern in codeSnippetPatterns) {
+            val matcher = pattern.matcher(code)
+            if (matcher.find()) {
+                return matcher.group(1)
+            }
         }
+        return null
     }
 }

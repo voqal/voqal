@@ -79,8 +79,3 @@ class AnswerQuestionToolTest : JBTest() {
         )
     }
 }
-
-//"Here is the JSON call to use the \\\"answer_question\\\" tool:\\n\\n```json\\n[\\n  {\\n    \\\"answer_question\\\": {\\n      \\\"directive\\\": \\\"What time is it?\\\"\\n    }\\n  }\\n]\\n```"
-//        "content" : "## Assistant Tool Request\n\n### trigger_github_build\n\n```json\n{\n    \"branch\": \"master\"\n}\n```"
-//        "content" : "## Assistant Tool Request\n\n### CloseFile\n\n```json\n\n```\n\n\n## Assistant Tool Request\n\n### trigger_github_build\n\n```json\n{\n  \"branch\": \"master\"\n}\n```"
-//2024-05-14 09:25:50,266 [ 297121]   FINE - dev.voqal.services.VoqalToolService - Invoking action: answer_question - Args: {"answer":"## Assistant Tool Request\n\n### NextTab\n\n```json\n\n```"}
