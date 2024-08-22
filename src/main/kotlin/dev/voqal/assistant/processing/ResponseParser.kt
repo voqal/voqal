@@ -18,7 +18,7 @@ import java.util.regex.Pattern
 /**
  * Parses the wide variety of responses given by LLMs and returns the appropriate tool calls.
  */
-object VoqalResponseParser {
+object ResponseParser {
 
     //1|public class Test {
     //2|}

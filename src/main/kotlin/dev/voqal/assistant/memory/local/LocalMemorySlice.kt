@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.memory.MemorySlice
-import dev.voqal.assistant.processing.VoqalResponseParser
+import dev.voqal.assistant.processing.ResponseParser
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.VoqalStatusService
 import dev.voqal.services.getVoqalLogger
@@ -141,8 +141,8 @@ class LocalMemorySlice(
             messageList.add(ChatMessage(ChatRole.Assistant, textContent))
 
             val response = when (promptSettings.promptName) {
-                "Edit Mode" -> VoqalResponseParser.parseEditMode(completion, directive)
-                else -> VoqalResponseParser.parse(completion, directive)
+                "Edit Mode" -> ResponseParser.parseEditMode(completion, directive)
+                else -> ResponseParser.parse(completion, directive)
             }
             if (aiProvider.isObservabilityProvider()) {
                 log.debug("Logging successful observability data")

@@ -14,10 +14,10 @@ import dev.voqal.assistant.tool.system.AnswerQuestionTool
 import io.vertx.core.json.JsonObject
 import org.mockito.kotlin.mock
 
-class VoqalResponseParserTest : JBTest() {
+class ResponseParserTest : JBTest() {
 
     fun `test json seperated tools using parameters field`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -74,7 +74,7 @@ class VoqalResponseParserTest : JBTest() {
     }
 
     fun `test single tool with only args given`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -116,7 +116,7 @@ class VoqalResponseParserTest : JBTest() {
     }
 
     fun `test code block directive array`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -150,7 +150,7 @@ class VoqalResponseParserTest : JBTest() {
     }
 
     fun `test empty json block`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -213,7 +213,7 @@ class VoqalResponseParserTest : JBTest() {
     }
 
     fun `test parse regular text content with new line`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -253,7 +253,7 @@ Without additional information or a clear request from the developer, no action 
 
 If the developer intends to test the system, they may provide a specific task or voice a command for action.
         """.trimIndent()
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -286,7 +286,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test parse json tool request`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -329,7 +329,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test parse json tool request - tool and parameters`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -372,7 +372,7 @@ If the developer intends to test the system, they may provide a specific task or
 
     fun `test parse json tool request for unavailable tool`() {
         try {
-            VoqalResponseParser.parse(
+            ResponseParser.parse(
                 ChatCompletion(
                     id = "n/a",
                     created = System.currentTimeMillis(),
@@ -409,7 +409,7 @@ If the developer intends to test the system, they may provide a specific task or
     fun `test parse raw text content as answer question`() {
         val rawAnswer =
             "I'm not sure what specific task you'd like me to assist with. Please provide more details so I can help you effectively."
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -442,7 +442,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test parse raw text content as yaml as answer question`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -475,7 +475,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test parse raw text content as json as answer question`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -511,7 +511,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test directive array`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -553,7 +553,7 @@ If the developer intends to test the system, they may provide a specific task or
     }
 
     fun `test directive array2`() {
-        val response = VoqalResponseParser.parse(
+        val response = ResponseParser.parse(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),
@@ -606,7 +606,7 @@ If the developer intends to test the system, they may provide a specific task or
         val test =
             JsonObject("{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"```json\\n[\\n  {\\n    \\\"answer_question\\\": {\\n      \\\"directive\\\": \\\"What does 'interpreter.chat(\\\\\\\"Hello!\\\\\\\", blocking=False)' go to?\\\"\\n    }\\n  },\\n  {\\n    \\\"view_source\\\": {\\n      \\\"directive\\\": \\\"copy.py\\\"\\n    }\\n  }\\n]\\n```\"}],\"role\":\"model\"},\"finishReason\":\"STOP\",\"index\":0,\"safetyRatings\":[{\"category\":\"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\"probability\":\"NEGLIGIBLE\"},{\"category\":\"HARM_CATEGORY_HATE_SPEECH\",\"probability\":\"NEGLIGIBLE\"},{\"category\":\"HARM_CATEGORY_HARASSMENT\",\"probability\":\"NEGLIGIBLE\"},{\"category\":\"HARM_CATEGORY_DANGEROUS_CONTENT\",\"probability\":\"NEGLIGIBLE\"}]}],\"usageMetadata\":{\"promptTokenCount\":9579,\"candidatesTokenCount\":75,\"totalTokenCount\":9654}}")
         try {
-            VoqalResponseParser.parse(
+            ResponseParser.parse(
                 ChatCompletion(
                     id = "n/a",
                     created = System.currentTimeMillis(),
@@ -643,7 +643,7 @@ If the developer intends to test the system, they may provide a specific task or
     fun `test edit code with extra data`() {
         val test =
             JsonObject("{\"content\": \"```kotlin\\nclass TestClass {\\n    fun add(firstParam: Int, y: Int): Int {\\n        return firstParam + y\\n    }\\n}\\n```\\n\\n```json\\n{\\\"accept\\\": true}\\n```\\n\\nNote: The output is the modified code based on the developer's request to rename the parameter `x` to `firstParam`.\"}")
-        val response = VoqalResponseParser.parseEditMode(
+        val response = ResponseParser.parseEditMode(
             ChatCompletion(
                 id = "n/a",
                 created = System.currentTimeMillis(),

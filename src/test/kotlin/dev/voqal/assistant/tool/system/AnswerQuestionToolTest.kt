@@ -7,7 +7,7 @@ import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.InternalContext
-import dev.voqal.assistant.processing.VoqalResponseParser
+import dev.voqal.assistant.processing.ResponseParser
 import io.vertx.core.json.JsonObject
 import org.mockito.kotlin.mock
 
@@ -41,7 +41,7 @@ class AnswerQuestionToolTest : JBTest() {
                 transcription = ""
             )
         )
-        val response = VoqalResponseParser.parse(completion, directive)
+        val response = ResponseParser.parse(completion, directive)
         assertTrue(JsonObject((response.toolCalls.first() as ToolCall.Function).function.arguments).containsKey("answer"))
     }
 
@@ -72,7 +72,7 @@ class AnswerQuestionToolTest : JBTest() {
                 transcription = ""
             )
         )
-        val response = VoqalResponseParser.parse(completion, directive)
+        val response = ResponseParser.parse(completion, directive)
         assertEquals(
             "Hello! How can I assist you today?",
             JsonObject((response.toolCalls.first() as ToolCall.Function).function.arguments).getString("answer")
