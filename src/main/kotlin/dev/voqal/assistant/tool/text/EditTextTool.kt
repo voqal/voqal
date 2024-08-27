@@ -54,7 +54,7 @@ class EditTextTool : VoqalTool() {
         val VOQAL_HIGHLIGHTERS = Key.create<List<RangeHighlighter>>("VOQAL_HIGHLIGHTERS")
 
         //diff edit format, each line must start with -num| or +num| where num is the line number
-        val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
+        private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
     }
 
     override val name = NAME
@@ -64,11 +64,6 @@ class EditTextTool : VoqalTool() {
         val log = project.getVoqalLogger(this::class)
         log.debug("Triggering edit text")
 
-        process(project, directive, args)
-    }
-
-    private suspend fun process(project: Project, directive: VoqalDirective, args: JsonObject) {
-        val log = project.getVoqalLogger(this::class)
         val editor = directive.ide.editor!!
         var responseCode = args.getString("text")
         log.debug("Got completion: ${responseCode.replace("\n", "\\n")}")
@@ -86,8 +81,7 @@ class EditTextTool : VoqalTool() {
         }
 
         log.debug("Doing editing")
-        val memoryId = directive.internal.memorySlice.id
-        project.service<VoqalMemoryService>().saveEditLabel(memoryId)
+        project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id)
         val editHighlighters = doDocumentEdits(project, responseCode, editor)
         val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
         editor.putUserData(VOQAL_HIGHLIGHTERS, updatedHighlighters)
