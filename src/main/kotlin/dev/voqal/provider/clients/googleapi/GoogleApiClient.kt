@@ -56,12 +56,12 @@ class GoogleApiClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
+    private val baseUrl = "https://generativelanguage.googleapis.com"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
         val modelName = request.model.id
-        val providerUrl =
-            "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$providerKey"
+        val providerUrl = "${baseUrl}/v1beta/models/$modelName:generateContent?key=$providerKey"
         try {
             val requestJson = JsonObject()
                 .put("contents", JsonArray(request.messages.map { it.toJson() }))
@@ -113,28 +113,13 @@ class GoogleApiClient(
             if (response.status.isSuccess()) { //todo: better
                 val json = JsonObject(response.bodyAsText())
                 log.debug("Completion: $json")
-                val candidates = json.getJsonArray("candidates")
-                val bestContent = candidates.getJsonObject(0).getJsonObject("content")
-                val bestContentParts = bestContent?.getJsonArray("parts")
-                //todo: null is temp fix
-                val textResponse = bestContentParts?.getJsonObject(0)?.getString("text") ?: "null"
-                val choice = ChatChoice(
-                    index = 0,
-                    ChatMessage(
-                        ChatRole.Assistant,
-                        TextContent(textResponse)
-                    )
-                )
+
                 val completion = ChatCompletion(
                     id = UUID.randomUUID().toString(),
                     created = System.currentTimeMillis(),
                     model = ModelId(request.model.id),
-                    choices = listOf(choice),
-                    usage = Usage(
-                        promptTokens = json.getJsonObject("usageMetadata").getInteger("promptTokenCount"),
-                        completionTokens = json.getJsonObject("usageMetadata").getInteger("candidatesTokenCount"),
-                        totalTokens = json.getJsonObject("usageMetadata").getInteger("totalTokenCount")
-                    )
+                    choices = toChatChoices(json.getJsonArray("candidates")),
+                    usage = toUsage(json.getJsonObject("usageMetadata"))
                 )
                 return completion
             } else if (response.status.value == 401) {
@@ -200,5 +185,29 @@ class GoogleApiClient(
                 add(JsonObject().put("text", content))
             })
         }
+    }
+
+    private fun toChatChoices(json: JsonArray): List<ChatChoice> {
+        return json.mapIndexed { index, jsonElement ->
+            val jsonObject = jsonElement as JsonObject
+            val content = jsonObject.getJsonObject("content")
+            val parts = content.getJsonArray("parts")
+            val text = parts.getJsonObject(0).getString("text") //todo: other parts?
+            ChatChoice(
+                index = index,
+                ChatMessage(
+                    if (content.getString("role") == "model") Role.Assistant else Role.User,
+                    TextContent(text)
+                )
+            )
+        }
+    }
+
+    private fun toUsage(json: JsonObject): Usage {
+        return Usage(
+            promptTokens = json.getInteger("promptTokenCount"),
+            completionTokens = json.getInteger("candidatesTokenCount"),
+            totalTokens = json.getInteger("totalTokenCount")
+        )
     }
 }
