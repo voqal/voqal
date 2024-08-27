@@ -1,7 +1,6 @@
 package dev.voqal.assistant.tool.text
 
-import com.aallam.openai.api.chat.*
-import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.api.chat.Tool
 import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffManager
@@ -32,7 +31,6 @@ import com.intellij.psi.PsiNamedElement
 import com.intellij.refactoring.rename.RenameProcessor
 import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
-import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.processing.TextSearcher
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
@@ -66,27 +64,13 @@ class EditTextTool : VoqalTool() {
         val log = project.getVoqalLogger(this::class)
         log.debug("Triggering edit text")
 
-        val responseCode = args.getString("text")
-        val response = VoqalResponse(
-            directive, listOf(), ChatCompletion(
-                id = "n/a",
-                created = System.currentTimeMillis(),
-                model = ModelId("n/a"),
-                choices = listOf(
-                    ChatChoice(
-                        index = 0,
-                        ChatMessage(ChatRole.Assistant, TextContent(content = responseCode))
-                    )
-                )
-            )
-        )
-        process(project, directive, response)
+        process(project, directive, args)
     }
 
-    private suspend fun process(project: Project, directive: VoqalDirective, response: VoqalResponse) {
+    private suspend fun process(project: Project, directive: VoqalDirective, args: JsonObject) {
         val log = project.getVoqalLogger(this::class)
         val editor = directive.ide.editor!!
-        var responseCode = response.getBackingResponseAsText()
+        var responseCode = args.getString("text")
         log.debug("Got completion: ${responseCode.replace("\n", "\\n")}")
         responseCode = responseCode.replace("↕", "") //remove any carets
 
@@ -94,17 +78,15 @@ class EditTextTool : VoqalTool() {
         if (TextSearcher.checkForVuiInteraction("cancel", responseCode)) {
             log.debug("Cancelling editing")
             project.service<VoqalToolService>().blindExecute(CancelTool())
-            project.service<VoqalStatusService>().updateText("Editing cancelled", response)
             return
         } else if (TextSearcher.checkForVuiInteraction("accept", responseCode)) {
             log.debug("Accepting editing")
             project.service<VoqalToolService>().blindExecute(LooksGoodTool())
-            project.service<VoqalStatusService>().updateText("Editing accepted", response)
             return
         }
 
         log.debug("Doing editing")
-        val memoryId = response.directive.internal.memorySlice.id
+        val memoryId = directive.internal.memorySlice.id
         project.service<VoqalMemoryService>().saveEditLabel(memoryId)
         val editHighlighters = doDocumentEdits(project, responseCode, editor)
         val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
@@ -156,7 +138,6 @@ class EditTextTool : VoqalTool() {
                         ) //todo: throw VoqalCritique
                         project.service<VoqalDirectiveService>().executeDirective(correctionDirective)
                     } else {
-                        project.service<VoqalStatusService>().updateText("Editing completed", response)
                         project.service<VoqalStatusService>()
                             .updateText("Finished editing file: " + directive.developer.viewingFile?.name)
                     }

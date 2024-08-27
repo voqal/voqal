@@ -491,7 +491,9 @@ class VoqalDirectiveService(private val project: Project) {
                     }
                 })
             }
-            project.service<VoqalStatusService>().updateText(executionStr, response)
+            if (toolCalls.size > 1) {
+                project.service<VoqalStatusService>().updateText(executionStr, response)
+            }
             log.debug(executionStr)
 
             val toolService = project.service<VoqalToolService>()
