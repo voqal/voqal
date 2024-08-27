@@ -31,8 +31,6 @@ import dev.voqal.assistant.flaw.error.parse.ResponseParseError
 import dev.voqal.assistant.focus.DirectiveExecution
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.local.LocalMemorySlice
-import dev.voqal.assistant.tool.VoqalTool
-import dev.voqal.assistant.tool.system.AnswerQuestionTool
 import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.config.settings.TextToSpeechSettings
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
@@ -244,8 +242,6 @@ class VoqalDirectiveService(private val project: Project) {
             .filter { it.fileUrl == selectedTextEditor?.virtualFile?.url }
             .map { (it.sourcePosition?.line ?: it.line) + 1 }
 
-        //val projectCodeStructure = project.service<VoqalSearchService>().getProjectCodeStructure()
-        //println(projectCodeStructure)
         val viewingCodeProblems = selectedTextEditor?.let {
             project.service<VoqalSearchService>().getActiveProblems(it)
         }
@@ -259,8 +255,7 @@ class VoqalDirectiveService(private val project: Project) {
             ide = IdeContext(
                 project,
                 selectedTextEditor,
-                projectFileTree = projectFileStructure,
-                //projectCodeStructure = projectCodeStructure
+                projectFileTree = projectFileStructure
             ),
             internal = InternalContext(
                 memorySlice = project.service<VoqalMemoryService>().getCurrentMemory(promptSettings),
@@ -500,30 +495,7 @@ class VoqalDirectiveService(private val project: Project) {
             log.debug(executionStr)
 
             val toolService = project.service<VoqalToolService>()
-            var sortedToolCalls = VoqalTool.asSortedToolCalls(toolCalls).toMutableList()
-//            if (sortedToolCalls.size == 1 && (sortedToolCalls.first() as? ToolCall.Function)?.function?.name == AnswerQuestionTool.NAME) {
-//                //if there is only one tool call and it is the answer question tool, execute it immediately
-//                log.debug("Executing directive answer question tool immediately")
-//                val function = sortedToolCalls.first() as ToolCall.Function
-//                sortedToolCalls = mutableListOf(function.copy(
-//                    function = function.function.copy(
-//                        argumentsOrNull = JsonObject(function.function.arguments)
-//                            .put("executeImmediately", true)
-//                            .toString()
-//                    )
-//                ))
-//            }
-
-            //ensure answer question tool is last
-            val answerQuestionTool = sortedToolCalls.find {
-                (it as? ToolCall.Function)?.function?.name == AnswerQuestionTool.NAME
-            }
-            if (answerQuestionTool != null) {
-                sortedToolCalls.remove(answerQuestionTool)
-                sortedToolCalls.add(answerQuestionTool)
-            }
-
-            sortedToolCalls.forEach {
+            toolCalls.forEach {
                 val toolCall = it as? ToolCall.Function
                 if (toolCall != null) {
                     toolService.handleFunctionCall(toolCall, response)
