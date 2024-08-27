@@ -368,14 +368,14 @@ class VoqalDirectiveService(private val project: Project) {
                     execution.errors.add(e)
                     if (e.statusCode in setOf(503)) {
                         if (++attempt >= maxAttempts) {
-                            log.warn("OpenAI API error. Maximum retry attempts reached.")
-                            handleResponse("OpenAI API error. Please try again later.", isTextOnly = textOnly)
+                            log.warn("LLM API error. Maximum retry attempts reached.")
+                            handleResponse("LLM API error. Please try again later.", isTextOnly = textOnly)
                             retry = false
                         } else {
                             val delayTime = (2.0.pow(attempt.toDouble()) * 1000).toLong()
-                            log.warn("OpenAI API error. Retrying in ${delayTime / 1000} seconds...")
+                            log.warn("LLM API error. Retrying in ${delayTime / 1000} seconds...")
                             handleResponse(
-                                "OpenAI API error. Retrying in ${delayTime / 1000} seconds...",
+                                "LLM API error. Retrying in ${delayTime / 1000} seconds...",
                                 isTextOnly = textOnly
                             )
                             delay(delayTime)
