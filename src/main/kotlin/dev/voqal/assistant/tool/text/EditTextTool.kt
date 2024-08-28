@@ -3,11 +3,11 @@ package dev.voqal.assistant.tool.text
 import com.aallam.openai.api.chat.Tool
 import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
-import com.intellij.diff.DiffManager
 import com.intellij.diff.fragments.DiffFragmentImpl
 import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.diff.tools.simple.SimpleDiffChange
-import com.intellij.diff.tools.simple.SimpleDiffViewer
+import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
+import com.intellij.diff.util.DiffUtil
 import com.intellij.lang.Language
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.ApplicationManager
@@ -41,7 +41,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.joor.Reflect
 import org.slf4j.Logger
 import kotlin.Pair
 import kotlin.math.abs
@@ -468,22 +467,7 @@ class EditTextTool : VoqalTool() {
     }
 
     private fun getTextDiff(project: Project, oldText: String, newText: String): Diff {
-        val content1 = DiffContentFactory.getInstance().create(oldText)
-        val content2 = DiffContentFactory.getInstance().create(newText)
-        val diffRequest = SimpleDiffRequest("Voqal Diff", content1, content2, "Old", "New")
-        val diffPanel = WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
-            DiffManager.getInstance().createRequestPanel(project, project, null).apply { setRequest(diffRequest) }
-        })
-        val diffViewer = Reflect.on(Reflect.on(Reflect.on(diffPanel).get<Any>("myProcessor")).get<Any>("myState"))
-            .get<SimpleDiffViewer>("myViewer")
-        val indicator = EmptyProgressIndicator()
-        val lineFragments = diffViewer.textDiffProvider.compare(oldText, newText, indicator) ?: emptyList()
-        val changes = mutableListOf<SimpleDiffChange>()
-        for (fragment in lineFragments.filterNotNull()) {
-            changes.add(SimpleDiffChange(changes.size, fragment))
-        }
-        Disposer.dispose(diffPanel)
-
+        val changes = getSimpleDiffChanges(oldText, newText, project)
         val fragments = changes.map { Pair(it, it.fragment.innerFragments) }
             .flatMap { pair ->
                 pair.second?.map {
@@ -504,6 +488,26 @@ class EditTextTool : VoqalTool() {
             }.reversed().toMutableList()
 
         return Diff(oldText, fragments, newText, "full")
+    }
+
+    private fun getSimpleDiffChanges(
+        oldText: String,
+        newText: String,
+        project: Project
+    ): List<SimpleDiffChange> {
+        val disposable = Disposer.newDisposable()
+        val oldContent = DiffContentFactory.getInstance().create(oldText)
+        val newContent = DiffContentFactory.getInstance().create(newText)
+        val provider = DiffUtil.createTextDiffProvider(
+            project, SimpleDiffRequest("Voqal Diff", oldContent, newContent, "Old", "New"),
+            TextDiffSettingsHolder.TextDiffSettings(), {}, disposable
+        )
+        val fragments = provider.compare(oldText, newText, EmptyProgressIndicator())
+        Disposer.dispose(disposable)
+
+        return fragments?.mapIndexed { index, fragment ->
+            SimpleDiffChange(index, fragment)
+        } ?: emptyList()
     }
 
     private data class Diff(
