@@ -2,8 +2,11 @@ package dev.voqal.services
 
 import com.intellij.history.LocalHistory
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.memory.MemorySystem
@@ -64,10 +67,16 @@ class VoqalMemoryService(private val project: Project) : Disposable {
         }
     }
 
-    fun saveEditLabel(memoryId: String) {
+    fun saveEditLabel(memoryId: String, editor: Editor) {
         if (savedLabels.contains(memoryId)) return
         savedLabels.add(memoryId)
 
+        //ensure any active changes are saved before saving label
+        ApplicationManager.getApplication().invokeAndWait {
+            FileDocumentManager.getInstance().saveDocument(editor.document)
+        }
+
+        //invoking cancel during edit mode will now revert up to this point
         putLongTermUserData(
             "voqal.edit.$memoryId",
             LocalHistory.getInstance().putSystemLabel(project, "voqal.edit.$memoryId")

@@ -83,7 +83,7 @@ class EditTextTool : VoqalTool() {
         }
 
         log.debug("Doing editing")
-        project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id)
+        project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
         val streaming = args.getBoolean("streaming") ?: false
         val editHighlighters = doDocumentEdits(project, responseCode, editor, streaming)
         val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
