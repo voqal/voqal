@@ -31,7 +31,6 @@ import dev.voqal.assistant.flaw.error.parse.ResponseParseError
 import dev.voqal.assistant.focus.DirectiveExecution
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.local.LocalMemorySlice
-import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.config.settings.TextToSpeechSettings
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.status.VoqalStatus.*
@@ -88,19 +87,6 @@ class VoqalDirectiveService(private val project: Project) {
                 }
                 delay(30_000)
             }
-        }
-    }
-
-    /**
-     * Send the partial developer transcription to the appropriate Voqal mode for processing.
-     */
-    suspend fun handlePartialTranscription(spokenTranscript: SpokenTranscript) {
-        val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
-        if (promptSettings.showPartialResults && project.service<VoqalStatusService>().getStatus() == EDITING) {
-            project.service<VoqalToolService>().blindExecute(
-                EditTextTool(), io.vertx.core.json.JsonObject()
-                    .put("spokenTranscript", spokenTranscript.toJson())
-            )
         }
     }
 

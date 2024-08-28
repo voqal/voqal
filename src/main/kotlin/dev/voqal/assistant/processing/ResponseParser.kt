@@ -25,6 +25,30 @@ object ResponseParser {
     private val lineNumberRegex = Regex("^\\d+\\|")
 
     fun parseEditMode(
+        chunk: ChatCompletionChunk,
+        directive: VoqalDirective
+    ): VoqalResponse {
+        return parseEditMode(ChatCompletion(
+            id = chunk.id,
+            created = chunk.created.toLong(),
+            model = chunk.model,
+            choices = chunk.choices.map { it.toChatChoice() },
+            usage = chunk.usage,
+            systemFingerprint = chunk.systemFingerprint
+        ), directive)
+    }
+
+    fun ChatChunk.toChatChoice(): ChatChoice {
+        return ChatChoice(
+            index = 0,
+            message = ChatMessage(
+                role = this.delta!!.role!!,
+                messageContent = TextContent(this.delta!!.content!! + "\n```")
+            )
+        )
+    }
+
+    fun parseEditMode(
         completion: ChatCompletion,
         directive: VoqalDirective
     ): VoqalResponse {

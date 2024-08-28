@@ -173,14 +173,19 @@ class VoqalToolService(private val project: Project) {
         }
     }
 
-    suspend fun blindExecute(tool: VoqalTool, args: JsonObject = JsonObject(), chatMessage: Boolean = false) {
+    suspend fun blindExecute(
+        tool: VoqalTool,
+        args: JsonObject = JsonObject(),
+        chatMessage: Boolean = false,
+        memoryId: String? = null
+    ) {
         val editor = project.service<VoqalContextService>().getSelectedTextEditor()
         val mockDirective = VoqalDirective(
             IdeContext(project, editor),
             InternalContext(
                 memorySlice = object : MemorySlice {
                     override val id: String
-                        get() = throw UnsupportedOperationException("Not supported")
+                        get() = memoryId ?: throw UnsupportedOperationException("Not supported")
 
                     override suspend fun addMessage(directive: VoqalDirective, addMessage: Boolean): VoqalResponse =
                         throw UnsupportedOperationException("Not supported")

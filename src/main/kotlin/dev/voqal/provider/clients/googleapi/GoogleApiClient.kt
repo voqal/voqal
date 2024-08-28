@@ -14,14 +14,18 @@ import dev.voqal.provider.StmProvider
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.getVoqalLogger
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -175,6 +179,104 @@ class GoogleApiClient(
         }
     }
 
+    override suspend fun streamChatCompletion(
+        request: ChatCompletionRequest,
+        directive: VoqalDirective?
+    ): Flow<ChatCompletionChunk> = flow {
+        val log = project.getVoqalLogger(this::class)
+        val modelName = request.model.id
+        val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
+
+        try {
+            val requestJson = JsonObject().apply {
+                put("contents", JsonArray(request.messages.map { it.toJson() }))
+
+                if (directive?.internal?.includeToolsInMarkdown == false) {
+                    val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
+                        ?.map { JsonObject(Json.encodeToString(it)) })
+                    val functionDeclarations = toolsArray.map {
+                        val jsonObject = it as JsonObject
+                        jsonObject.remove("type")
+                        jsonObject.getJsonObject("function")
+                    }
+                    put("tools", JsonArray().apply {
+                        add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
+                    })
+
+                    put(
+                        "tool_config",
+                        JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY"))
+                    )
+                }
+
+                if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
+                    log.debug("Using audio modality")
+                    val speechId = directive.internal.speechId
+                    val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
+                    speechDirectory.mkdirs()
+                    val speechFile = File(speechDirectory, "developer-$speechId.wav")
+                    val audio1Bytes = speechFile.readBytes()
+
+                    // Add audio bytes to last contents/parts
+                    val lastContent = getJsonArray("contents")
+                        .getJsonObject(getJsonArray("contents").size() - 1)
+                    val parts = lastContent.getJsonArray("parts")
+                    parts.add(JsonObject().put("inline_data", JsonObject().apply {
+                        put("mime_type", "audio/wav")
+                        put("data", Base64.getEncoder().encodeToString(audio1Bytes))
+                    }))
+                    lastContent.put("parts", parts)
+                }
+            }
+
+            val fullText = StringBuilder()
+            val fullResponse = StringBuilder()
+            client.preparePost(providerUrl) {
+                header("Content-Type", "application/json")
+                header("Accept", "application/json")
+                setBody(requestJson.encode())
+            }.execute { httpResponse: HttpResponse ->
+                val channel: ByteReadChannel = httpResponse.body()
+                while (!channel.isClosedForRead) {
+                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+                    fullResponse.append(line)
+
+                    //extract chunks (todo: on another thread)
+                    try {
+                        val jsonArray = JsonArray("$fullResponse}]")
+                        if (!jsonArray.isEmpty) {
+                            val last = jsonArray.getJsonObject(jsonArray.size() - 1)
+                            val test = toChatChoices(last.getJsonArray("candidates"))
+                            fullText.append(test.get(0).message.content!!)
+
+                            emit(
+                                ChatCompletionChunk(
+                                    id = UUID.randomUUID().toString(),
+                                    created = 0, //todo: System.currentTimeMillis(),
+                                    model = ModelId(request.model.id),
+                                    choices = listOf(
+                                        ChatChunk(
+                                            index = 0,
+                                            ChatDelta(
+                                                role = test.get(0).message.role,
+                                                content = fullText.toString()
+                                            )
+                                        )
+                                    ),
+                                    usage = toUsage(last.getJsonObject("usageMetadata"))
+                                )
+                            )
+                        }
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+        } catch (e: HttpRequestTimeoutException) {
+            throw OpenAITimeoutException(e)
+        }
+    }
+
+    override fun isStreamable() = true
     override fun getAvailableModelNames() = MODELS
     override fun dispose() = Unit
 

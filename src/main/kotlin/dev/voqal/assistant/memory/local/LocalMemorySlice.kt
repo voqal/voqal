@@ -11,8 +11,11 @@ import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.processing.ResponseParser
+import dev.voqal.assistant.processing.ResponseParser.toChatChoice
+import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.VoqalStatusService
+import dev.voqal.services.VoqalToolService
 import dev.voqal.services.getVoqalLogger
 import io.vertx.core.json.JsonObject
 import org.jetbrains.annotations.VisibleForTesting
@@ -128,7 +131,32 @@ class LocalMemorySlice(
         val requestTime = System.currentTimeMillis()
         var completion: ChatCompletion? = null
         try {
-            completion = aiProvider.asLlmProvider(lmSettings.name).chatCompletion(request, directive)
+            val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
+            if (llmProvider.isStreamable()) {
+                val originalText = directive.ide.editor?.document?.text ?: ""
+                val chunks = mutableListOf<ChatCompletionChunk>()
+                llmProvider.streamChatCompletion(request, directive).collect {
+                    chunks.add(it)
+
+                    val response = try {
+                        ResponseParser.parseEditMode(it, directive)
+                    } catch (e: Throwable) {
+                        println(e)
+                        return@collect
+                    }
+                    val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
+                    project.service<VoqalToolService>().blindExecute(
+                        tool = EditTextTool(),
+                        args = JsonObject(argsString)
+                            .put("originalText", originalText)
+                            .put("streaming", true),
+                        memoryId = directive.internal.memorySlice.id
+                    )
+                }
+                completion = toChatCompletion(chunks)
+            } else {
+                completion = llmProvider.chatCompletion(request, directive)
+            }
             val responseTime = System.currentTimeMillis()
 
             //todo: check other choices
@@ -186,6 +214,18 @@ class LocalMemorySlice(
                 it
             }
         }
+    }
+
+    private fun toChatCompletion(chunks: List<ChatCompletionChunk>): ChatCompletion {
+        val chunk = chunks.last()
+        return ChatCompletion(
+            id = chunk.id,
+            created = chunk.created.toLong(),
+            model = chunk.model,
+            choices = chunk.choices.map { it.toChatChoice() },
+            usage = chunk.usage,
+            systemFingerprint = chunk.systemFingerprint
+        )
     }
 }
 

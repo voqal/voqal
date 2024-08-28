@@ -41,7 +41,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.slf4j.Logger
 import kotlin.Pair
 import kotlin.math.abs
 
@@ -65,6 +64,10 @@ class EditTextTool : VoqalTool() {
 
         val editor = directive.ide.editor!!
         var responseCode = args.getString("text")
+        if (responseCode.isBlank()) {
+            log.debug("Ignoring empty edit text")
+            return
+        }
         log.debug("Got completion: ${responseCode.replace("\n", "\\n")}")
         responseCode = responseCode.replace("↕", "") //remove any carets
 
@@ -81,59 +84,72 @@ class EditTextTool : VoqalTool() {
 
         log.debug("Doing editing")
         project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id)
-        val editHighlighters = doDocumentEdits(project, responseCode, editor)
+        val streaming = args.getBoolean("streaming") ?: false
+        val editHighlighters = doDocumentEdits(project, responseCode, editor, streaming)
         val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
         editor.putUserData(VOQAL_HIGHLIGHTERS, updatedHighlighters)
         WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
             PsiDocumentManager.getInstance(project).commitDocument(editor.document)
         })
-        PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
-            //move caret to end of last highlight
-            val lastHighlight = editHighlighters.lastOrNull()
-            val caretOffset = lastHighlight?.range?.endOffset
-            if (caretOffset != null) {
-                ApplicationManager.getApplication().invokeAndWait {
-                    editor.caretModel.moveToOffset(caretOffset)
 
-                    var visibleRange: ProperTextRange? = null
+        if (!streaming) {
+            PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
+                //move caret to end of last highlight
+                val lastHighlight = editHighlighters.lastOrNull()
+                val caretOffset = lastHighlight?.range?.endOffset
+                if (caretOffset != null) {
                     ApplicationManager.getApplication().invokeAndWait {
-                        visibleRange = editor.calculateVisibleRange()
-                    }
-                    val anyEditVisible = editHighlighters.any { visibleRange!!.intersects(it.range!!) }
+                        editor.caretModel.moveToOffset(caretOffset)
 
-                    //determine if caret is visible and scroll if necessary
-                    val visibleRectangle = editor.scrollingModel.visibleArea
-                    val caretRectangle = editor.logicalPositionToXY(editor.offsetToLogicalPosition(caretOffset))
-                    if (!anyEditVisible && !visibleRectangle.contains(caretRectangle)) {
-                        editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
+                        var visibleRange: ProperTextRange? = null
+                        ApplicationManager.getApplication().invokeAndWait {
+                            visibleRange = editor.calculateVisibleRange()
+                        }
+                        val anyEditVisible = editHighlighters.any { visibleRange!!.intersects(it.range!!) }
+
+                        //determine if caret is visible and scroll if necessary
+                        val visibleRectangle = editor.scrollingModel.visibleArea
+                        val caretRectangle = editor.logicalPositionToXY(editor.offsetToLogicalPosition(caretOffset))
+                        if (!anyEditVisible && !visibleRectangle.contains(caretRectangle)) {
+                            editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
+                        }
                     }
                 }
-            }
 
-            project.invokeLater {
-                val codeSmells = mutableListOf<CodeSmellInfo>()
                 if (directive.internal.promptSettings?.codeSmellCorrection == true) {
                     log.debug("Checking for code smells")
-                    val virtualFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.virtualFile
-                    codeSmells.addAll(CodeSmellDetector.getInstance(project).findCodeSmells(listOf(virtualFile))
-                        .filter { it.severity == HighlightSeverity.ERROR })
+                    checkCodeSmells(directive)
                 } else {
                     log.debug("Skipping code smell check")
+                    project.service<VoqalStatusService>()
+                        .updateText("Finished editing file: " + directive.developer.viewingFile?.name)
                 }
-                project.scope.launch {
-                    if (codeSmells.isNotEmpty()) {
-                        project.service<VoqalStatusService>().updateText("Found " + codeSmells.size + " code smells")
-                        val correctionDirective = directive.copy(
-                            developer = directive.developer.copy(
-                                transcription = "The following code smells were detected:\n -" +
-                                        codeSmells.joinToString("\n -") { it.description }
-                            )
-                        ) //todo: throw VoqalCritique
-                        project.service<VoqalDirectiveService>().executeDirective(correctionDirective)
-                    } else {
-                        project.service<VoqalStatusService>()
-                            .updateText("Finished editing file: " + directive.developer.viewingFile?.name)
-                    }
+            }
+        }
+    }
+
+    private fun checkCodeSmells(directive: VoqalDirective) {
+        val project = directive.project
+        project.invokeLater {
+            val editor = directive.ide.editor!!
+            val codeSmells = mutableListOf<CodeSmellInfo>()
+            val virtualFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.virtualFile
+            codeSmells.addAll(CodeSmellDetector.getInstance(project).findCodeSmells(listOf(virtualFile))
+                .filter { it.severity == HighlightSeverity.ERROR })
+
+            project.scope.launch {
+                if (codeSmells.isNotEmpty()) {
+                    project.service<VoqalStatusService>().updateText("Found " + codeSmells.size + " code smells")
+                    val correctionDirective = directive.copy(
+                        developer = directive.developer.copy(
+                            transcription = "The following code smells were detected:\n -" +
+                                    codeSmells.joinToString("\n -") { it.description }
+                        )
+                    ) //todo: throw VoqalCritique
+                    project.service<VoqalDirectiveService>().executeDirective(correctionDirective)
+                } else {
+                    project.service<VoqalStatusService>()
+                        .updateText("Finished editing file: " + directive.developer.viewingFile?.name)
                 }
             }
         }
@@ -142,7 +158,9 @@ class EditTextTool : VoqalTool() {
     suspend fun doDocumentEdits(
         project: Project,
         replaceResponseCode: String,
-        editor: Editor
+        editor: Editor,
+        streaming: Boolean = false,
+        originalText: String? = null
     ): List<RangeHighlighter> {
         val log = project.getVoqalLogger(this::class)
 
@@ -157,18 +175,58 @@ class EditTextTool : VoqalTool() {
             responseCode = responseCode.lines().drop(3).joinToString("\n")
         }
 
-        return if (responseCode.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
-            doDiffTextEdit(replaceResponseCode, editor, project, log)
-        } else {
-            doFullTextEdit(editor, replaceResponseCode, project, log)
+        //if streaming, add rest of editor text to response code
+        val streamIndicators = mutableListOf<RangeHighlighter>()
+        val existingHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS)
+        val previousStreamIndicator = existingHighlighters?.find { it.layer == HighlighterLayer.LAST }
+        if (previousStreamIndicator != null) {
+            editor.markupModel.removeHighlighter(previousStreamIndicator)
+            editor.putUserData(VOQAL_HIGHLIGHTERS, existingHighlighters.toMutableList().apply {
+                remove(previousStreamIndicator)
+            })
         }
+        if (streaming) {
+            val origText = originalText ?: editor.document.text
+            val simpleDiffs = getSimpleDiffChanges(origText, responseCode, project)
+            val textRange = simpleDiffs.lastOrNull()?.fragment?.let {
+                TextRange(it.startOffset2, it.endOffset2)
+            }
+
+            if (textRange != null) {
+                val diffOffset = simpleDiffs.toMutableList().apply { removeLast() }
+                    .sumOf { it.fragment.endOffset1 - it.fragment.startOffset1 }
+                responseCode += origText.substring(textRange.endOffset + diffOffset)
+                val lastLine = editor.document.getLineNumber(textRange.endOffset)
+                val lastLineStartOffset = editor.document.getLineStartOffset(lastLine)
+                val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
+                val textAttributes = TextAttributes()
+                textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.defaultBackground.brighter()
+                val highlighter = editor.markupModel.addRangeHighlighter(
+                    lastLineStartOffset, lastLineEndOffset,
+                    HighlighterLayer.LAST,
+                    textAttributes,
+                    HighlighterTargetArea.LINES_IN_RANGE
+                )
+                streamIndicators.add(highlighter)
+            } else {
+                log.warn("Could not find existing text in editor to update stream indicator")
+            }
+        }
+
+        val editHighlighters = if (responseCode.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
+            doDiffTextEdit(responseCode, editor, project, streaming)
+        } else {
+            doFullTextEdit(editor, responseCode, project, streaming)
+        }
+        return streamIndicators + editHighlighters
     }
 
     private suspend fun doDiffTextEdit(
         replaceResponseCode: String,
         editor: Editor,
         project: Project,
-        log: Logger
+        streaming: Boolean
     ): MutableList<RangeHighlighter> {
         val diffs = replaceResponseCode.lines().filter { it.isNotBlank() }.mapNotNull { line ->
             val match = diffRegex.matchEntire(line)
@@ -206,15 +264,17 @@ class EditTextTool : VoqalTool() {
         }
 
         val finalTextString = finalText.joinToString("\n")
-        return doFullTextEdit(editor, finalTextString, project, log)
+        return doFullTextEdit(editor, finalTextString, project, streaming)
     }
 
     private suspend fun doFullTextEdit(
         editor: Editor,
         replaceResponseCode: String,
         project: Project,
-        log: Logger
+        streaming: Boolean
     ): MutableList<RangeHighlighter> {
+        val log = project.getVoqalLogger(this::class)
+
         //get all diffs from current code to completion
         var oldText = editor.document.text
         var newText = replaceResponseCode
@@ -270,14 +330,10 @@ class EditTextTool : VoqalTool() {
         val activeHighlighters = mutableListOf<RangeHighlighter>()
         diffFragments.forEach { diff ->
             var element = ReadAction.compute(ThrowableComputable {
-                PsiDocumentManager.getInstance(project).getPsiFile(editor.document)
-                    ?.findElementAt(diff.startOffset1)
+                PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.findElementAt(diff.startOffset1)
             })
-            val isIdentifier = element?.toString()?.contains("PsiIdentifier") == true
-                    || element?.toString()?.contains("IDENTIFIER") == true
-            val parent = if (isIdentifier) {
-                ReadAction.compute(ThrowableComputable { element?.parent })
-            } else null
+            val isIdentifier = element?.let { project.service<VoqalSearchService>().isIdentifier(it) } ?: false
+            val parent = if (isIdentifier) ReadAction.compute(ThrowableComputable { element?.parent }) else null
             if (isIdentifier && parent is PsiNamedElement) {
                 //can be smart renamed, use rename processor
                 element = parent
