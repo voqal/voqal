@@ -132,7 +132,7 @@ class LocalMemorySlice(
         var completion: ChatCompletion? = null
         try {
             val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
-            if (llmProvider.isStreamable()) {
+            if (promptSettings.promptName == "Edit Mode" && llmProvider.isStreamable()) {
                 val originalText = directive.ide.editor?.document?.text ?: ""
                 val chunks = mutableListOf<ChatCompletionChunk>()
                 llmProvider.streamChatCompletion(request, directive).collect {
