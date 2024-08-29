@@ -188,10 +188,10 @@ class GoogleApiClient(
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
 
         try {
-            val requestJson = JsonObject().apply {
-                put("contents", JsonArray(request.messages.map { it.toJson() }))
-
-                if (directive?.internal?.includeToolsInMarkdown == false) {
+            val requestJson = JsonObject()
+                .put("contents", JsonArray(request.messages.map { it.toJson() }))
+            if (directive?.internal?.includeToolsInMarkdown == false) {
+                requestJson.put("tools", JsonArray().apply {
                     val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
                         ?.map { JsonObject(Json.encodeToString(it)) })
                     val functionDeclarations = toolsArray.map {
@@ -199,34 +199,32 @@ class GoogleApiClient(
                         jsonObject.remove("type")
                         jsonObject.getJsonObject("function")
                     }
-                    put("tools", JsonArray().apply {
-                        add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
-                    })
+                    add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
+                })
 
-                    put(
-                        "tool_config",
-                        JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY"))
-                    )
-                }
+                requestJson.put(
+                    "tool_config",
+                    JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY"))
+                )
+            }
 
-                if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
-                    log.debug("Using audio modality")
-                    val speechId = directive.internal.speechId
-                    val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
-                    speechDirectory.mkdirs()
-                    val speechFile = File(speechDirectory, "developer-$speechId.wav")
-                    val audio1Bytes = speechFile.readBytes()
+            if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
+                log.debug("Using audio modality")
+                val speechId = directive.internal.speechId
+                val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
+                speechDirectory.mkdirs()
+                val speechFile = File(speechDirectory, "developer-$speechId.wav")
+                val audio1Bytes = speechFile.readBytes()
 
-                    // Add audio bytes to last contents/parts
-                    val lastContent = getJsonArray("contents")
-                        .getJsonObject(getJsonArray("contents").size() - 1)
-                    val parts = lastContent.getJsonArray("parts")
-                    parts.add(JsonObject().put("inline_data", JsonObject().apply {
-                        put("mime_type", "audio/wav")
-                        put("data", Base64.getEncoder().encodeToString(audio1Bytes))
-                    }))
-                    lastContent.put("parts", parts)
-                }
+                //add audio bytes to last contents/parts
+                val lastContent = requestJson.getJsonArray("contents")
+                    .getJsonObject(requestJson.getJsonArray("contents").size() - 1)
+                val parts = lastContent.getJsonArray("parts")
+                parts.add(JsonObject().put("inline_data", JsonObject().apply {
+                    put("mime_type", "audio/wav")
+                    put("data", Base64.getEncoder().encodeToString(audio1Bytes))
+                }))
+                lastContent.put("parts", parts)
             }
 
             val fullText = StringBuilder()
