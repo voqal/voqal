@@ -53,6 +53,7 @@ class EditTextTool : VoqalTool() {
 
         //diff edit format, each line must start with -num| or +num| where num is the line number
         private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
+        private const val STREAM_INDICATOR_LAYER = 6100
     }
 
     override val name = NAME
@@ -163,40 +164,57 @@ class EditTextTool : VoqalTool() {
         originalText: String? = null
     ): List<RangeHighlighter> {
         val log = project.getVoqalLogger(this::class)
+        var responseCode = removeDiffHeaderIfPresent(replaceResponseCode)
 
-        //remove diff headers (if present)
-        var responseCode = replaceResponseCode
-        //todo: more robust diff header detection
-        if (
-            responseCode.lines().firstOrNull()?.startsWith("---") == true &&
-            responseCode.lines().getOrNull(1)?.startsWith("+++") == true &&
-            responseCode.lines().getOrNull(2)?.startsWith("@@") == true
-        ) {
-            responseCode = responseCode.lines().drop(3).joinToString("\n")
-        }
-
-        //if streaming, add rest of editor text to response code
+        //remove existing stream indicator (if present)
         val streamIndicators = mutableListOf<RangeHighlighter>()
-        val existingHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS)
-        val previousStreamIndicator = existingHighlighters?.find { it.layer == HighlighterLayer.LAST }
+        val existingHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS)?.toMutableList()
+        val previousStreamIndicator = existingHighlighters?.find { it.layer == STREAM_INDICATOR_LAYER }
         if (previousStreamIndicator != null) {
             editor.markupModel.removeHighlighter(previousStreamIndicator)
-            editor.putUserData(VOQAL_HIGHLIGHTERS, existingHighlighters.toMutableList().apply {
+            editor.putUserData(VOQAL_HIGHLIGHTERS, existingHighlighters.apply {
                 remove(previousStreamIndicator)
             })
         }
         if (streaming) {
+            //when streaming, the last line may or may not be complete, drop to be safe
+            responseCode = responseCode.lines().dropLast(1).joinToString("\n")
+
+            //determine diff between original text and text streamed so far
             val origText = originalText ?: editor.document.text
             val simpleDiffs = getSimpleDiffChanges(origText, responseCode, project)
-            val textRange = simpleDiffs.lastOrNull()?.fragment?.let {
-                TextRange(it.startOffset2, it.endOffset2)
-            }
+            val lastDiff = simpleDiffs.lastOrNull()
+            val textRange = lastDiff?.fragment?.let { TextRange(it.startOffset2, it.endOffset2) }
 
+            //append remaining original text to text streamed so far (assuming no changes)
             if (textRange != null) {
-                val diffOffset = simpleDiffs.toMutableList().apply { removeLast() }
-                    .sumOf { it.fragment.endOffset1 - it.fragment.startOffset1 }
+                val diffFragments = simpleDiffs.toMutableList().apply { removeLast() }.map { it.fragment }
+                var diffOffset = 0
+                for (fragment in diffFragments) {
+                    val length1 = fragment.endOffset1 - fragment.startOffset1
+                    val length2 = fragment.endOffset2 - fragment.startOffset2
+                    diffOffset += length1 - length2
+                }
+                println("Diff offset: $diffOffset")
+
+                val previousStreamIndicatorLine = previousStreamIndicator?.startOffset?.let {
+                    editor.document.getLineNumber(it)
+                } ?: 0
+                val linesWithEdits = diffFragments.map { editor.document.getLineNumber(it.startOffset1) }
+                var lastLine = editor.document.getLineNumber(textRange.endOffset)
+                //wait for changes to be applied on edited lines before progressing stream indicator
+                val hasEditedLineInRange = linesWithEdits.any { it in (previousStreamIndicatorLine + 1) until lastLine }
+                if (hasEditedLineInRange) {
+                    val lastEditedLine = existingHighlighters?.filter { it.layer == HighlighterLayer.SELECTION }
+                        ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) } //todo: don't count smart renames
+                    if (lastEditedLine != null) {
+                        lastLine = lastEditedLine
+                    } else {
+                        lastLine = linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine
+                    }
+                }
+
                 responseCode += origText.substring(textRange.endOffset + diffOffset)
-                val lastLine = editor.document.getLineNumber(textRange.endOffset)
                 val lastLineStartOffset = editor.document.getLineStartOffset(lastLine)
                 val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
                 val textAttributes = TextAttributes()
@@ -204,7 +222,7 @@ class EditTextTool : VoqalTool() {
                     .globalScheme.defaultBackground.brighter()
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     lastLineStartOffset, lastLineEndOffset,
-                    HighlighterLayer.LAST,
+                    STREAM_INDICATOR_LAYER,
                     textAttributes,
                     HighlighterTargetArea.LINES_IN_RANGE
                 )
@@ -215,18 +233,30 @@ class EditTextTool : VoqalTool() {
         }
 
         val editHighlighters = if (responseCode.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
-            doDiffTextEdit(responseCode, editor, project, streaming)
+            doDiffTextEdit(responseCode, editor, project)
         } else {
-            doFullTextEdit(editor, responseCode, project, streaming)
+            doFullTextEdit(editor, responseCode, project)
         }
         return streamIndicators + editHighlighters
+    }
+
+    private fun removeDiffHeaderIfPresent(responseCode: String): String {
+        //todo: more robust diff header detection
+        var finalResponseCode = responseCode
+        if (
+            finalResponseCode.lines().firstOrNull()?.startsWith("---") == true &&
+            finalResponseCode.lines().getOrNull(1)?.startsWith("+++") == true &&
+            finalResponseCode.lines().getOrNull(2)?.startsWith("@@") == true
+        ) {
+            finalResponseCode = finalResponseCode.lines().drop(3).joinToString("\n")
+        }
+        return finalResponseCode
     }
 
     private suspend fun doDiffTextEdit(
         replaceResponseCode: String,
         editor: Editor,
-        project: Project,
-        streaming: Boolean
+        project: Project
     ): MutableList<RangeHighlighter> {
         val diffs = replaceResponseCode.lines().filter { it.isNotBlank() }.mapNotNull { line ->
             val match = diffRegex.matchEntire(line)
@@ -264,14 +294,13 @@ class EditTextTool : VoqalTool() {
         }
 
         val finalTextString = finalText.joinToString("\n")
-        return doFullTextEdit(editor, finalTextString, project, streaming)
+        return doFullTextEdit(editor, finalTextString, project)
     }
 
     private suspend fun doFullTextEdit(
         editor: Editor,
         replaceResponseCode: String,
-        project: Project,
-        streaming: Boolean
+        project: Project
     ): MutableList<RangeHighlighter> {
         val log = project.getVoqalLogger(this::class)
 
