@@ -5,9 +5,11 @@ import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.fragments.DiffFragmentImpl
 import com.intellij.diff.requests.SimpleDiffRequest
+import com.intellij.diff.tools.fragmented.asLineRange
 import com.intellij.diff.tools.simple.SimpleDiffChange
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
 import com.intellij.diff.util.DiffUtil
+import com.intellij.diff.util.Range
 import com.intellij.lang.Language
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.ApplicationManager
@@ -178,7 +180,7 @@ class EditTextTool : VoqalTool() {
             })
         }
         if (streaming) {
-            responseCode = getFullTextAfterStreamEdits(
+            val fullTextWithEdits = getFullTextAfterStreamEdits(
                 responseCode,
                 originalText,
                 editor,
@@ -186,6 +188,9 @@ class EditTextTool : VoqalTool() {
                 previousStreamIndicator,
                 streamIndicators
             )
+            if (fullTextWithEdits != null) {
+                responseCode = fullTextWithEdits
+            }
         }
 
         val editHighlighters = if (responseCode.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
@@ -203,7 +208,7 @@ class EditTextTool : VoqalTool() {
         project: Project,
         previousStreamIndicator: RangeHighlighter?,
         streamIndicators: MutableList<RangeHighlighter>
-    ): String {
+    ): String? {
         val log = project.getVoqalLogger(this::class)
         val existingHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS)?.toMutableList()
 
@@ -232,6 +237,12 @@ class EditTextTool : VoqalTool() {
             } ?: 0
             val linesWithEdits = diffFragments.map { editor.document.getLineNumber(it.startOffset1) }
             var lastLine = editor.document.getLineNumber(textRange.endOffset)
+
+            //contains modification on last line instead of addition, can't progress
+            if (containsLine(lastDiff.fragment.asLineRange(), lastLine) && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0) {
+                return null
+            }
+
             //wait for changes to be applied on edited lines before progressing stream indicator
             val hasEditedLineInRange = linesWithEdits.any { it in (previousStreamIndicatorLine + 1) until lastLine }
             if (hasEditedLineInRange) {
@@ -261,6 +272,11 @@ class EditTextTool : VoqalTool() {
             log.warn("Could not find existing text in editor to update stream indicator")
         }
         return fullTextWithEdits
+    }
+
+    private fun containsLine(range: Range, lineNumber: Int): Boolean {
+        return range.start1 <= lineNumber && range.end1 >= lineNumber
+                && range.start2 <= lineNumber && range.end2 >= lineNumber
     }
 
     private fun removeDiffHeaderIfPresent(responseCode: String): String {
