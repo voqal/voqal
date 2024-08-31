@@ -5,11 +5,9 @@ import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.fragments.DiffFragmentImpl
 import com.intellij.diff.requests.SimpleDiffRequest
-import com.intellij.diff.tools.fragmented.asLineRange
 import com.intellij.diff.tools.simple.SimpleDiffChange
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
 import com.intellij.diff.util.DiffUtil
-import com.intellij.diff.util.Range
 import com.intellij.lang.Language
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.ApplicationManager
@@ -238,8 +236,8 @@ class EditTextTool : VoqalTool() {
             val linesWithEdits = diffFragments.map { editor.document.getLineNumber(it.startOffset1) }
             var lastLine = editor.document.getLineNumber(textRange.endOffset)
 
-            //contains modification instead of addition on last line, can not append remaining original text
-            if (isModificationChange(lastDiff, lastLine)) {
+            //contains modification instead of addition on last change, can not append remaining original text
+            if (!isAppendRemainingChange(editor, lastDiff)) {
                 streamIndicators.add(createStreamIndicator(editor, lastLine))
                 return null
             }
@@ -247,13 +245,10 @@ class EditTextTool : VoqalTool() {
             //wait for changes to be applied on edited lines before progressing stream indicator
             val hasEditedLineInRange = linesWithEdits.any { it in (previousStreamIndicatorLine + 1) until lastLine }
             if (hasEditedLineInRange) {
-                val lastEditedLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
-                    ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) } //todo: don't count smart renames
-                if (lastEditedLine != null) {
-                    lastLine = lastEditedLine
-                } else {
-                    lastLine = linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine
-                }
+                //todo: make sure it isn't counting smart renames
+                lastLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
+                    ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) }
+                    ?: (linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine)
             }
 
             fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
@@ -626,14 +621,9 @@ class EditTextTool : VoqalTool() {
         )
     }
 
-    private fun isModificationChange(diffChange: SimpleDiffChange, lineNumber: Int): Boolean {
-        return containsLine(diffChange.fragment.asLineRange(), lineNumber)
-                && abs(diffChange.fragment.startOffset2 - diffChange.fragment.endOffset2) > 0
-    }
-
-    private fun containsLine(range: Range, lineNumber: Int): Boolean {
-        return range.start1 <= lineNumber && range.end1 >= lineNumber
-                && range.start2 <= lineNumber && range.end2 >= lineNumber
+    private fun isAppendRemainingChange(editor: Editor, diffChange: SimpleDiffChange): Boolean {
+        return diffChange.fragment.endOffset1 == editor.document.textLength
+                && abs(diffChange.fragment.startOffset2 - diffChange.fragment.endOffset2) == 0
     }
 
     private fun removeDiffHeaderIfPresent(responseCode: String): String {
