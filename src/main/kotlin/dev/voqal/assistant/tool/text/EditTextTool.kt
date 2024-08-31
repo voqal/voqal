@@ -266,43 +266,6 @@ class EditTextTool : VoqalTool() {
         return fullTextWithEdits
     }
 
-    private fun createStreamIndicator(editor: Editor, lineNumber: Int): RangeHighlighter {
-        val lastLineStartOffset = editor.document.getLineStartOffset(lineNumber)
-        val lastLineEndOffset = editor.document.getLineEndOffset(lineNumber)
-        val textAttributes = TextAttributes()
-        textAttributes.backgroundColor = EditorColorsManager.getInstance()
-            .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
-        return editor.markupModel.addRangeHighlighter(
-            lastLineStartOffset, lastLineEndOffset,
-            STREAM_INDICATOR_LAYER,
-            textAttributes,
-            HighlighterTargetArea.LINES_IN_RANGE
-        )
-    }
-
-    private fun isModificationChange(lastDiff: SimpleDiffChange, lastLine: Int): Boolean {
-        return containsLine(lastDiff.fragment.asLineRange(), lastLine)
-                && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0
-    }
-
-    private fun containsLine(range: Range, lineNumber: Int): Boolean {
-        return range.start1 <= lineNumber && range.end1 >= lineNumber
-                && range.start2 <= lineNumber && range.end2 >= lineNumber
-    }
-
-    private fun removeDiffHeaderIfPresent(responseCode: String): String {
-        //todo: more robust diff header detection
-        var finalResponseCode = responseCode
-        if (
-            finalResponseCode.lines().firstOrNull()?.startsWith("---") == true &&
-            finalResponseCode.lines().getOrNull(1)?.startsWith("+++") == true &&
-            finalResponseCode.lines().getOrNull(2)?.startsWith("@@") == true
-        ) {
-            finalResponseCode = finalResponseCode.lines().drop(3).joinToString("\n")
-        }
-        return finalResponseCode
-    }
-
     private suspend fun doDiffTextEdit(
         replaceResponseCode: String,
         editor: Editor,
@@ -650,6 +613,43 @@ class EditTextTool : VoqalTool() {
             }
             totalDiffAmount
         }
+    }
+
+    private fun createStreamIndicator(editor: Editor, lineNumber: Int): RangeHighlighter {
+        val lastLineStartOffset = editor.document.getLineStartOffset(lineNumber)
+        val lastLineEndOffset = editor.document.getLineEndOffset(lineNumber)
+        val textAttributes = TextAttributes()
+        textAttributes.backgroundColor = EditorColorsManager.getInstance()
+            .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
+        return editor.markupModel.addRangeHighlighter(
+            lastLineStartOffset, lastLineEndOffset,
+            STREAM_INDICATOR_LAYER,
+            textAttributes,
+            HighlighterTargetArea.LINES_IN_RANGE
+        )
+    }
+
+    private fun isModificationChange(lastDiff: SimpleDiffChange, lastLine: Int): Boolean {
+        return containsLine(lastDiff.fragment.asLineRange(), lastLine)
+                && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0
+    }
+
+    private fun containsLine(range: Range, lineNumber: Int): Boolean {
+        return range.start1 <= lineNumber && range.end1 >= lineNumber
+                && range.start2 <= lineNumber && range.end2 >= lineNumber
+    }
+
+    private fun removeDiffHeaderIfPresent(responseCode: String): String {
+        //todo: more robust diff header detection
+        var finalResponseCode = responseCode
+        if (
+            finalResponseCode.lines().firstOrNull()?.startsWith("---") == true &&
+            finalResponseCode.lines().getOrNull(1)?.startsWith("+++") == true &&
+            finalResponseCode.lines().getOrNull(2)?.startsWith("@@") == true
+        ) {
+            finalResponseCode = finalResponseCode.lines().drop(3).joinToString("\n")
+        }
+        return finalResponseCode
     }
 
     //PsiNameHelper.getInstance(project).isIdentifier(newName)
