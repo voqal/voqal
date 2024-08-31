@@ -242,18 +242,7 @@ class EditTextTool : VoqalTool() {
 
             //contains modification instead of addition on last line, can not append remaining original text
             if (isModificationChange(lastDiff, lastLine)) {
-                val lastLineStartOffset = editor.document.getLineStartOffset(lastLine)
-                val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
-                val textAttributes = TextAttributes()
-                textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
-                val highlighter = editor.markupModel.addRangeHighlighter(
-                    lastLineStartOffset, lastLineEndOffset,
-                    STREAM_INDICATOR_LAYER,
-                    textAttributes,
-                    HighlighterTargetArea.LINES_IN_RANGE
-                )
-                streamIndicators.add(highlighter)
+                streamIndicators.add(createStreamIndicator(editor, lastLine))
                 return null
             }
 
@@ -270,22 +259,25 @@ class EditTextTool : VoqalTool() {
             }
 
             fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
-            val lastLineStartOffset = editor.document.getLineStartOffset(lastLine)
-            val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
-            val textAttributes = TextAttributes()
-            textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
-            val highlighter = editor.markupModel.addRangeHighlighter(
-                lastLineStartOffset, lastLineEndOffset,
-                STREAM_INDICATOR_LAYER,
-                textAttributes,
-                HighlighterTargetArea.LINES_IN_RANGE
-            )
-            streamIndicators.add(highlighter)
+            streamIndicators.add(createStreamIndicator(editor, lastLine))
         } else {
             log.warn("Could not find existing text in editor to update stream indicator")
         }
         return fullTextWithEdits
+    }
+
+    private fun createStreamIndicator(editor: Editor, lineNumber: Int): RangeHighlighter {
+        val lastLineStartOffset = editor.document.getLineStartOffset(lineNumber)
+        val lastLineEndOffset = editor.document.getLineEndOffset(lineNumber)
+        val textAttributes = TextAttributes()
+        textAttributes.backgroundColor = EditorColorsManager.getInstance()
+            .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
+        return editor.markupModel.addRangeHighlighter(
+            lastLineStartOffset, lastLineEndOffset,
+            STREAM_INDICATOR_LAYER,
+            textAttributes,
+            HighlighterTargetArea.LINES_IN_RANGE
+        )
     }
 
     private fun isModificationChange(lastDiff: SimpleDiffChange, lastLine: Int): Boolean {
