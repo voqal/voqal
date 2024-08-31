@@ -16,8 +16,8 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ScrollType
+import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
@@ -53,6 +53,8 @@ class EditTextTool : VoqalTool() {
 
         //diff edit format, each line must start with -num| or +num| where num is the line number
         private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
+
+        private const val ACTIVE_EDIT_LAYER = 6099
         private const val STREAM_INDICATOR_LAYER = 6100
     }
 
@@ -195,7 +197,6 @@ class EditTextTool : VoqalTool() {
                     val length2 = fragment.endOffset2 - fragment.startOffset2
                     diffOffset += length1 - length2
                 }
-                println("Diff offset: $diffOffset")
 
                 val previousStreamIndicatorLine = previousStreamIndicator?.startOffset?.let {
                     editor.document.getLineNumber(it)
@@ -205,7 +206,7 @@ class EditTextTool : VoqalTool() {
                 //wait for changes to be applied on edited lines before progressing stream indicator
                 val hasEditedLineInRange = linesWithEdits.any { it in (previousStreamIndicatorLine + 1) until lastLine }
                 if (hasEditedLineInRange) {
-                    val lastEditedLine = existingHighlighters?.filter { it.layer == HighlighterLayer.SELECTION }
+                    val lastEditedLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
                         ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) } //todo: don't count smart renames
                     if (lastEditedLine != null) {
                         lastLine = lastEditedLine
@@ -219,7 +220,7 @@ class EditTextTool : VoqalTool() {
                 val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
                 val textAttributes = TextAttributes()
                 textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.defaultBackground.brighter()
+                    .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     lastLineStartOffset, lastLineEndOffset,
                     STREAM_INDICATOR_LAYER,
@@ -393,14 +394,9 @@ class EditTextTool : VoqalTool() {
                 }
 
                 val newTextRange = TextRange(diff.startOffset1, diff.startOffset1 + text2.length)
-                val textAttributes = TextAttributes()
-                textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.defaultBackground.darker()
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     newTextRange.startOffset, newTextRange.endOffset,
-                    HighlighterLayer.SELECTION,
-                    textAttributes,
-                    HighlighterTargetArea.EXACT_RANGE
+                    ACTIVE_EDIT_LAYER, null, HighlighterTargetArea.EXACT_RANGE
                 )
                 activeHighlighters.add(highlighter)
             } else {
@@ -413,14 +409,9 @@ class EditTextTool : VoqalTool() {
                 })
 
                 val newTextRange = TextRange(diff.startOffset1, diff.startOffset1 + text2.length)
-                val textAttributes = TextAttributes()
-                textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.defaultBackground.darker()
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     newTextRange.startOffset, newTextRange.endOffset,
-                    HighlighterLayer.SELECTION,
-                    textAttributes,
-                    HighlighterTargetArea.EXACT_RANGE
+                    ACTIVE_EDIT_LAYER, null, HighlighterTargetArea.EXACT_RANGE
                 )
                 if (newTextRange.length > 0) {
                     activeHighlighters.add(highlighter)
