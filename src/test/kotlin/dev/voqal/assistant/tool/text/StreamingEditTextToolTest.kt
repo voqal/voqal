@@ -10,7 +10,7 @@ import java.io.File
 
 class StreamingEditTextToolTest : JBTest() {
 
-    fun `test streaming code edit`() {
+    fun `test streaming rename removing text`() {
         val responseCode =
             File("C:\\Users\\Brandon\\IdeaProjects\\voqal\\src\\test\\resources\\edit-stream\\isTest-to-test.txt").readText()
                 .replace("\r\n", "\n")
@@ -55,7 +55,7 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
-    fun `test streaming code edit2`() {
+    fun `test streaming rename adding text`() {
         val responseCode =
             File("C:\\Users\\Brandon\\IdeaProjects\\voqal\\src\\test\\resources\\edit-stream\\isTest-to-isTestIo.txt").readText()
                 .replace("\r\n", "\n")
@@ -100,7 +100,7 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
-    fun `test streaming code edit3`() {
+    fun `test streaming rename causing last line modification`() {
         val responseCode =
             File("C:\\Users\\Brandon\\IdeaProjects\\voqal\\src\\test\\resources\\edit-stream\\todoItemService-to-theService.txt").readText()
                 .replace("\r\n", "\n")

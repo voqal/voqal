@@ -616,22 +616,21 @@ class EditTextTool : VoqalTool() {
     }
 
     private fun createStreamIndicator(editor: Editor, lineNumber: Int): RangeHighlighter {
-        val lastLineStartOffset = editor.document.getLineStartOffset(lineNumber)
-        val lastLineEndOffset = editor.document.getLineEndOffset(lineNumber)
-        val textAttributes = TextAttributes()
-        textAttributes.backgroundColor = EditorColorsManager.getInstance()
-            .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
         return editor.markupModel.addRangeHighlighter(
-            lastLineStartOffset, lastLineEndOffset,
+            editor.document.getLineStartOffset(lineNumber),
+            editor.document.getLineEndOffset(lineNumber),
             STREAM_INDICATOR_LAYER,
-            textAttributes,
+            TextAttributes().apply {
+                backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
+            },
             HighlighterTargetArea.LINES_IN_RANGE
         )
     }
 
-    private fun isModificationChange(lastDiff: SimpleDiffChange, lastLine: Int): Boolean {
-        return containsLine(lastDiff.fragment.asLineRange(), lastLine)
-                && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0
+    private fun isModificationChange(diffChange: SimpleDiffChange, lineNumber: Int): Boolean {
+        return containsLine(diffChange.fragment.asLineRange(), lineNumber)
+                && abs(diffChange.fragment.startOffset2 - diffChange.fragment.endOffset2) > 0
     }
 
     private fun containsLine(range: Range, lineNumber: Int): Boolean {
