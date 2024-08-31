@@ -181,12 +181,9 @@ class EditTextTool : VoqalTool() {
         }
         if (streaming) {
             val fullTextWithEdits = getFullTextAfterStreamEdits(
-                responseCode,
-                originalText,
-                editor,
-                project,
-                previousStreamIndicator,
-                streamIndicators
+                responseCode, originalText,
+                editor, project,
+                previousStreamIndicator, streamIndicators
             )
             if (fullTextWithEdits != null) {
                 responseCode = fullTextWithEdits
