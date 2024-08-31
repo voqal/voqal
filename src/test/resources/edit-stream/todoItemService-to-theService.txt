@@ -1,0 +1,13 @@
+package ch.ibw.appl.todo.server.item.infra;
+
+import ch.ibw.appl.todo.server.item.model.TodoItem;
+import ch.ibw.appl.todo.server.item.service.TodoItemService;
+import ch.ibw.appl.todo.server.shared.service.JSONSerializer;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.eclipse.jetty.http.HttpStatus;
+import spark.Service;
+
+public class TodoItemController {
+  private TodoItemService theService;
+
+  public TodoItemController(Boolean isTest) {

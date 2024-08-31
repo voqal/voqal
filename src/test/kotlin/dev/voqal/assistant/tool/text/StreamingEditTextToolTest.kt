@@ -99,4 +99,37 @@ class StreamingEditTextToolTest : JBTest() {
                 )
         )
     }
+
+    fun `test streaming code edit3`() {
+        val responseCode =
+            File("C:\\Users\\Brandon\\IdeaProjects\\voqal\\src\\test\\resources\\edit-stream\\todoItemService-to-theService.txt").readText()
+                .replace("\r\n", "\n")
+        val originalText =
+            File("C:\\Users\\Brandon\\IdeaProjects\\voqal\\src\\test\\resources\\edit-stream\\TodoItemController.java").readText()
+                .replace("\r\n", "\n")
+        val previousStreamIndicator = null
+        val streamIndicators = mutableListOf<RangeHighlighter>()
+
+        val testDocument = EditorFactory.getInstance().createDocument(originalText)
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val fullTextWithEdits = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+            runBlocking {
+                EditTextTool().getFullTextAfterStreamEdits(
+                    responseCode,
+                    originalText,
+                    testEditor,
+                    project,
+                    previousStreamIndicator,
+                    streamIndicators
+                )
+            }
+        })
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            fullTextWithEdits,
+            originalText
+                .replace("private TodoItemService todoItemService;", "private TodoItemService theService;")
+        )
+    }
 }
