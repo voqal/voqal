@@ -190,6 +190,8 @@ class EditTextTool : VoqalTool() {
             )
             if (fullTextWithEdits != null) {
                 responseCode = fullTextWithEdits
+            } else {
+                return streamIndicators
             }
         }
 
@@ -238,8 +240,20 @@ class EditTextTool : VoqalTool() {
             val linesWithEdits = diffFragments.map { editor.document.getLineNumber(it.startOffset1) }
             var lastLine = editor.document.getLineNumber(textRange.endOffset)
 
-            //contains modification on last line instead of addition, can't progress
-            if (containsLine(lastDiff.fragment.asLineRange(), lastLine) && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0) {
+            //contains modification instead of addition on last line, can not append remaining original text
+            if (isModificationChange(lastDiff, lastLine)) {
+                val lastLineStartOffset = editor.document.getLineStartOffset(lastLine)
+                val lastLineEndOffset = editor.document.getLineEndOffset(lastLine)
+                val textAttributes = TextAttributes()
+                textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
+                val highlighter = editor.markupModel.addRangeHighlighter(
+                    lastLineStartOffset, lastLineEndOffset,
+                    STREAM_INDICATOR_LAYER,
+                    textAttributes,
+                    HighlighterTargetArea.LINES_IN_RANGE
+                )
+                streamIndicators.add(highlighter)
                 return null
             }
 
@@ -272,6 +286,11 @@ class EditTextTool : VoqalTool() {
             log.warn("Could not find existing text in editor to update stream indicator")
         }
         return fullTextWithEdits
+    }
+
+    private fun isModificationChange(lastDiff: SimpleDiffChange, lastLine: Int): Boolean {
+        return containsLine(lastDiff.fragment.asLineRange(), lastLine)
+                && abs(lastDiff.fragment.startOffset2 - lastDiff.fragment.endOffset2) > 0
     }
 
     private fun containsLine(range: Range, lineNumber: Int): Boolean {
