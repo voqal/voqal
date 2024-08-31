@@ -179,6 +179,7 @@ class EditTextTool : VoqalTool() {
                 remove(previousStreamIndicator)
             })
         }
+
         if (streaming) {
             val fullTextWithEdits = getFullTextAfterStreamEdits(
                 responseCode, originalText,
