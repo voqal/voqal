@@ -39,6 +39,7 @@ import dev.voqal.provider.clients.openai.OpenAiClient
 import dev.voqal.provider.clients.picovoice.PicovoiceCobraClient
 import dev.voqal.provider.clients.picovoice.PicovoiceLeopardClient
 import dev.voqal.provider.clients.picovoice.PicovoiceOrcaClient
+import dev.voqal.provider.clients.picovoice.error.PicovoiceError
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
 import dev.voqal.provider.clients.voqal.VoqalVadClient
@@ -265,11 +266,15 @@ class VoqalConfigService(private val project: Project) {
             TextToSpeechSettings.TTSProvider.PICOVOICE -> {
                 log.debug("Using Picovoice text-to-speech provider")
                 if (voqalConfig.textToSpeechSettings.providerKey.isNotEmpty()) {
-                    val orcaClient = PicovoiceOrcaClient(
-                        project,
-                        voqalConfig.textToSpeechSettings.providerKey
-                    )
-                    addTtsProvider(orcaClient)
+                    try {
+                        val orcaClient = PicovoiceOrcaClient(
+                            project,
+                            voqalConfig.textToSpeechSettings.providerKey
+                        )
+                        addTtsProvider(orcaClient)
+                    } catch (e: PicovoiceError) {
+                        log.warn("Unable to validate text-to-speech provider key")
+                    }
                 } else {
                     log.warn("Missing text-to-speech provider key")
                 }
@@ -503,12 +508,16 @@ class VoqalConfigService(private val project: Project) {
             SpeechToTextSettings.STTProvider.PICOVOICE -> {
                 log.debug("Using Picovoice speech-to-text provider")
                 if (voqalConfig.speechToTextSettings.providerKey.isNotEmpty()) {
-                    addSttProvider(
-                        PicovoiceLeopardClient(
-                            project,
-                            voqalConfig.speechToTextSettings.providerKey
+                    try {
+                        addSttProvider(
+                            PicovoiceLeopardClient(
+                                project,
+                                voqalConfig.speechToTextSettings.providerKey
+                            )
                         )
-                    )
+                    } catch (e: PicovoiceError) {
+                        log.warn("Unable to validate speech-to-text provider key")
+                    }
                 } else {
                     log.warn("Missing speech-to-text provider key")
                 }
@@ -596,16 +605,20 @@ class VoqalConfigService(private val project: Project) {
             VoiceDetectionSettings.VoiceDetectionProvider.Picovoice -> {
                 log.debug("Using Picovoice voice activity detection provider")
                 if (voqalConfig.voiceDetectionSettings.providerKey.isNotEmpty()) {
-                    addVadProvider(
-                        PicovoiceCobraClient(
-                            project,
-                            voqalConfig.voiceDetectionSettings.providerKey,
-                            voqalConfig.voiceDetectionSettings.sensitivity.toDouble(),
-                            voqalConfig.voiceDetectionSettings.voiceSilenceThreshold,
-                            voqalConfig.voiceDetectionSettings.speechSilenceThreshold,
-                            voqalConfig.voiceDetectionSettings.sustainDuration
+                    try {
+                        addVadProvider(
+                            PicovoiceCobraClient(
+                                project,
+                                voqalConfig.voiceDetectionSettings.providerKey,
+                                voqalConfig.voiceDetectionSettings.sensitivity.toDouble(),
+                                voqalConfig.voiceDetectionSettings.voiceSilenceThreshold,
+                                voqalConfig.voiceDetectionSettings.speechSilenceThreshold,
+                                voqalConfig.voiceDetectionSettings.sustainDuration
+                            )
                         )
-                    )
+                    } catch (e: PicovoiceError) {
+                        log.warn("Unable to validate wake provider key")
+                    }
                 } else {
                     log.warn("Missing wake provider key")
                 }

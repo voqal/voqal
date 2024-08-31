@@ -5,6 +5,7 @@ import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
+import dev.voqal.provider.clients.picovoice.error.PicovoiceError
 import org.slf4j.Logger
 
 @Suppress("FunctionName")
@@ -14,8 +15,6 @@ interface PicovoiceNative : Library {
         fun throwIfError(log: Logger, native: PicovoiceNative, status: Int) {
             if (status != 0) {
                 var errorMessage = native.pv_status_to_string(status)
-                log.warn(errorMessage)
-
                 val messageStackRef = PointerByReference()
                 val messageStackDepthRef = IntByReference()
                 val errorStatus = native.pv_get_error_stack(messageStackRef, messageStackDepthRef)
@@ -27,11 +26,12 @@ interface PicovoiceNative : Library {
                         errorMessage += ", $message"
                     }
                     native.pv_free_error_stack(messageStack)
+                    log.warn(errorMessage)
                 } else {
                     log.error("Error getting error stack, status: $errorStatus")
                 }
 
-                throw IllegalStateException("Failed to init: $errorMessage")
+                throw PicovoiceError(errorMessage)
             }
         }
     }
