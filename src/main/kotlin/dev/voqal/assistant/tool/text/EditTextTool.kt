@@ -241,8 +241,11 @@ class EditTextTool : VoqalTool() {
             val previousStreamIndicatorLine = previousStreamIndicator?.startOffset?.let {
                 editor.document.getLineNumber(it)
             } ?: 0
-            val linesWithEdits = diffFragments.map { editor.document.getLineNumber(it.startOffset1) }
-            var lastLine = editor.document.getLineNumber(textRange.endOffset)
+            val visibleRangeLineOffset = visibleRange?.startOffset ?: 0
+            val linesWithEdits = diffFragments.map {
+                editor.document.getLineNumber(it.startOffset1 + visibleRangeLineOffset)
+            }
+            var lastLine = editor.document.getLineNumber(textRange.endOffset + visibleRangeLineOffset)
 
             //contains modification instead of addition on last change, can not append remaining original text
             if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
