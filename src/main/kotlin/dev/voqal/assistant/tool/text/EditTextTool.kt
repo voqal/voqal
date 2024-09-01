@@ -260,6 +260,9 @@ class EditTextTool : VoqalTool() {
                 lastLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
                     ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) }
                     ?: (linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine)
+                if (lastLine < previousStreamIndicatorLine) {
+                    lastLine = previousStreamIndicatorLine
+                }
             }
 
             if (textRange.endOffset < origText.length) {
