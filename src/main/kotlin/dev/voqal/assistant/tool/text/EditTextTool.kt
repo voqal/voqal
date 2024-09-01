@@ -341,14 +341,9 @@ class EditTextTool : VoqalTool() {
         var updatedOldText = oldText
         var updatedNewText = newText
         var diffType: String
-        result.forEach { diff ->
-            if (diff != null && diff.diffAmount < smallestDiff.diffAmount && diff.fragments.isNotEmpty()) {
-                smallestDiff = diff
-                diffFragments = diff.fragments
-                updatedOldText = diff.originalText
-                updatedNewText = diff.newText
-                diffType = diff.diffType
-            } else if (diff != null && diff.diffAmount == smallestDiff.diffAmount && diff.fragments.size < diffFragments.size) {
+        result.filterNotNull().forEach { diff ->
+            val fewerChanges = diff.diffAmount == smallestDiff.diffAmount && diff.fragments.size < diffFragments.size
+            if (diff.diffAmount < smallestDiff.diffAmount || fewerChanges) {
                 smallestDiff = diff
                 diffFragments = diff.fragments
                 updatedOldText = diff.originalText
@@ -378,11 +373,8 @@ class EditTextTool : VoqalTool() {
 
                 if (text1.isNotEmpty() && validName) {
                     log.debug("Renaming element: $text1 -> $text2")
-                    val scope = ReadAction.compute(ThrowableComputable {
-                        element.useScope //todo: look into what proper scope is
-                    }) //GlobalSearchScope.projectScope(project)
                     val renameProcessor = ReadAction.compute(ThrowableComputable {
-                        RenameProcessor(project, element, text2, scope, false, true)
+                        RenameProcessor(project, element, text2, element.useScope, false, true)
                     })
                     val usageInfos = ProgressManager.getInstance().computeInNonCancelableSection(ThrowableComputable {
                         ReadAction.compute(ThrowableComputable { renameProcessor.findUsages() })
@@ -515,7 +507,7 @@ class EditTextTool : VoqalTool() {
                 newText = finalNewText
             }
         } else if (indent) {
-            // Detect the indentation type and width used in the old text
+            //detect the indentation type and width used in the old text
             val oldTextIndent = oldText!!.lines()
                 .filter(String::isNotBlank)
                 .map { line ->
@@ -527,7 +519,7 @@ class EditTextTool : VoqalTool() {
                 return null
             }
 
-            // Apply the detected indentation to each line of the new text
+            //apply the detected indentation to each line of the new text
             newText = newText.lines().joinToString("\n") { line ->
                 if (line.isBlank()) line else oldTextIndent + line
             }
