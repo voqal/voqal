@@ -215,7 +215,15 @@ class EditTextTool : VoqalTool() {
         fullTextWithEdits = fullTextWithEdits.lines().dropLast(1).joinToString("\n")
 
         //determine diff between original text and text streamed so far
-        val origText = originalText ?: editor.document.text
+        var origText = originalText ?: editor.document.text
+        val highlighter = project.service<VoqalMemoryService>()
+            .getUserData("visibleRangeHighlighter") as RangeHighlighter?
+        val visibleRange = highlighter?.range
+        if (visibleRange != null) {
+            ApplicationManager.getApplication().invokeAndWait {
+                origText = visibleRange.substring(editor.document.text)
+            }
+        }
         val simpleDiffs = getSimpleDiffChanges(origText, fullTextWithEdits, project)
         val lastDiff = simpleDiffs.lastOrNull()
         val textRange = lastDiff?.fragment?.let { TextRange(it.startOffset2, it.endOffset2) }
@@ -237,7 +245,7 @@ class EditTextTool : VoqalTool() {
             var lastLine = editor.document.getLineNumber(textRange.endOffset)
 
             //contains modification instead of addition on last change, can not append remaining original text
-            if (!isAppendRemainingChange(editor, lastDiff)) {
+            if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
                 streamIndicators.add(createStreamIndicator(editor, lastLine))
                 return null
             }
@@ -251,7 +259,16 @@ class EditTextTool : VoqalTool() {
                     ?: (linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine)
             }
 
-            fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
+            if (textRange.endOffset < origText.length) {
+                fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
+            } else {
+                //edit is adding text past visible range, need to re-add final line dropped above
+                var finalLine = responseCode.lines().last()
+                if (finalLine.isEmpty()) {
+                    finalLine = "\n"
+                }
+                fullTextWithEdits += finalLine
+            }
             streamIndicators.add(createStreamIndicator(editor, lastLine))
         } else {
             log.warn("Could not find existing text in editor to update stream indicator")
@@ -613,8 +630,21 @@ class EditTextTool : VoqalTool() {
         )
     }
 
-    private fun isAppendRemainingChange(editor: Editor, diffChange: SimpleDiffChange): Boolean {
-        return diffChange.fragment.endOffset1 == editor.document.textLength
+    private fun isAppendRemainingChange(
+        originalText: String,
+        diffChange: SimpleDiffChange,
+        visibleRange: TextRange?
+    ): Boolean {
+        if (visibleRange != null) {
+            val offsetVisibleRange = TextRange(0, visibleRange.endOffset - visibleRange.startOffset)
+            val appendAfterVisibleRange = diffChange.fragment.endOffset1 == originalText.length
+                    && diffChange.fragment.startOffset2 == offsetVisibleRange.endOffset
+                    && diffChange.fragment.endOffset2 > diffChange.fragment.startOffset2
+            if (appendAfterVisibleRange) {
+                return true
+            }
+        }
+        return diffChange.fragment.endOffset1 == originalText.length
                 && abs(diffChange.fragment.startOffset2 - diffChange.fragment.endOffset2) == 0
     }
 
