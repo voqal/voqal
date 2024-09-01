@@ -11,9 +11,9 @@ import java.io.File
 class StreamingEditTextToolTest : JBTest() {
 
     fun `test streaming rename removing text`() {
-        val responseCode = File("src\\test\\resources\\edit-stream\\isTest-to-test.txt").readText()
+        val responseCode = File("src/test/resources/edit-stream/isTest-to-test.txt").readText()
             .replace("\r\n", "\n")
-        val originalText = File("src\\test\\resources\\edit-stream\\TodoItemController.java").readText()
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
             .replace("\r\n", "\n")
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
@@ -54,9 +54,9 @@ class StreamingEditTextToolTest : JBTest() {
     }
 
     fun `test streaming rename adding text`() {
-        val responseCode = File("src\\test\\resources\\edit-stream\\isTest-to-isTestIo.txt").readText()
+        val responseCode = File("src/test/resources/edit-stream/isTest-to-isTestIo.txt").readText()
             .replace("\r\n", "\n")
-        val originalText = File("src\\test\\resources\\edit-stream\\TodoItemController.java").readText()
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
             .replace("\r\n", "\n")
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
@@ -97,9 +97,9 @@ class StreamingEditTextToolTest : JBTest() {
     }
 
     fun `test streaming rename causing last line modification`() {
-        val responseCode = File("src\\test\\resources\\edit-stream\\todoItemService-to-theService.txt").readText()
+        val responseCode = File("src/test/resources/edit-stream/todoItemService-to-theService.txt").readText()
             .replace("\r\n", "\n")
-        val originalText = File("src\\test\\resources\\edit-stream\\TodoItemController.java").readText()
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
             .replace("\r\n", "\n")
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
