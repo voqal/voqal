@@ -238,30 +238,30 @@ class EditTextTool : VoqalTool() {
                 diffOffset += length1 - length2
             }
 
-            val previousStreamIndicatorLine = previousStreamIndicator?.startOffset?.let {
+            val previousIndicatorLine = previousStreamIndicator?.startOffset?.let {
                 editor.document.getLineNumber(it)
             } ?: 0
             val visibleRangeLineOffset = visibleRange?.startOffset ?: 0
             val linesWithEdits = diffFragments.map {
                 editor.document.getLineNumber(it.startOffset1 + visibleRangeLineOffset)
             }
-            var lastLine = editor.document.getLineNumber(textRange.endOffset + visibleRangeLineOffset)
+            var indicatorLine = editor.document.getLineNumber(textRange.endOffset + visibleRangeLineOffset)
 
             //contains modification instead of addition on last change, can not append remaining original text
             if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
-                streamIndicators.add(createStreamIndicator(editor, previousStreamIndicatorLine))
+                streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
                 return null
             }
 
             //wait for changes to be applied on edited lines before progressing stream indicator
-            val hasEditedLineInRange = linesWithEdits.any { it in (previousStreamIndicatorLine + 1) until lastLine }
+            val hasEditedLineInRange = linesWithEdits.any { it in (previousIndicatorLine + 1) until indicatorLine }
             if (hasEditedLineInRange) {
                 //todo: make sure it isn't counting smart renames
-                lastLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
+                indicatorLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
                     ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) }
-                    ?: (linesWithEdits.filter { it < lastLine }.maxOrNull() ?: lastLine)
-                if (lastLine < previousStreamIndicatorLine) {
-                    lastLine = previousStreamIndicatorLine
+                    ?: (linesWithEdits.filter { it < indicatorLine }.maxOrNull() ?: indicatorLine)
+                if (indicatorLine < previousIndicatorLine) {
+                    indicatorLine = previousIndicatorLine
                 }
             }
 
@@ -275,7 +275,7 @@ class EditTextTool : VoqalTool() {
                 }
                 fullTextWithEdits += finalLine
             }
-            streamIndicators.add(createStreamIndicator(editor, lastLine))
+            streamIndicators.add(createStreamIndicator(editor, indicatorLine))
         } else {
             log.warn("Could not find existing text in editor to update stream indicator")
         }
