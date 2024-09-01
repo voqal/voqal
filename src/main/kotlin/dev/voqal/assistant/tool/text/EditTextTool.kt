@@ -246,7 +246,7 @@ class EditTextTool : VoqalTool() {
 
             //contains modification instead of addition on last change, can not append remaining original text
             if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
-                streamIndicators.add(createStreamIndicator(editor, lastLine))
+                streamIndicators.add(createStreamIndicator(editor, previousStreamIndicatorLine))
                 return null
             }
 
