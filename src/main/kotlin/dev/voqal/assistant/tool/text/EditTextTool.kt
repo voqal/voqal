@@ -77,7 +77,7 @@ class EditTextTool : VoqalTool() {
             log.debug("Ignoring empty edit text")
             return
         }
-        log.debug("Got completion: ${responseCode.replace("\n", "\\n")}")
+        log.trace("Got completion: ${responseCode.replace("\n", "\\n")}")
         responseCode = responseCode.replace("↕", "") //remove any carets
 
         //check for vui interactions
