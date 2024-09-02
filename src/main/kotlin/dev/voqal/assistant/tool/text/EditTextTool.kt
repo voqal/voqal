@@ -483,6 +483,9 @@ class EditTextTool : VoqalTool() {
                     }
                 }
 
+                val renameOffset = text2.length - text1.length
+                offsets.add(Pair(diffStartOffset, renameOffset))
+
                 log.debug("Replacing text: $text1 -> $text2")
                 WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                     editor.document.replaceString(diffStartOffset, diffEndOffset, text2)
