@@ -67,45 +67,7 @@ class GoogleApiClient(
         val modelName = request.model.id
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:generateContent?key=$providerKey"
         try {
-            val requestJson = JsonObject()
-                .put("contents", JsonArray(request.messages.map { it.toJson() }))
-            if (directive?.internal?.includeToolsInMarkdown == false) {
-                requestJson.put("tools", JsonArray().apply {
-                    val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
-                        ?.map { JsonObject(Json.encodeToString(it)) })
-                    val functionDeclarations = toolsArray.map {
-                        val jsonObject = it as JsonObject
-                        jsonObject.remove("type")
-                        jsonObject.getJsonObject("function")
-                    }
-                    add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
-                })
-
-                requestJson.put(
-                    "tool_config",
-                    JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY"))
-                )
-            }
-
-            if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
-                log.debug("Using audio modality")
-                val speechId = directive.internal.speechId
-                val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
-                speechDirectory.mkdirs()
-                val speechFile = File(speechDirectory, "developer-$speechId.wav")
-                val audio1Bytes = speechFile.readBytes()
-
-                //add audio bytes to last contents/parts
-                val lastContent = requestJson.getJsonArray("contents")
-                    .getJsonObject(requestJson.getJsonArray("contents").size() - 1)
-                val parts = lastContent.getJsonArray("parts")
-                parts.add(JsonObject().put("inline_data", JsonObject().apply {
-                    put("mime_type", "audio/wav")
-                    put("data", Base64.getEncoder().encodeToString(audio1Bytes))
-                }))
-                lastContent.put("parts", parts)
-            }
-
+            val requestJson = makeJsonRequest(request, directive)
             val response = client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
@@ -183,50 +145,11 @@ class GoogleApiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val modelName = request.model.id
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
 
         try {
-            val requestJson = JsonObject()
-                .put("contents", JsonArray(request.messages.map { it.toJson() }))
-            if (directive?.internal?.includeToolsInMarkdown == false) {
-                requestJson.put("tools", JsonArray().apply {
-                    val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
-                        ?.map { JsonObject(Json.encodeToString(it)) })
-                    val functionDeclarations = toolsArray.map {
-                        val jsonObject = it as JsonObject
-                        jsonObject.remove("type")
-                        jsonObject.getJsonObject("function")
-                    }
-                    add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
-                })
-
-                requestJson.put(
-                    "tool_config",
-                    JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY"))
-                )
-            }
-
-            if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
-                log.debug("Using audio modality")
-                val speechId = directive.internal.speechId
-                val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
-                speechDirectory.mkdirs()
-                val speechFile = File(speechDirectory, "developer-$speechId.wav")
-                val audio1Bytes = speechFile.readBytes()
-
-                //add audio bytes to last contents/parts
-                val lastContent = requestJson.getJsonArray("contents")
-                    .getJsonObject(requestJson.getJsonArray("contents").size() - 1)
-                val parts = lastContent.getJsonArray("parts")
-                parts.add(JsonObject().put("inline_data", JsonObject().apply {
-                    put("mime_type", "audio/wav")
-                    put("data", Base64.getEncoder().encodeToString(audio1Bytes))
-                }))
-                lastContent.put("parts", parts)
-            }
-
+            val requestJson = makeJsonRequest(request, directive)
             val fullText = StringBuilder()
             val fullResponse = StringBuilder()
             client.preparePost(providerUrl) {
@@ -239,13 +162,12 @@ class GoogleApiClient(
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
                     fullResponse.append(line)
 
-                    //extract chunks (todo: on another thread)
                     try {
-                        val jsonArray = JsonArray("$fullResponse}]")
-                        if (!jsonArray.isEmpty) {
-                            val last = jsonArray.getJsonObject(jsonArray.size() - 1)
-                            val test = toChatChoices(last.getJsonArray("candidates"))
-                            fullText.append(test.get(0).message.content!!)
+                        val resultArray = JsonArray("$fullResponse}]")
+                        if (!resultArray.isEmpty) {
+                            val lastResult = resultArray.getJsonObject(resultArray.size() - 1)
+                            val choices = toChatChoices(lastResult.getJsonArray("candidates"))
+                            fullText.append(choices[0].message.content!!)
 
                             emit(
                                 ChatCompletionChunk(
@@ -256,12 +178,12 @@ class GoogleApiClient(
                                         ChatChunk(
                                             index = 0,
                                             ChatDelta(
-                                                role = test.get(0).message.role,
+                                                role = choices[0].message.role,
                                                 content = fullText.toString()
                                             )
                                         )
                                     ),
-                                    usage = toUsage(last.getJsonObject("usageMetadata"))
+                                    usage = toUsage(lastResult.getJsonObject("usageMetadata"))
                                 )
                             )
                         }
@@ -274,9 +196,45 @@ class GoogleApiClient(
         }
     }
 
-    override fun isStreamable() = true
-    override fun getAvailableModelNames() = MODELS
-    override fun dispose() = Unit
+    private fun makeJsonRequest(request: ChatCompletionRequest, directive: VoqalDirective?): JsonObject {
+        val log = project.getVoqalLogger(this::class)
+        val requestJson = JsonObject().put("contents", JsonArray(request.messages.map { it.toJson() }))
+
+        if (directive?.internal?.includeToolsInMarkdown == false) {
+            requestJson.put("tools", JsonArray().apply {
+                val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
+                    ?.map { JsonObject(Json.encodeToString(it)) })
+                val functionDeclarations = toolsArray.map {
+                    val jsonObject = it as JsonObject
+                    jsonObject.remove("type")
+                    jsonObject.getJsonObject("function")
+                }
+                add(JsonObject().put("function_declarations", JsonArray(functionDeclarations)))
+            })
+            requestJson.put("tool_config", JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY")))
+        }
+
+        if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
+            log.debug("Using audio modality")
+            val speechId = directive.internal.speechId
+            val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
+            speechDirectory.mkdirs()
+            val speechFile = File(speechDirectory, "developer-$speechId.wav")
+            val audio1Bytes = speechFile.readBytes()
+
+            //add audio bytes to last contents/parts
+            val lastContent = requestJson.getJsonArray("contents")
+                .getJsonObject(requestJson.getJsonArray("contents").size() - 1)
+            val parts = lastContent.getJsonArray("parts")
+            parts.add(JsonObject().put("inline_data", JsonObject().apply {
+                put("mime_type", "audio/wav")
+                put("data", Base64.getEncoder().encodeToString(audio1Bytes))
+            }))
+            lastContent.put("parts", parts)
+        }
+
+        return requestJson
+    }
 
     private fun ChatMessage.toJson(): JsonObject {
         return JsonObject().apply {
@@ -310,4 +268,8 @@ class GoogleApiClient(
             totalTokens = json.getInteger("totalTokenCount")
         )
     }
+
+    override fun isStreamable() = true
+    override fun getAvailableModelNames() = MODELS
+    override fun dispose() = Unit
 }
