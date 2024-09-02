@@ -27,7 +27,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.*
 import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
+import com.intellij.psi.PsiReference
 import com.intellij.refactoring.rename.RenameProcessor
 import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
@@ -56,6 +58,10 @@ class EditTextTool : VoqalTool() {
 
         private const val ACTIVE_EDIT_LAYER = 6099
         private const val STREAM_INDICATOR_LAYER = 6100
+
+        private val SMART_RENAME_ELEMENT = Key.create<PsiElement>("SMART_RENAME_ELEMENT")
+        private val ORIGINAL_NAME = Key.create<String>("ORIGINAL_NAME")
+        private val NEW_NAME = Key.create<String>("NEW_NAME")
     }
 
     override val name = NAME
@@ -256,7 +262,6 @@ class EditTextTool : VoqalTool() {
             //wait for changes to be applied on edited lines before progressing stream indicator
             val hasEditedLineInRange = linesWithEdits.any { it in (previousIndicatorLine + 1) until indicatorLine }
             if (hasEditedLineInRange) {
-                //todo: make sure it isn't counting smart renames
                 indicatorLine = existingHighlighters?.filter { it.layer == ACTIVE_EDIT_LAYER }
                     ?.maxOfOrNull { editor.document.getLineNumber(it.range!!.endOffset) }
                     ?: (linesWithEdits.filter { it < indicatorLine }.maxOrNull() ?: indicatorLine)
@@ -380,20 +385,34 @@ class EditTextTool : VoqalTool() {
         diffType = smallestDiff.diffType
         log.debug("Smallest diff: $diffType")
 
+        val offsets = mutableListOf<Pair<Int, Int>>()
         val activeHighlighters = mutableListOf<RangeHighlighter>()
         diffFragments.forEach { diff ->
+            var diffStartOffset = diff.startOffset1
+            var diffEndOffset = diff.endOffset1
+            offsets.forEach {
+                if (it.first < diff.startOffset1) {
+                    diffStartOffset += it.second
+                }
+                if (it.first < diff.endOffset1) {
+                    diffEndOffset += it.second
+                }
+            }
+
             var element = ReadAction.compute(ThrowableComputable {
-                PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.findElementAt(diff.startOffset1)
+                PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.findElementAt(diffStartOffset)
             })
             val isIdentifier = element?.let { project.service<VoqalSearchService>().isIdentifier(it) } ?: false
             val parent = if (isIdentifier) ReadAction.compute(ThrowableComputable { element?.parent }) else null
             if (isIdentifier && parent is PsiNamedElement) {
                 //can be smart renamed, use rename processor
                 element = parent
-                val text1 = TextRange(diff.startOffset1, diff.endOffset1).substring(fullTextDiff.originalText)
+                val text1 = TextRange(diffStartOffset, diffEndOffset).substring(fullTextDiff.originalText)
                 val text2 = TextRange(diff.startOffset2, diff.endOffset2).substring(newText)
                 val validName = isValidIdentifier(element.language, text2)
 
+                val renameOffset = text2.length - text1.length
+                offsets.add(Pair(diffStartOffset, renameOffset))
                 if (text1.isNotEmpty() && validName) {
                     log.debug("Renaming element: $text1 -> $text2")
                     val renameProcessor = ReadAction.compute(ThrowableComputable {
@@ -405,33 +424,73 @@ class EditTextTool : VoqalTool() {
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                         renameProcessor.executeEx(usageInfos)
                     })
+                    ReadAction.compute(ThrowableComputable {
+                        usageInfos.forEach { offsets.add(Pair(it.navigationRange.startOffset, renameOffset)) }
+                    })
                 } else {
                     //otherwise, just replace text
                     log.debug("Replacing text: $text1 -> $text2")
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
-                        editor.document.replaceString(diff.startOffset1, diff.endOffset1, text2)
+                        editor.document.replaceString(diffStartOffset, diffEndOffset, text2)
                     })
                 }
 
-                val newTextRange = TextRange(diff.startOffset1, diff.startOffset1 + text2.length)
+                val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
+                val textAttributes = TextAttributes()
+                textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.defaultBackground.darker()
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     newTextRange.startOffset, newTextRange.endOffset,
-                    ACTIVE_EDIT_LAYER, null, HighlighterTargetArea.EXACT_RANGE
+                    ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
                 )
+                highlighter.putUserData(SMART_RENAME_ELEMENT, element)
+                highlighter.putUserData(ORIGINAL_NAME, text1)
+                highlighter.putUserData(NEW_NAME, text2)
                 activeHighlighters.add(highlighter)
             } else {
                 //otherwise, just replace text
                 val text1 = TextRange(diff.startOffset1, diff.endOffset1).substring(fullTextDiff.originalText)
                 val text2 = TextRange(diff.startOffset2, diff.endOffset2).substring(newText)
+
+                //first make sure this hasn't already been smart renamed
+                if (parent is PsiReference) {
+                    val declaration = ReadAction.compute(ThrowableComputable { parent.resolve() })
+                    val allHighlighters = activeHighlighters + (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList())
+                    val smartRenameElement = allHighlighters.find {
+                        it.getUserData(SMART_RENAME_ELEMENT) === declaration
+                    }
+                    if (smartRenameElement != null) {
+                        val currentName = ReadAction.compute(ThrowableComputable { element?.text })
+                        val originalName = smartRenameElement.getUserData(ORIGINAL_NAME)
+                        val newName = smartRenameElement.getUserData(NEW_NAME)
+                        if (text2 in setOf(originalName, newName) && currentName == newName) {
+                            log.debug("Already smart renamed: $originalName -> $currentName")
+                            val newTextRange = TextRange(diffStartOffset, diffStartOffset + currentName!!.length)
+                            val textAttributes = TextAttributes()
+                            textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                                .globalScheme.defaultBackground.darker()
+                            val highlighter = editor.markupModel.addRangeHighlighter(
+                                newTextRange.startOffset, newTextRange.endOffset,
+                                ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
+                            )
+                            activeHighlighters.add(highlighter)
+                            return@forEach
+                        }
+                    }
+                }
+
                 log.debug("Replacing text: $text1 -> $text2")
                 WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
-                    editor.document.replaceString(diff.startOffset1, diff.endOffset1, text2)
+                    editor.document.replaceString(diffStartOffset, diffEndOffset, text2)
                 })
 
-                val newTextRange = TextRange(diff.startOffset1, diff.startOffset1 + text2.length)
+                val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
+                val textAttributes = TextAttributes()
+                textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.defaultBackground.darker()
                 val highlighter = editor.markupModel.addRangeHighlighter(
                     newTextRange.startOffset, newTextRange.endOffset,
-                    ACTIVE_EDIT_LAYER, null, HighlighterTargetArea.EXACT_RANGE
+                    ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
                 )
                 if (newTextRange.length > 0) {
                     activeHighlighters.add(highlighter)
@@ -581,7 +640,7 @@ class EditTextTool : VoqalTool() {
                         pair.first.fragment.endOffset2
                     )
                 )
-            }.reversed().toMutableList()
+            }.toMutableList()
 
         return Diff(oldText, fragments, newText, "full")
     }
