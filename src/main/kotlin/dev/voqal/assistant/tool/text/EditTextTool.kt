@@ -390,8 +390,8 @@ class EditTextTool : VoqalTool() {
         diffFragments.forEach { diff ->
             var diffStartOffset = diff.startOffset1
             var diffEndOffset = diff.endOffset1
-            offsets.forEach {
-                if (it.first < diff.startOffset1) {
+            offsets.sortedBy { it.first }.forEach {
+                if (it.first < diff.startOffset1 && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
                     diffStartOffset += it.second
                 }
                 if (it.first < diff.endOffset1) {
@@ -462,7 +462,7 @@ class EditTextTool : VoqalTool() {
                 activeHighlighters.add(highlighter)
             } else {
                 //otherwise, just replace text
-                val text1 = TextRange(diff.startOffset1, diff.endOffset1).substring(fullTextDiff.originalText)
+                val text1 = TextRange(diffStartOffset, diffEndOffset).substring(editor.document.text)
                 val text2 = TextRange(diff.startOffset2, diff.endOffset2).substring(newText)
 
                 //first make sure this hasn't already been smart renamed
