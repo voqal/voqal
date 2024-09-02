@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.openapi.util.ThrowableComputable
+import com.intellij.testFramework.LightVirtualFile
+import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.VoqalStatusService
@@ -27,7 +29,7 @@ class StreamingEditTextToolTest : JBTest() {
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
 
-        val testDocument = EditorFactory.getInstance().createDocument(originalText)
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
         val fullTextWithEdits = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
             EditTextTool().getFullTextAfterStreamEdits(
@@ -68,7 +70,7 @@ class StreamingEditTextToolTest : JBTest() {
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
 
-        val testDocument = EditorFactory.getInstance().createDocument(originalText)
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
         val fullTextWithEdits = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
             EditTextTool().getFullTextAfterStreamEdits(
@@ -109,7 +111,7 @@ class StreamingEditTextToolTest : JBTest() {
         val previousStreamIndicator = null
         val streamIndicators = mutableListOf<RangeHighlighter>()
 
-        val testDocument = EditorFactory.getInstance().createDocument(originalText)
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
         val fullTextWithEdits = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
             EditTextTool().getFullTextAfterStreamEdits(
@@ -135,7 +137,7 @@ class StreamingEditTextToolTest : JBTest() {
         val streamIndicators = mutableListOf<RangeHighlighter>()
 
         var fullTextWithEdits: String? = null
-        val testDocument = EditorFactory.getInstance().createDocument(originalText)
+        val testDocument = LightVirtualFile("TextAdventureGame.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
         val testRange = ProperTextRange(14, 91)
         val testContext = VertxTestContext()
