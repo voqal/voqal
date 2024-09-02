@@ -56,8 +56,8 @@ class EditTextTool : VoqalTool() {
         //diff edit format, each line must start with -num| or +num| where num is the line number
         private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
 
-        private const val ACTIVE_EDIT_LAYER = 6099
-        private const val STREAM_INDICATOR_LAYER = 6100
+        private const val STREAM_INDICATOR_LAYER = 6099
+        private const val ACTIVE_EDIT_LAYER = 6100
 
         private val SMART_RENAME_ELEMENT = Key.create<PsiElement>("SMART_RENAME_ELEMENT")
         private val ORIGINAL_NAME = Key.create<String>("ORIGINAL_NAME")
@@ -425,7 +425,20 @@ class EditTextTool : VoqalTool() {
                         renameProcessor.executeEx(usageInfos)
                     })
                     ReadAction.compute(ThrowableComputable {
-                        usageInfos.forEach { offsets.add(Pair(it.navigationRange.startOffset, renameOffset)) }
+                        usageInfos.forEach {
+                            val navigationRange = it.navigationRange
+                            offsets.add(Pair(navigationRange.startOffset, renameOffset))
+
+                            val newTextRange = TextRange(navigationRange.startOffset, navigationRange.endOffset)
+                            val textAttributes = TextAttributes()
+                            textAttributes.backgroundColor = EditorColorsManager.getInstance()
+                                .globalScheme.defaultBackground.darker()
+                            val highlighter = editor.markupModel.addRangeHighlighter(
+                                newTextRange.startOffset, newTextRange.endOffset,
+                                ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
+                            )
+                            activeHighlighters.add(highlighter)
+                        }
                     })
                 } else {
                     //otherwise, just replace text
@@ -465,15 +478,6 @@ class EditTextTool : VoqalTool() {
                         val newName = smartRenameElement.getUserData(NEW_NAME)
                         if (text2 in setOf(originalName, newName) && currentName == newName) {
                             log.debug("Already smart renamed: $originalName -> $currentName")
-                            val newTextRange = TextRange(diffStartOffset, diffStartOffset + currentName!!.length)
-                            val textAttributes = TextAttributes()
-                            textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                                .globalScheme.defaultBackground.darker()
-                            val highlighter = editor.markupModel.addRangeHighlighter(
-                                newTextRange.startOffset, newTextRange.endOffset,
-                                ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
-                            )
-                            activeHighlighters.add(highlighter)
                             return@forEach
                         }
                     }
