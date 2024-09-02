@@ -27,9 +27,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.*
 import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
-import com.intellij.psi.PsiReference
 import com.intellij.refactoring.rename.RenameProcessor
 import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
@@ -58,10 +56,6 @@ class EditTextTool : VoqalTool() {
 
         internal const val STREAM_INDICATOR_LAYER = 6099
         internal const val ACTIVE_EDIT_LAYER = 6100
-
-        private val SMART_RENAME_ELEMENT = Key.create<PsiElement>("SMART_RENAME_ELEMENT")
-        private val ORIGINAL_NAME = Key.create<String>("ORIGINAL_NAME")
-        private val NEW_NAME = Key.create<String>("NEW_NAME")
     }
 
     override val name = NAME
@@ -456,31 +450,13 @@ class EditTextTool : VoqalTool() {
                     newTextRange.startOffset, newTextRange.endOffset,
                     ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
                 )
-                highlighter.putUserData(SMART_RENAME_ELEMENT, element)
-                highlighter.putUserData(ORIGINAL_NAME, text1)
-                highlighter.putUserData(NEW_NAME, text2)
                 activeHighlighters.add(highlighter)
             } else {
                 //otherwise, just replace text
                 val text1 = TextRange(diffStartOffset, diffEndOffset).substring(editor.document.text)
                 val text2 = TextRange(diff.startOffset2, diff.endOffset2).substring(newText)
-
-                //first make sure this hasn't already been smart renamed
-                if (parent is PsiReference) {
-                    val declaration = ReadAction.compute(ThrowableComputable { parent.resolve() })
-                    val allHighlighters = activeHighlighters + (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList())
-                    val smartRenameElement = allHighlighters.find {
-                        it.getUserData(SMART_RENAME_ELEMENT) === declaration
-                    }
-                    if (smartRenameElement != null) {
-                        val currentName = ReadAction.compute(ThrowableComputable { element?.text })
-                        val originalName = smartRenameElement.getUserData(ORIGINAL_NAME)
-                        val newName = smartRenameElement.getUserData(NEW_NAME)
-                        if (text2 in setOf(originalName, newName) && currentName == newName) {
-                            log.debug("Already smart renamed: $originalName -> $currentName")
-                            return@forEach
-                        }
-                    }
+                if (text1 == text2) {
+                    return@forEach //already made change via rename processor
                 }
 
                 val renameOffset = text2.length - text1.length
