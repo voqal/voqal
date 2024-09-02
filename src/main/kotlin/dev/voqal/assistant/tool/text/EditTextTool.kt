@@ -56,8 +56,8 @@ class EditTextTool : VoqalTool() {
         //diff edit format, each line must start with -num| or +num| where num is the line number
         private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
 
-        private const val STREAM_INDICATOR_LAYER = 6099
-        private const val ACTIVE_EDIT_LAYER = 6100
+        internal const val STREAM_INDICATOR_LAYER = 6099
+        internal const val ACTIVE_EDIT_LAYER = 6100
 
         private val SMART_RENAME_ELEMENT = Key.create<PsiElement>("SMART_RENAME_ELEMENT")
         private val ORIGINAL_NAME = Key.create<String>("ORIGINAL_NAME")
@@ -202,10 +202,10 @@ class EditTextTool : VoqalTool() {
         } else {
             doFullTextEdit(editor, responseCode, project)
         }
-        return streamIndicators + editHighlighters
+        return streamIndicators + editHighlighters.sortedBy { it.startOffset }
     }
 
-    internal fun getFullTextAfterStreamEdits(
+    private fun getFullTextAfterStreamEdits(
         responseCode: String,
         originalText: String?,
         editor: Editor,
