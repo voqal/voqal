@@ -14,7 +14,10 @@ interface LlmProvider : AiProvider {
     override fun isLlmProvider() = true
     fun isStreamable(): Boolean = false
 
+    //todo: only VertexAiClient/GoogleApiClient use directive for InternalContext, shouldn't need
     suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective? = null): ChatCompletion
+
+    //todo: only VertexAiClient/GoogleApiClient use directive for InternalContext, shouldn't need
     suspend fun streamChatCompletion(
         request: ChatCompletionRequest,
         directive: VoqalDirective? = null
