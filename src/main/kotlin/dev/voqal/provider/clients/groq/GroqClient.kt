@@ -120,8 +120,6 @@ class GroqClient(
                 .put("model", request.model.id)
                 .put("messages", JsonArray(request.messages.map { it.toJson() }))
                 .put("stream", true)
-
-            val fullText = StringBuilder()
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
@@ -153,8 +151,9 @@ class GroqClient(
                     )
                 }
 
-                val channel: ByteReadChannel = response.body()
                 var deltaRole: Role? = null
+                val fullText = StringBuilder()
+                val channel: ByteReadChannel = response.body()
                 while (!channel.isClosedForRead) {
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
 
