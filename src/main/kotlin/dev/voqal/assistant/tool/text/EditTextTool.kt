@@ -434,13 +434,7 @@ class EditTextTool : VoqalTool() {
                             offsets.add(Pair(navigationRange.startOffset, renameOffset))
 
                             val newTextRange = TextRange(navigationRange.startOffset, navigationRange.endOffset)
-                            val textAttributes = TextAttributes()
-                            textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                                .globalScheme.defaultBackground.darker()
-                            val highlighter = editor.markupModel.addRangeHighlighter(
-                                newTextRange.startOffset, newTextRange.endOffset,
-                                ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
-                            )
+                            val highlighter = createActiveEdit(editor, newTextRange)
                             activeHighlighters.add(highlighter)
                         }
                     })
@@ -453,13 +447,7 @@ class EditTextTool : VoqalTool() {
                 }
 
                 val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
-                val textAttributes = TextAttributes()
-                textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.defaultBackground.darker()
-                val highlighter = editor.markupModel.addRangeHighlighter(
-                    newTextRange.startOffset, newTextRange.endOffset,
-                    ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
-                )
+                val highlighter = createActiveEdit(editor, newTextRange)
                 highlighter.putUserData(SMART_RENAME_ELEMENT, element)
                 highlighter.putUserData(ORIGINAL_NAME, text1)
                 highlighter.putUserData(NEW_NAME, text2)
@@ -493,13 +481,7 @@ class EditTextTool : VoqalTool() {
                 offsets.add(Pair(diffStartOffset, renameOffset))
 
                 val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
-                val textAttributes = TextAttributes()
-                textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                    .globalScheme.defaultBackground.darker()
-                val highlighter = editor.markupModel.addRangeHighlighter(
-                    newTextRange.startOffset, newTextRange.endOffset,
-                    ACTIVE_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
-                )
+                val highlighter = createActiveEdit(editor, newTextRange)
                 if (newTextRange.length > 0) {
                     activeHighlighters.add(highlighter)
                 }
@@ -700,6 +682,19 @@ class EditTextTool : VoqalTool() {
                     .globalScheme.getColor(ColorKey.find("CARET_ROW_COLOR"))
             },
             HighlighterTargetArea.LINES_IN_RANGE
+        )
+    }
+
+    private fun createActiveEdit(editor: Editor, textRange: TextRange): RangeHighlighter {
+        return editor.markupModel.addRangeHighlighter(
+            textRange.startOffset,
+            textRange.endOffset,
+            ACTIVE_EDIT_LAYER,
+            TextAttributes().apply {
+                backgroundColor = EditorColorsManager.getInstance()
+                    .globalScheme.defaultBackground.darker()
+            },
+            HighlighterTargetArea.EXACT_RANGE
         )
     }
 
