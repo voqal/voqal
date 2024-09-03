@@ -81,31 +81,10 @@ class GroqClient(
             val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
             log.debug("Groq response status: ${response.status} in $roundTripTime ms")
 
-            if (response.status.isSuccess()) {
-                val completion = response.body<ChatCompletion>()
-                log.debug("Completion: $completion")
-                return completion
-            } else if (response.status.value == 401) {
-                throw AuthenticationException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Unauthorized access to Groq. Please check your API key and try again.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else {
-                val error = response.body<OpenAIError>()
-                throw InvalidRequestException(
-                    response.status.value,
-                    OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            }
+            throwIfError(response)
+            val completion = response.body<ChatCompletion>()
+            log.debug("Completion: $completion")
+            return completion
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
@@ -126,30 +105,7 @@ class GroqClient(
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
             }.execute { response: HttpResponse ->
-                if (!response.status.isSuccess()) {
-                    val responseBody = response.bodyAsText()
-                    if (response.status.value == 401) {
-                        throw AuthenticationException(
-                            response.status.value,
-                            OpenAIError(
-                                OpenAIErrorDetails(
-                                    code = null,
-                                    message = "Unauthorized access to Groq. Please check your API key and try again.",
-                                    param = null,
-                                    type = null
-                                )
-                            ),
-                            ClientRequestException(response, responseBody)
-                        )
-                    }
-
-                    val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
-                    throw InvalidRequestException(
-                        response.status.value,
-                        OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
-                        ClientRequestException(response, responseBody)
-                    )
-                }
+                throwIfError(response)
 
                 var deltaRole: Role? = null
                 val fullText = StringBuilder()
@@ -182,6 +138,33 @@ class GroqClient(
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
+    }
+
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
+
+        val responseBody = response.bodyAsText()
+        if (response.status.value == 401) {
+            throw AuthenticationException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = "Unauthorized access to Groq. Please check your API key and try again.",
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, responseBody)
+            )
+        }
+
+        val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
+        throw InvalidRequestException(
+            response.status.value,
+            OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
+            ClientRequestException(response, responseBody)
+        )
     }
 
     override fun isStreamable() = true
