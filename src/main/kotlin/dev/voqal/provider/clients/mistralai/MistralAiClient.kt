@@ -64,56 +64,63 @@ class MistralAiClient(
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
-        try {
-            val requestJson = JsonObject()
-                .put("model", request.model.id)
-                .put("messages", JsonArray(request.messages.map { it.toJson() }))
-            val response = client.post(providerUrl) {
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+
+        val response = try {
+            client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
             }
-            val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
-            log.debug("Mistral response status: ${response.status} in $roundTripTime ms")
-
-            if (response.status.isSuccess()) {
-                val completion = response.body<ChatCompletion>()
-                log.debug("Completion: $completion")
-                return completion
-            } else if (response.status.value == 401) {
-                throw AuthenticationException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Unauthorized access to Mistral AI. Please check your API key and try again.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else if (response.status.value == 429) {
-                throw RateLimitException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Rate limit exceeded. Please try again later.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else {
-                log.error("Mistral completion failed: ${response.status}")
-                throw Exception("Mistral completion failed: ${response.status}")
-            }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
+        log.debug("Mistral response status: ${response.status} in $roundTripTime ms")
+
+        throwIfError(response)
+        val completion = response.body<ChatCompletion>()
+        log.debug("Completion: $completion")
+        return completion
+    }
+
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
+
+        if (response.status.value == 401) {
+            throw AuthenticationException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = "Unauthorized access to Mistral AI. Please check your API key and try again.",
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, response.bodyAsText())
+            )
+        } else if (response.status.value == 429) {
+            throw RateLimitException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = "Rate limit exceeded. Please try again later.",
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, response.bodyAsText())
+            )
+        }
+
+        val log = project.getVoqalLogger(this::class)
+        log.error("Mistral completion failed: ${response.status}")
+        throw Exception("Mistral completion failed: ${response.status}")
     }
 
     override fun getAvailableModelNames() = MODELS
