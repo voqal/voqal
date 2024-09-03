@@ -140,6 +140,7 @@ class EditTextTool : VoqalTool() {
         }
     }
 
+    //todo: checking for code smells shouldn't be here (perhaps auto-added CheckCodeSmellsTool?)
     private fun checkCodeSmells(directive: VoqalDirective) {
         val project = directive.project
         project.invokeLater {
