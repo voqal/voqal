@@ -64,7 +64,6 @@ class TogetherAiClient(
             .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
             //.put("stop", JsonArray().add("<|eot_id|>"))
 
-        val startTime = System.currentTimeMillis()
         val response = try {
             client.post(providerUrl) { //todo: /chat/completions?
                 header("Accept", "application/json")
@@ -75,7 +74,7 @@ class TogetherAiClient(
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
-        val roundTripTime = System.currentTimeMillis() - startTime
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
         log.debug("Together AI response status: ${response.status} in $roundTripTime ms")
 
         throwIfError(response)

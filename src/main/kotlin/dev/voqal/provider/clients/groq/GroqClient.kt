@@ -68,26 +68,27 @@ class GroqClient(
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
-        try {
-            val requestJson = JsonObject()
-                .put("model", request.model.id)
-                .put("messages", JsonArray(request.messages.map { it.toJson() }))
-            val response = client.post(providerUrl) {
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+
+        val response = try {
+            client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
             }
-            val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
-            log.debug("Groq response status: ${response.status} in $roundTripTime ms")
-
-            throwIfError(response)
-            val completion = response.body<ChatCompletion>()
-            log.debug("Completion: $completion")
-            return completion
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
+        log.debug("Groq response status: ${response.status} in $roundTripTime ms")
+
+        throwIfError(response)
+        val completion = response.body<ChatCompletion>()
+        log.debug("Completion: $completion")
+        return completion
     }
 
     override suspend fun streamChatCompletion(
