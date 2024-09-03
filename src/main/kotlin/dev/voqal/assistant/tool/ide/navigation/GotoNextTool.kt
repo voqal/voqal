@@ -1,6 +1,5 @@
 package dev.voqal.assistant.tool.ide.navigation
 
-import com.aallam.openai.api.chat.Tool
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.VoqalDirective
@@ -40,9 +39,6 @@ class GotoNextTool : VoqalTool() {
         }
     }
 
-    override fun isVisible(directive: VoqalDirective): Boolean = false
-
-    override fun asTool(directive: VoqalDirective): Tool {
-        throw UnsupportedOperationException("Not supported")
-    }
+    override fun isVisible(directive: VoqalDirective) = false
+    override fun asTool(directive: VoqalDirective) = throw UnsupportedOperationException("Not supported")
 }

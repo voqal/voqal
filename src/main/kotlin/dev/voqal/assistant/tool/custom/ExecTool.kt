@@ -1,6 +1,5 @@
 package dev.voqal.assistant.tool.custom
 
-import com.aallam.openai.api.chat.Tool
 import com.intellij.openapi.components.service
 import com.profesorfalken.jpowershell.PowerShell
 import dev.voqal.assistant.VoqalDirective
@@ -70,7 +69,5 @@ class ExecTool(
         }
     }
 
-    override fun asTool(directive: VoqalDirective): Tool {
-        throw UnsupportedOperationException("Not supported")
-    }
+    override fun asTool(directive: VoqalDirective) = throw UnsupportedOperationException("Not supported")
 }

@@ -1,6 +1,5 @@
 package dev.voqal.assistant.tool.text
 
-import com.aallam.openai.api.chat.Tool
 import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.fragments.DiffFragmentImpl
@@ -729,9 +728,6 @@ class EditTextTool : VoqalTool() {
         return text.matches(Regex("[a-zA-Z_][a-zA-Z0-9_]*")) //todo: per lang regex
     }
 
-    override fun isVisible(directive: VoqalDirective): Boolean = false
-
-    override fun asTool(directive: VoqalDirective): Tool {
-        throw UnsupportedOperationException("Not supported")
-    }
+    override fun isVisible(directive: VoqalDirective) = false
+    override fun asTool(directive: VoqalDirective) = throw UnsupportedOperationException("Not supported")
 }
