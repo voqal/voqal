@@ -350,7 +350,7 @@ class DeepgramClient(
         }
     }
 
-    override fun isTestListener(): Boolean = testMode
+    override fun isTestListener() = testMode
     override fun isWavOutput() = true
     override fun isRawOutput() = false //todo: changing to true adds a pop sound to beginning of audio???
 }

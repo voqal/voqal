@@ -156,7 +156,7 @@ class AnthropicClient(
         }
     }
 
-    override fun getAvailableModelNames(): List<String> = MODELS
+    override fun getAvailableModelNames() = MODELS
     override fun dispose() = client.close()
 
     private fun ChatMessage.toJson(): JsonObject {

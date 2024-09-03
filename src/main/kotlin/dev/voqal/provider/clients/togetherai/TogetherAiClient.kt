@@ -142,10 +142,7 @@ class TogetherAiClient(
         }
     }
 
-    override fun getAvailableModelNames(): List<String> = MODELS
+    override fun getAvailableModelNames() = MODELS
     override fun dispose() = client.close()
-
-    private fun ChatMessage.toJson(): JsonObject {
-        return JsonObject().put("role", role.role.lowercase()).put("content", content)
-    }
+    private fun ChatMessage.toJson() = JsonObject().put("role", role.role.lowercase()).put("content", content)
 }
