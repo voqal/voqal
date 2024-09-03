@@ -144,11 +144,9 @@ open class OpenAiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val completionFlow = openAI.chatCompletions(request)
-
         var deltaRole: Role? = null
         val fullText = StringBuilder()
-        completionFlow.collect { completionChunk ->
+        openAI.chatCompletions(request).collect { completionChunk ->
             if (deltaRole == null) {
                 deltaRole = completionChunk.choices[0].delta?.role
             }
