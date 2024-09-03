@@ -293,19 +293,6 @@ class DeepgramClient(
         }
     }
 
-    override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
-        throw UnsupportedOperationException("todo")
-    }
-
-    override fun dispose() {
-        disposed = true
-        if (isSttProvider) {
-            project.audioCapture.removeListener(this)
-            if (::readThread.isInitialized) readThread.interrupt()
-            if (::pingThread.isInitialized) pingThread.interrupt()
-        }
-    }
-
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
         val log = project.getVoqalLogger(this::class)
         try {
@@ -348,6 +335,19 @@ class DeepgramClient(
         } catch (e: ConnectException) {
             throw ConnectException("Deepgram service is unavailable. Reason: ${e.message}")
         }
+    }
+
+    override fun dispose() {
+        disposed = true
+        if (isSttProvider) {
+            project.audioCapture.removeListener(this)
+            if (::readThread.isInitialized) readThread.interrupt()
+            if (::pingThread.isInitialized) pingThread.interrupt()
+        }
+    }
+
+    override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
+        throw UnsupportedOperationException("Not supported")
     }
 
     override fun isTestListener() = testMode
