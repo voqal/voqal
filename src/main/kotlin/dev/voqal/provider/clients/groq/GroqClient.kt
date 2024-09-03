@@ -127,9 +127,33 @@ class GroqClient(
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
-            }.execute { httpResponse: HttpResponse ->
-                val channel: ByteReadChannel = httpResponse.body()
+            }.execute { response: HttpResponse ->
+                if (!response.status.isSuccess()) {
+                    val responseBody = response.bodyAsText()
+                    if (response.status.value == 401) {
+                        throw AuthenticationException(
+                            response.status.value,
+                            OpenAIError(
+                                OpenAIErrorDetails(
+                                    code = null,
+                                    message = "Unauthorized access to Groq. Please check your API key and try again.",
+                                    param = null,
+                                    type = null
+                                )
+                            ),
+                            ClientRequestException(response, responseBody)
+                        )
+                    }
 
+                    val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
+                    throw InvalidRequestException(
+                        response.status.value,
+                        OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
+                        ClientRequestException(response, responseBody)
+                    )
+                }
+
+                val channel: ByteReadChannel = response.body()
                 var deltaRole: Role? = null
                 while (!channel.isClosedForRead) {
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
