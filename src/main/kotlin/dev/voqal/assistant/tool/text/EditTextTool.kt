@@ -477,8 +477,8 @@ class EditTextTool : VoqalTool() {
                     editor.document.replaceString(diffStartOffset, diffEndOffset, text2)
                 })
 
-                val renameOffset = text2.length - text1.length
-                offsets.add(Pair(diffStartOffset, renameOffset))
+                val replaceOffset = text2.length - text1.length
+                offsets.add(Pair(diffStartOffset, replaceOffset))
 
                 val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
                 if (newTextRange.length > 0) {
