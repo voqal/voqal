@@ -650,22 +650,9 @@ class EditTextTool : VoqalTool() {
         } ?: emptyList()
     }
 
-    private data class Diff(
-        val fragments: List<DiffFragmentImpl>,
-        val newText: String,
-        val diffType: String
-    ) {
-        val diffAmount by lazy {
-            var totalDiffAmount = 0
-            for (fragment in fragments) {
-                val length1 = fragment.endOffset1 - fragment.startOffset1
-                val length2 = fragment.endOffset2 - fragment.startOffset2
-                totalDiffAmount += abs(length1 - length2)
-            }
-            totalDiffAmount
-        }
-    }
-
+    /**
+     * Creates a full line highlighter that visualizes completion text sent by LLM so far.
+     */
     private fun createStreamIndicator(editor: Editor, lineNumber: Int): RangeHighlighter {
         return editor.markupModel.addRangeHighlighter(
             editor.document.getLineStartOffset(lineNumber),
@@ -679,6 +666,9 @@ class EditTextTool : VoqalTool() {
         )
     }
 
+    /**
+     * Creates an exact text highlighter that shows active edits made by LLM.
+     */
     private fun createActiveEdit(editor: Editor, textRange: TextRange): RangeHighlighter {
         return editor.markupModel.addRangeHighlighter(
             textRange.startOffset,
@@ -692,6 +682,9 @@ class EditTextTool : VoqalTool() {
         )
     }
 
+    /**
+     * Determines if completion text can be completed by appending remaining text from editor.
+     */
     private fun isAppendRemainingChange(
         originalText: String,
         diffChange: SimpleDiffChange,
@@ -726,6 +719,22 @@ class EditTextTool : VoqalTool() {
     //PsiNameHelper.getInstance(project).isIdentifier(newName)
     private fun isValidIdentifier(language: Language, text: String): Boolean {
         return text.matches(Regex("[a-zA-Z_][a-zA-Z0-9_]*")) //todo: per lang regex
+    }
+
+    private data class Diff(
+        val fragments: List<DiffFragmentImpl>,
+        val newText: String,
+        val diffType: String
+    ) {
+        val diffAmount by lazy {
+            var totalDiffAmount = 0
+            for (fragment in fragments) {
+                val length1 = fragment.endOffset1 - fragment.startOffset1
+                val length2 = fragment.endOffset2 - fragment.startOffset2
+                totalDiffAmount += abs(length1 - length2)
+            }
+            totalDiffAmount
+        }
     }
 
     override fun isVisible(directive: VoqalDirective) = false
