@@ -156,30 +156,26 @@ class GroqClient(
                 val channel: ByteReadChannel = response.body()
                 while (!channel.isClosedForRead) {
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-
-                    try {
-                        val chunkJson = line.substringAfter("data: ")
-                        if (chunkJson != "[DONE]") {
-                            val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
-                            if (deltaRole == null) {
-                                deltaRole = completionChunk.choices[0].delta?.role
-                            }
-                            fullText.append(completionChunk.choices[0].delta?.content ?: "")
-
-                            emit(
-                                completionChunk.copy(
-                                    choices = completionChunk.choices.map {
-                                        it.copy(
-                                            delta = it.delta?.copy(
-                                                role = deltaRole,
-                                                content = fullText.toString()
-                                            )
-                                        )
-                                    }
-                                )
-                            )
+                    val chunkJson = line.substringAfter("data: ")
+                    if (chunkJson != "[DONE]") {
+                        val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
+                        if (deltaRole == null) {
+                            deltaRole = completionChunk.choices[0].delta?.role
                         }
-                    } catch (_: Exception) {
+                        fullText.append(completionChunk.choices[0].delta?.content ?: "")
+
+                        emit(
+                            completionChunk.copy(
+                                choices = completionChunk.choices.map {
+                                    it.copy(
+                                        delta = it.delta?.copy(
+                                            role = deltaRole,
+                                            content = fullText.toString()
+                                        )
+                                    )
+                                }
+                            )
+                        )
                     }
                 }
             }
