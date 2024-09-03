@@ -236,15 +236,6 @@ class GoogleApiClient(
         return requestJson
     }
 
-    private fun ChatMessage.toJson(): JsonObject {
-        return JsonObject().apply {
-            put("role", if (role == Role.Assistant) "model" else "user")
-            put("parts", JsonArray().apply {
-                add(JsonObject().put("text", content))
-            })
-        }
-    }
-
     private fun toChatChoices(json: JsonArray): List<ChatChoice> {
         return json.mapIndexed { index, jsonElement ->
             val jsonObject = jsonElement as JsonObject
@@ -272,4 +263,13 @@ class GoogleApiClient(
     override fun isStreamable() = true
     override fun getAvailableModelNames() = MODELS
     override fun dispose() = Unit
+
+    private fun ChatMessage.toJson(): JsonObject {
+        return JsonObject().apply {
+            put("role", if (role == Role.Assistant) "model" else "user")
+            put("parts", JsonArray().apply {
+                add(JsonObject().put("text", content))
+            })
+        }
+    }
 }
