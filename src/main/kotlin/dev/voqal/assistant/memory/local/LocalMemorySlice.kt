@@ -22,7 +22,7 @@ import org.jetbrains.annotations.VisibleForTesting
 import java.util.*
 
 /**
- * Holds the chat messages in local memory.
+ * Holds chat messages with the LLM in local memory.
  */
 class LocalMemorySlice(
     private val project: Project
