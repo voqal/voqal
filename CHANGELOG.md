@@ -6,6 +6,7 @@
 
 ### Added
 
+- Streaming completions to `Edit Mode`
 - Groq distil-whisper-large-v3-en model
 
 ### Changed
