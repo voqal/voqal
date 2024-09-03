@@ -75,20 +75,20 @@ class EditTextTool : VoqalTool() {
         log.debug("Triggering edit text")
 
         val editor = directive.ide.editor!!
-        var responseCode = args.getString("text")
-        if (responseCode.isBlank()) {
+        var editText = args.getString("text")
+        if (editText.isBlank()) {
             log.debug("Ignoring empty edit text")
             return
         }
-        log.trace("Got completion: ${responseCode.replace("\n", "\\n")}")
-        responseCode = responseCode.replace("↕", "") //remove any carets
+        log.trace("Got completion: ${editText.replace("\n", "\\n")}")
+        editText = editText.replace("↕", "") //remove any carets
 
         //check for vui interactions
-        if (TextSearcher.checkForVuiInteraction("cancel", responseCode)) {
+        if (TextSearcher.checkForVuiInteraction("cancel", editText)) {
             log.debug("Cancelling editing")
             project.service<VoqalToolService>().blindExecute(CancelTool())
             return
-        } else if (TextSearcher.checkForVuiInteraction("accept", responseCode)) {
+        } else if (TextSearcher.checkForVuiInteraction("accept", editText)) {
             log.debug("Accepting editing")
             project.service<VoqalToolService>().blindExecute(LooksGoodTool())
             return
@@ -97,7 +97,7 @@ class EditTextTool : VoqalTool() {
         log.debug("Doing editing")
         project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
         val streaming = args.getBoolean("streaming") ?: false
-        val editHighlighters = doDocumentEdits(project, responseCode, editor, streaming)
+        val editHighlighters = doDocumentEdits(project, editText, editor, streaming)
         val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
         editor.putUserData(VOQAL_HIGHLIGHTERS, updatedHighlighters)
         WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
@@ -169,11 +169,11 @@ class EditTextTool : VoqalTool() {
 
     suspend fun doDocumentEdits(
         project: Project,
-        replaceResponseCode: String,
+        editText: String,
         editor: Editor,
         streaming: Boolean = false
     ): List<RangeHighlighter> {
-        var responseCode = removeDiffHeaderIfPresent(replaceResponseCode)
+        var replacementText = removeDiffHeaderIfPresent(editText)
 
         //remove existing stream indicator (if present)
         val streamIndicators = mutableListOf<RangeHighlighter>()
@@ -188,19 +188,19 @@ class EditTextTool : VoqalTool() {
 
         if (streaming) {
             val fullTextWithEdits = getFullTextAfterStreamEdits(
-                responseCode, editor, project, previousStreamIndicator, streamIndicators
+                replacementText, editor, project, previousStreamIndicator, streamIndicators
             )
             if (fullTextWithEdits != null) {
-                responseCode = fullTextWithEdits
+                replacementText = fullTextWithEdits
             } else {
                 return streamIndicators
             }
         }
 
-        val editHighlighters = if (responseCode.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
-            doDiffTextEdit(responseCode, editor, project)
+        val editHighlighters = if (replacementText.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
+            doDiffTextEdit(replacementText, editor, project)
         } else {
-            doFullTextEdit(editor, responseCode, project)
+            doFullTextEdit(editor, replacementText, project)
         }
         return streamIndicators + editHighlighters.sortedBy { it.startOffset }
     }
@@ -332,14 +332,14 @@ class EditTextTool : VoqalTool() {
 
     private suspend fun doFullTextEdit(
         editor: Editor,
-        replaceResponseCode: String,
+        replacementText: String,
         project: Project
     ): MutableList<RangeHighlighter> {
         val log = project.getVoqalLogger(this::class)
 
         //get all diffs from current code to completion
         val oldText = editor.document.text
-        var newText = replaceResponseCode
+        var newText = replacementText
 
         //find smallest way to modify text to desired completion
         val result = coroutineScope {
