@@ -187,6 +187,7 @@ class EditTextTool : VoqalTool() {
             })
         }
 
+        //if streaming, attempt to append remaining text to replacement text
         if (streaming) {
             val fullTextWithEdits = getFullTextAfterStreamEdits(
                 replacementText, editor, project, previousStreamIndicator, streamIndicators
@@ -198,6 +199,7 @@ class EditTextTool : VoqalTool() {
             }
         }
 
+        //finally, do text replacement on current editor
         val editHighlighters = if (replacementText.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
             doDiffTextEdit(replacementText, editor, project)
         } else {
