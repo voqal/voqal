@@ -8,7 +8,6 @@ import com.aallam.openai.api.model.ModelId
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.memory.local.asDirectiveTool
-import dev.voqal.provider.AiProvider
 import dev.voqal.provider.LlmProvider
 import dev.voqal.provider.StmProvider
 import dev.voqal.provider.clients.picovoice.NativesExtractor
@@ -35,7 +34,7 @@ class GoogleApiClient(
     override val name: String,
     private val project: Project,
     private val providerKey: String
-) : AiProvider, StmProvider, LlmProvider {
+) : LlmProvider, StmProvider {
 
     companion object {
         const val DEFAULT_MODEL = "gemini-1.5-flash-latest"
