@@ -52,7 +52,7 @@ class FireworksClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val url = "https://api.fireworks.ai/inference/v1/chat/completions"
+    private val providerUrl = "https://api.fireworks.ai/inference/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
@@ -60,7 +60,7 @@ class FireworksClient(
             val requestJson = JsonObject()
                 .put("model", request.model.id)
                 .put("messages", JsonArray(request.messages.map { it.toJson() }))
-            val response = client.post(url) {
+            val response = client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
