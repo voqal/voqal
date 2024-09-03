@@ -62,13 +62,7 @@ class TogetherAiClient(
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
-        val messages = JsonArray(request.messages.map { it.toJson() })
-        val messagesTokenCount = project.service<VoqalContextService>().getTokenCount(messages.toString())
-        val requestJson = JsonObject()
-            .put("model", request.model.id) //todo: temp and stuff
-            .put("messages", messages)
-            .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
-            //.put("stop", JsonArray().add("<|eot_id|>"))
+        val requestJson = toRequestJson(request)
 
         val response = try {
             client.post(providerUrl) { //todo: /chat/completions?
@@ -113,14 +107,7 @@ class TogetherAiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val messages = JsonArray(request.messages.map { it.toJson() })
-        val messagesTokenCount = project.service<VoqalContextService>().getTokenCount(messages.toString())
-        val requestJson = JsonObject()
-            .put("model", request.model.id) //todo: temp and stuff
-            .put("messages", messages)
-            .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
-            .put("stream", true)
-            //.put("stop", JsonArray().add("<|eot_id|>"))
+        val requestJson = toRequestJson(request).put("stream", true)
 
         val response = try {
             client.preparePost(providerUrl) {
@@ -161,6 +148,17 @@ class TogetherAiClient(
                 )
             }
         }
+    }
+
+    private fun toRequestJson(request: ChatCompletionRequest): JsonObject {
+        val messages = JsonArray(request.messages.map { it.toJson() })
+        val messagesTokenCount = project.service<VoqalContextService>().getTokenCount(messages.toString())
+        val requestJson = JsonObject()
+            .put("model", request.model.id) //todo: temp and stuff
+            .put("messages", messages)
+            .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
+        //.put("stop", JsonArray().add("<|eot_id|>"))
+        return requestJson
     }
 
     private suspend fun throwIfError(response: HttpResponse) {
