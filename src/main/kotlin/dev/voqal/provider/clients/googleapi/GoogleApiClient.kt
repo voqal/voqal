@@ -66,7 +66,7 @@ class GoogleApiClient(
         val modelName = request.model.id
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:generateContent?key=$providerKey"
         try {
-            val requestJson = makeJsonRequest(request, directive)
+            val requestJson = toRequestJson(request, directive)
             val response = client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
@@ -147,7 +147,7 @@ class GoogleApiClient(
         val modelName = request.model.id
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
         try {
-            val requestJson = makeJsonRequest(request, directive)
+            val requestJson = toRequestJson(request, directive)
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
@@ -196,7 +196,7 @@ class GoogleApiClient(
         }
     }
 
-    private fun makeJsonRequest(request: ChatCompletionRequest, directive: VoqalDirective?): JsonObject {
+    private fun toRequestJson(request: ChatCompletionRequest, directive: VoqalDirective?): JsonObject {
         val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject().put("contents", JsonArray(request.messages.map { it.toJson() }))
 
