@@ -67,7 +67,7 @@ class GoogleApiClient(
         val requestJson = toRequestJson(request, directive)
 
         val response = try {
-            client.post("${providerUrl}/v1beta/models/$modelName:generateContent?key=$providerKey") {
+            client.post("$providerUrl/v1beta/models/$modelName:generateContent?key=$providerKey") {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
@@ -96,53 +96,53 @@ class GoogleApiClient(
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
         val modelName = request.model.id
-        try {
-            val requestJson = toRequestJson(request, directive)
-            client.preparePost("${providerUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey") {
+        val requestJson = toRequestJson(request, directive)
+
+        val response = try {
+            client.preparePost("$providerUrl/v1beta/models/$modelName:streamGenerateContent?key=$providerKey") {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
-            }.execute { httpResponse: HttpResponse ->
-                //todo: throwIfError
-
-                val fullText = StringBuilder()
-                val fullResponse = StringBuilder()
-                val channel: ByteReadChannel = httpResponse.body()
-                while (!channel.isClosedForRead) {
-                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-                    fullResponse.append(line)
-
-                    try {
-                        val resultArray = JsonArray("$fullResponse}]")
-                        if (!resultArray.isEmpty) {
-                            val lastResult = resultArray.getJsonObject(resultArray.size() - 1)
-                            val choices = toChatChoices(lastResult.getJsonArray("candidates"))
-                            fullText.append(choices[0].message.content!!)
-
-                            emit(
-                                ChatCompletionChunk(
-                                    id = UUID.randomUUID().toString(),
-                                    created = 0, //todo: System.currentTimeMillis(),
-                                    model = ModelId(request.model.id),
-                                    choices = listOf(
-                                        ChatChunk(
-                                            index = 0,
-                                            ChatDelta(
-                                                role = choices[0].message.role,
-                                                content = fullText.toString()
-                                            )
-                                        )
-                                    ),
-                                    usage = toUsage(lastResult.getJsonObject("usageMetadata"))
-                                )
-                            )
-                        }
-                    } catch (_: Exception) {
-                    }
-                }
-            }
+            }.execute()
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
+        }
+        throwIfError(response)
+
+        val fullText = StringBuilder()
+        val fullResponse = StringBuilder()
+        val channel: ByteReadChannel = response.body()
+        while (!channel.isClosedForRead) {
+            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+            fullResponse.append(line)
+
+            try {
+                val resultArray = JsonArray("$fullResponse}]")
+                if (!resultArray.isEmpty) {
+                    val lastResult = resultArray.getJsonObject(resultArray.size() - 1)
+                    val choices = toChatChoices(lastResult.getJsonArray("candidates"))
+                    fullText.append(choices[0].message.content!!)
+
+                    emit(
+                        ChatCompletionChunk(
+                            id = UUID.randomUUID().toString(),
+                            created = 0, //todo: System.currentTimeMillis(),
+                            model = ModelId(request.model.id),
+                            choices = listOf(
+                                ChatChunk(
+                                    index = 0,
+                                    ChatDelta(
+                                        role = choices[0].message.role,
+                                        content = fullText.toString()
+                                    )
+                                )
+                            ),
+                            usage = toUsage(lastResult.getJsonObject("usageMetadata"))
+                        )
+                    )
+                }
+            } catch (_: Exception) {
+            }
         }
     }
 
