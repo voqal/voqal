@@ -77,22 +77,22 @@ class AnthropicClient(
         log.debug("Anthropic response status: ${response.status} in $roundTripTime ms")
 
         throwIfError(response)
-        val json = JsonObject(response.bodyAsText())
+        val body = JsonObject(response.bodyAsText())
         val choice = ChatChoice(
             index = 0, //todo: multiple choices
             ChatMessage(
                 ChatRole.Assistant,
-                TextContent(json.getJsonArray("content").getJsonObject(0).getString("text"))
+                TextContent(body.getJsonArray("content").getJsonObject(0).getString("text"))
             )
         )
         val completion = ChatCompletion(
-            id = json.getString("id"),
+            id = body.getString("id"),
             created = System.currentTimeMillis(),
-            model = ModelId(json.getString("model")),
+            model = ModelId(body.getString("model")),
             choices = listOf(choice),
             usage = Usage(
-                promptTokens = json.getJsonObject("usage").getInteger("input_tokens"),
-                completionTokens = json.getJsonObject("usage").getInteger("output_tokens"),
+                promptTokens = body.getJsonObject("usage").getInteger("input_tokens"),
+                completionTokens = body.getJsonObject("usage").getInteger("output_tokens"),
                 totalTokens = 0
             ).let { it.copy(totalTokens = it.promptTokens!! + it.completionTokens!!) }
         )
