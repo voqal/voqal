@@ -47,7 +47,7 @@ import kotlin.Pair
 import kotlin.math.abs
 
 /**
- * This tool handles all the free-form text editing as requested by the Voqal Assistant.
+ * This tool handles all the free-form text editing as requested by the LLM.
  */
 class EditTextTool : VoqalTool() {
 
