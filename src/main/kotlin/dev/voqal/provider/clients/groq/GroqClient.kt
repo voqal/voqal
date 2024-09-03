@@ -95,49 +95,49 @@ class GroqClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        try {
-            val requestJson = JsonObject()
-                .put("model", request.model.id)
-                .put("messages", JsonArray(request.messages.map { it.toJson() }))
-                .put("stream", true)
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+            .put("stream", true)
+
+        val response = try {
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
-            }.execute { response: HttpResponse ->
-                throwIfError(response)
-
-                var deltaRole: Role? = null
-                val fullText = StringBuilder()
-                val channel: ByteReadChannel = response.body()
-                while (!channel.isClosedForRead) {
-                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-                    val chunkJson = line.substringAfter("data: ")
-                    if (chunkJson != "[DONE]") {
-                        val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
-                        if (deltaRole == null) {
-                            deltaRole = completionChunk.choices[0].delta?.role
-                        }
-                        fullText.append(completionChunk.choices[0].delta?.content ?: "")
-
-                        emit(
-                            completionChunk.copy(
-                                choices = completionChunk.choices.map {
-                                    it.copy(
-                                        delta = it.delta?.copy(
-                                            role = deltaRole,
-                                            content = fullText.toString()
-                                        )
-                                    )
-                                }
-                            )
-                        )
-                    }
-                }
-            }
+            }.execute()
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
+        }
+        throwIfError(response)
+
+        var deltaRole: Role? = null
+        val fullText = StringBuilder()
+        val channel: ByteReadChannel = response.body()
+        while (!channel.isClosedForRead) {
+            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+            val chunkJson = line.substringAfter("data: ")
+            if (chunkJson != "[DONE]") {
+                val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
+                if (deltaRole == null) {
+                    deltaRole = completionChunk.choices[0].delta?.role
+                }
+                fullText.append(completionChunk.choices[0].delta?.content ?: "")
+
+                emit(
+                    completionChunk.copy(
+                        choices = completionChunk.choices.map {
+                            it.copy(
+                                delta = it.delta?.copy(
+                                    role = deltaRole,
+                                    content = fullText.toString()
+                                )
+                            )
+                        }
+                    )
+                )
+            }
         }
     }
 
