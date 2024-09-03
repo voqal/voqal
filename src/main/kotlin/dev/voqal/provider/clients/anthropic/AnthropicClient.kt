@@ -52,7 +52,7 @@ class AnthropicClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val url = "https://api.anthropic.com/v1/messages"
+    private val providerUrl = "https://api.anthropic.com/v1/messages"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
@@ -62,7 +62,7 @@ class AnthropicClient(
                 .put("model", request.model.id)
                 .put("messages", JsonArray(request.messages.map { it.toJson() }))
                 .put("max_tokens", maxTokens)
-            val response = client.post(url) {
+            val response = client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("x-api-key", providerKey)
