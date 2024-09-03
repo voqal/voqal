@@ -46,6 +46,9 @@ import kotlinx.coroutines.launch
 import kotlin.Pair
 import kotlin.math.abs
 
+/**
+ * This tool handles all the free-form text editing as requested by the Voqal Assistant.
+ */
 class EditTextTool : VoqalTool() {
 
     companion object {
@@ -381,6 +384,7 @@ class EditTextTool : VoqalTool() {
         val activeHighlighters = mutableListOf<RangeHighlighter>()
         val diffOffsets = mutableListOf<Pair<Int, Int>>()
         diffFragments.forEach { diff ->
+            //applying changes invalidate offsets, make sure to recalculate after each change
             var diffStartOffset = diff.startOffset1
             var diffEndOffset = diff.endOffset1
             diffOffsets.sortedBy { it.first }.forEach {
