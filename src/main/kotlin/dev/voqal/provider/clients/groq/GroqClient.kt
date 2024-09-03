@@ -158,17 +158,17 @@ class GroqClient(
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
 
                     try {
-                        val dataJson = line.substringAfter("data: ")
-                        if (dataJson != "[DONE]") {
-                            val partialChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(dataJson)
+                        val chunkJson = line.substringAfter("data: ")
+                        if (chunkJson != "[DONE]") {
+                            val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
                             if (deltaRole == null) {
-                                deltaRole = partialChunk.choices[0].delta?.role
+                                deltaRole = completionChunk.choices[0].delta?.role
                             }
-                            fullText.append(partialChunk.choices[0].delta?.content ?: "")
+                            fullText.append(completionChunk.choices[0].delta?.content ?: "")
 
                             emit(
-                                partialChunk.copy(
-                                    choices = partialChunk.choices.map {
+                                completionChunk.copy(
+                                    choices = completionChunk.choices.map {
                                         it.copy(
                                             delta = it.delta?.copy(
                                                 role = deltaRole,
