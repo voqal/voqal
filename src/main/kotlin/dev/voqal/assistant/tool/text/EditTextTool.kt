@@ -436,7 +436,7 @@ class EditTextTool : VoqalTool() {
                         }
                     })
                 } else {
-                    //otherwise, just replace text
+                    //using invalid name, just replace text
                     log.debug("Replacing text: $text1 -> $text2")
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                         editor.document.replaceString(diffStartOffset, diffEndOffset, text2)
@@ -450,7 +450,7 @@ class EditTextTool : VoqalTool() {
                 highlighter.putUserData(NEW_NAME, text2)
                 activeHighlighters.add(highlighter)
             } else {
-                //first make sure this hasn't already been smart renamed
+                //make sure text hasn't already been smart renamed
                 if (parent is PsiReference) {
                     val declaration = ReadAction.compute(ThrowableComputable { parent.resolve() })
                     val allHighlighters = activeHighlighters + (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList())
