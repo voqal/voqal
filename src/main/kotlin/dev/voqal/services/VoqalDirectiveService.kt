@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
 import java.io.File
+import java.nio.channels.UnresolvedAddressException
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.pow
 
@@ -393,6 +394,12 @@ class VoqalDirectiveService(private val project: Project) {
                         handleResponse(errorMessage, isTextOnly = true)
                         retry = false
                     }
+                } catch (e: UnresolvedAddressException) {
+                    execution.errors.add(e)
+                    val errorMessage = "Internet connection unavailable"
+                    log.warn(errorMessage)
+                    handleResponse(errorMessage, isTextOnly = textOnly)
+                    retry = false
                 } catch (e: Exception) {
                     execution.errors.add(e)
                     val errorMessage = e.message ?: "An unknown error occurred"
