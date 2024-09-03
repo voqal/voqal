@@ -95,6 +95,7 @@ class GroqClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
+        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
@@ -112,11 +113,23 @@ class GroqClient(
         }
         throwIfError(response)
 
+        var hasError = false
         var deltaRole: Role? = null
         val fullText = StringBuilder()
         val channel: ByteReadChannel = response.body()
         while (!channel.isClosedForRead) {
             val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+            if (line == "event: error") {
+                hasError = true
+                continue
+            } else if (hasError) {
+                val errorJson = JsonObject(line.substringAfter("data: "))
+                log.warn("Received error while streaming completions: $errorJson")
+
+                val statusCode = errorJson.getJsonObject("error").getInteger("status_code")
+                throw UnknownAPIException(statusCode, jsonDecoder.decodeFromString(errorJson.toString()))
+            }
+
             val chunkJson = line.substringAfter("data: ")
             if (chunkJson != "[DONE]") {
                 val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
