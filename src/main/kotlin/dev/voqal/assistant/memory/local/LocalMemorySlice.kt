@@ -133,7 +133,6 @@ class LocalMemorySlice(
         try {
             val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
             if (promptSettings.promptName == "Edit Mode" && llmProvider.isStreamable()) {
-                val originalText = directive.ide.editor?.document?.text ?: ""
                 val chunks = mutableListOf<ChatCompletionChunk>()
                 llmProvider.streamChatCompletion(request, directive).collect {
                     chunks.add(it)
@@ -147,9 +146,7 @@ class LocalMemorySlice(
                     val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
                     project.service<VoqalToolService>().blindExecute(
                         tool = EditTextTool(),
-                        args = JsonObject(argsString)
-                            .put("originalText", originalText)
-                            .put("streaming", true),
+                        args = JsonObject(argsString).put("streaming", true),
                         memoryId = directive.internal.memorySlice.id
                     )
                 }

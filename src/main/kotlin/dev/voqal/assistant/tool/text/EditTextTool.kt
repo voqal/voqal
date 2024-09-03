@@ -168,8 +168,7 @@ class EditTextTool : VoqalTool() {
         project: Project,
         replaceResponseCode: String,
         editor: Editor,
-        streaming: Boolean = false,
-        originalText: String? = null
+        streaming: Boolean = false
     ): List<RangeHighlighter> {
         var responseCode = removeDiffHeaderIfPresent(replaceResponseCode)
 
@@ -186,9 +185,7 @@ class EditTextTool : VoqalTool() {
 
         if (streaming) {
             val fullTextWithEdits = getFullTextAfterStreamEdits(
-                responseCode, originalText,
-                editor, project,
-                previousStreamIndicator, streamIndicators
+                responseCode, editor, project, previousStreamIndicator, streamIndicators
             )
             if (fullTextWithEdits != null) {
                 responseCode = fullTextWithEdits
@@ -207,7 +204,6 @@ class EditTextTool : VoqalTool() {
 
     private fun getFullTextAfterStreamEdits(
         responseCode: String,
-        originalText: String?,
         editor: Editor,
         project: Project,
         previousStreamIndicator: RangeHighlighter?,
@@ -339,7 +335,7 @@ class EditTextTool : VoqalTool() {
         val log = project.getVoqalLogger(this::class)
 
         //get all diffs from current code to completion
-        var oldText = editor.document.text
+        val oldText = editor.document.text
         var newText = replaceResponseCode
 
         //find smallest way to modify text to desired completion
@@ -366,7 +362,6 @@ class EditTextTool : VoqalTool() {
         val fullTextDiff = result[0]!!
         var smallestDiff = fullTextDiff
         var diffFragments = fullTextDiff.fragments
-        var updatedOldText = oldText
         var updatedNewText = newText
         var diffType: String
         result.filterNotNull().forEach { diff ->
@@ -374,13 +369,11 @@ class EditTextTool : VoqalTool() {
             if (diff.diffAmount < smallestDiff.diffAmount || fewerChanges) {
                 smallestDiff = diff
                 diffFragments = diff.fragments
-                updatedOldText = diff.originalText
                 updatedNewText = diff.newText
                 diffType = diff.diffType
             }
         }
         diffFragments = smallestDiff.fragments
-        oldText = updatedOldText
         newText = updatedNewText
         diffType = smallestDiff.diffType
         log.debug("Smallest diff: $diffType")
@@ -608,7 +601,7 @@ class EditTextTool : VoqalTool() {
             )
         }.toMutableList()
 
-        return Diff(oldText!!, fragments, newText, "visible:indent:$indent")
+        return Diff(fragments, newText, "visible:indent:$indent")
     }
 
     private fun getTextDiff(project: Project, oldText: String, newText: String): Diff {
@@ -632,14 +625,10 @@ class EditTextTool : VoqalTool() {
                 )
             }.toMutableList()
 
-        return Diff(oldText, fragments, newText, "full")
+        return Diff(fragments, newText, "full")
     }
 
-    private fun getSimpleDiffChanges(
-        oldText: String,
-        newText: String,
-        project: Project
-    ): List<SimpleDiffChange> {
+    private fun getSimpleDiffChanges(oldText: String, newText: String, project: Project): List<SimpleDiffChange> {
         val disposable = Disposer.newDisposable()
         val oldContent = DiffContentFactory.getInstance().create(oldText)
         val newContent = DiffContentFactory.getInstance().create(newText)
@@ -656,7 +645,6 @@ class EditTextTool : VoqalTool() {
     }
 
     private data class Diff(
-        val originalText: String,
         val fragments: List<DiffFragmentImpl>,
         val newText: String,
         val diffType: String
