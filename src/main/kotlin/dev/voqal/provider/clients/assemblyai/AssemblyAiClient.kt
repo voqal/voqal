@@ -23,10 +23,11 @@ class AssemblyAiClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
+    private val providerUrl = "https://api.assemblyai.com/v2"
 
     private suspend fun upload(request: ByteArray): String {
         try {
-            val response: HttpResponse = client.post("https://api.assemblyai.com/v2/upload") {
+            val response: HttpResponse = client.post("$providerUrl/upload") {
                 header("Authorization", "Bearer $providerKey")
                 header("Content-Type", "application/octet-stream")
                 setBody(request)
@@ -45,7 +46,7 @@ class AssemblyAiClient(
         log.debug("Audio uploaded to: $fileUrl")
 
         log.debug("Creating transcript job")
-        val url = "https://api.assemblyai.com/v2/transcript"
+        val url = "$providerUrl/transcript"
         val response: HttpResponse = client.post(url) {
             header("Authorization", providerKey)
             header("Content-Type", "application/json")
