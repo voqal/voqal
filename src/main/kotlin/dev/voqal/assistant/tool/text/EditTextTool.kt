@@ -385,12 +385,12 @@ class EditTextTool : VoqalTool() {
         diffType = smallestDiff.diffType
         log.debug("Smallest diff: $diffType")
 
-        val offsets = mutableListOf<Pair<Int, Int>>()
         val activeHighlighters = mutableListOf<RangeHighlighter>()
+        val diffOffsets = mutableListOf<Pair<Int, Int>>()
         diffFragments.forEach { diff ->
             var diffStartOffset = diff.startOffset1
             var diffEndOffset = diff.endOffset1
-            offsets.sortedBy { it.first }.forEach {
+            diffOffsets.sortedBy { it.first }.forEach {
                 if (it.first < diff.startOffset1 && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
                     diffStartOffset += it.second
                 }
@@ -416,7 +416,7 @@ class EditTextTool : VoqalTool() {
                 val validName = isValidIdentifier(element.language, text2)
 
                 val renameOffset = text2.length - text1.length
-                offsets.add(Pair(diffStartOffset, renameOffset))
+                diffOffsets.add(Pair(diffStartOffset, renameOffset))
                 if (text1.isNotEmpty() && validName) {
                     log.debug("Renaming element: $text1 -> $text2")
                     val renameProcessor = ReadAction.compute(ThrowableComputable {
@@ -431,7 +431,7 @@ class EditTextTool : VoqalTool() {
                     ReadAction.compute(ThrowableComputable {
                         usageInfos.forEach {
                             val navigationRange = it.navigationRange
-                            offsets.add(Pair(navigationRange.startOffset, renameOffset))
+                            diffOffsets.add(Pair(navigationRange.startOffset, renameOffset))
 
                             val newTextRange = TextRange(navigationRange.startOffset, navigationRange.endOffset)
                             val highlighter = createActiveEdit(editor, newTextRange)
@@ -478,7 +478,7 @@ class EditTextTool : VoqalTool() {
                 })
 
                 val replaceOffset = text2.length - text1.length
-                offsets.add(Pair(diffStartOffset, replaceOffset))
+                diffOffsets.add(Pair(diffStartOffset, replaceOffset))
 
                 val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
                 if (newTextRange.length > 0) {
