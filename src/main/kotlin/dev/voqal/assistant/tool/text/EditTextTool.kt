@@ -97,9 +97,9 @@ class EditTextTool : VoqalTool() {
         log.debug("Doing editing")
         project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
         val streaming = args.getBoolean("streaming") ?: false
-        val editHighlighters = doDocumentEdits(project, editText, editor, streaming)
-        val updatedHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + editHighlighters
-        editor.putUserData(VOQAL_HIGHLIGHTERS, updatedHighlighters)
+        val newHighlighters = doDocumentEdits(project, editText, editor, streaming)
+        val allHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + newHighlighters
+        editor.putUserData(VOQAL_HIGHLIGHTERS, allHighlighters)
         WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
             PsiDocumentManager.getInstance(project).commitDocument(editor.document)
         })
@@ -107,7 +107,7 @@ class EditTextTool : VoqalTool() {
         if (!streaming) {
             PsiDocumentManager.getInstance(project).performForCommittedDocument(editor.document) {
                 //move caret to end of last highlight
-                val lastHighlight = editHighlighters.lastOrNull()
+                val lastHighlight = newHighlighters.lastOrNull()
                 val caretOffset = lastHighlight?.range?.endOffset
                 if (caretOffset != null) {
                     ApplicationManager.getApplication().invokeAndWait {
@@ -117,7 +117,7 @@ class EditTextTool : VoqalTool() {
                         ApplicationManager.getApplication().invokeAndWait {
                             visibleRange = editor.calculateVisibleRange()
                         }
-                        val anyEditVisible = editHighlighters.any { visibleRange!!.intersects(it.range!!) }
+                        val anyEditVisible = newHighlighters.any { visibleRange!!.intersects(it.range!!) }
 
                         //determine if caret is visible and scroll if necessary
                         val visibleRectangle = editor.scrollingModel.visibleArea
