@@ -1,6 +1,7 @@
 package dev.voqal.provider.clients.togetherai
 
 import com.aallam.openai.api.chat.*
+import com.aallam.openai.api.core.Role
 import com.aallam.openai.api.core.Usage
 import com.aallam.openai.api.exception.*
 import com.aallam.openai.api.model.ModelId
@@ -11,14 +12,18 @@ import dev.voqal.provider.LlmProvider
 import dev.voqal.services.VoqalContextService
 import dev.voqal.services.getVoqalLogger
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 
 class TogetherAiClient(
@@ -48,8 +53,9 @@ class TogetherAiClient(
         )
     }
 
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        install(ContentNegotiation) { json(jsonDecoder) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
     private val providerUrl = "https://api.together.xyz/v1/completions"
@@ -58,7 +64,7 @@ class TogetherAiClient(
         val log = project.getVoqalLogger(this::class)
         val messages = JsonArray(request.messages.map { it.toJson() })
         val messagesTokenCount = project.service<VoqalContextService>().getTokenCount(messages.toString())
-        val jsonObject = JsonObject()
+        val requestJson = JsonObject()
             .put("model", request.model.id) //todo: temp and stuff
             .put("messages", messages)
             .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
@@ -69,7 +75,7 @@ class TogetherAiClient(
                 header("Accept", "application/json")
                 header("Content-Type", "application/json")
                 header("Authorization", "Bearer $providerKey")
-                setBody(jsonObject.toString())
+                setBody(requestJson.toString())
             }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
@@ -101,6 +107,60 @@ class TogetherAiClient(
             )
         )
         return completion
+    }
+
+    override suspend fun streamChatCompletion(
+        request: ChatCompletionRequest,
+        directive: VoqalDirective?
+    ): Flow<ChatCompletionChunk> = flow {
+        val messages = JsonArray(request.messages.map { it.toJson() })
+        val messagesTokenCount = project.service<VoqalContextService>().getTokenCount(messages.toString())
+        val requestJson = JsonObject()
+            .put("model", request.model.id) //todo: temp and stuff
+            .put("messages", messages)
+            .put("max_tokens", 4096 - messagesTokenCount) //todo: shouldn't need to hardcode 4096
+            .put("stream", true)
+            //.put("stop", JsonArray().add("<|eot_id|>"))
+
+        val response = try {
+            client.preparePost(providerUrl) {
+                header("Accept", "application/json")
+                header("Content-Type", "application/json")
+                header("Authorization", "Bearer $providerKey")
+                setBody(requestJson.encode())
+            }.execute()
+        } catch (e: HttpRequestTimeoutException) {
+            throw OpenAITimeoutException(e)
+        }
+        throwIfError(response)
+
+        var deltaRole: Role? = null
+        val fullText = StringBuilder()
+        val channel: ByteReadChannel = response.body()
+        while (!channel.isClosedForRead) {
+            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+            val chunkJson = line.substringAfter("data: ")
+            if (chunkJson != "[DONE]") {
+                val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
+                if (deltaRole == null) {
+                    deltaRole = completionChunk.choices[0].delta?.role
+                }
+                fullText.append(completionChunk.choices[0].delta?.content ?: "")
+
+                emit(
+                    completionChunk.copy(
+                        choices = completionChunk.choices.map {
+                            it.copy(
+                                delta = it.delta?.copy(
+                                    role = deltaRole,
+                                    content = fullText.toString()
+                                )
+                            )
+                        }
+                    )
+                )
+            }
+        }
     }
 
     private suspend fun throwIfError(response: HttpResponse) {
@@ -149,6 +209,7 @@ class TogetherAiClient(
         )
     }
 
+    override fun isStreamable() = true
     override fun getAvailableModelNames() = MODELS
     override fun dispose() = client.close()
     private fun ChatMessage.toJson() = JsonObject().put("role", role.role.lowercase()).put("content", content)
