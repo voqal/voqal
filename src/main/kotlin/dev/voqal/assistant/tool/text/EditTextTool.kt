@@ -481,8 +481,8 @@ class EditTextTool : VoqalTool() {
                 offsets.add(Pair(diffStartOffset, renameOffset))
 
                 val newTextRange = TextRange(diffStartOffset, diffStartOffset + text2.length)
-                val highlighter = createActiveEdit(editor, newTextRange)
                 if (newTextRange.length > 0) {
+                    val highlighter = createActiveEdit(editor, newTextRange)
                     activeHighlighters.add(highlighter)
                 }
             }
