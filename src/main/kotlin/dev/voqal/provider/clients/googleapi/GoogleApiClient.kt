@@ -146,16 +146,17 @@ class GoogleApiClient(
     ): Flow<ChatCompletionChunk> = flow {
         val modelName = request.model.id
         val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
-
         try {
             val requestJson = makeJsonRequest(request, directive)
-            val fullText = StringBuilder()
-            val fullResponse = StringBuilder()
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
             }.execute { httpResponse: HttpResponse ->
+                //todo: throwIfError
+
+                val fullText = StringBuilder()
+                val fullResponse = StringBuilder()
                 val channel: ByteReadChannel = httpResponse.body()
                 while (!channel.isClosedForRead) {
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
