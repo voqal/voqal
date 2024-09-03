@@ -15,6 +15,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -51,6 +52,7 @@ class TogetherAiClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
+    private val providerUrl = "https://api.together.xyz/v1/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
@@ -64,7 +66,7 @@ class TogetherAiClient(
 
         val startTime = System.currentTimeMillis()
         val response = try {
-            client.post("https://api.together.xyz/v1/completions") { //todo: /chat/completions?
+            client.post(providerUrl) { //todo: /chat/completions?
                 header("Accept", "application/json")
                 header("Content-Type", "application/json")
                 header("Authorization", "Bearer $providerKey")
@@ -76,31 +78,37 @@ class TogetherAiClient(
         val roundTripTime = System.currentTimeMillis() - startTime
         log.debug("Together AI response status: ${response.status} in $roundTripTime ms")
 
+        throwIfError(response)
         val body = JsonObject(response.bodyAsText())
-        if (response.status.value == 200) {
-            log.info("Completion: $body")
-            val completion = ChatCompletion(
-                id = body.getString("id"),
-                created = body.getLong("created"),
-                model = ModelId(body.getString("model")),
-                choices = body.getJsonArray("choices").mapIndexed { index, it ->
-                    val choiceJson = JsonObject.mapFrom(it)
-                    ChatChoice(
-                        index = index,
-                        ChatMessage(
-                            ChatRole.Assistant,
-                            TextContent(choiceJson.getString("text"))
-                        )
+        log.info("Completion: $body")
+        val completion = ChatCompletion(
+            id = body.getString("id"),
+            created = body.getLong("created"),
+            model = ModelId(body.getString("model")),
+            choices = body.getJsonArray("choices").mapIndexed { index, it ->
+                val choiceJson = JsonObject.mapFrom(it)
+                ChatChoice(
+                    index = index,
+                    ChatMessage(
+                        ChatRole.Assistant,
+                        TextContent(choiceJson.getString("text"))
                     )
-                },
-                usage = Usage(
-                    body.getJsonObject("usage").getInteger("prompt_tokens"),
-                    body.getJsonObject("usage").getInteger("completion_tokens"),
-                    body.getJsonObject("usage").getInteger("total_tokens")
                 )
+            },
+            usage = Usage(
+                body.getJsonObject("usage").getInteger("prompt_tokens"),
+                body.getJsonObject("usage").getInteger("completion_tokens"),
+                body.getJsonObject("usage").getInteger("total_tokens")
             )
-            return completion
-        } else if (response.status.value == 401) {
+        )
+        return completion
+    }
+
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
+
+        val body = JsonObject(response.bodyAsText())
+        if (response.status.value == 401) {
             throw AuthenticationException(
                 response.status.value,
                 OpenAIError(
@@ -126,20 +134,20 @@ class TogetherAiClient(
                 ),
                 IllegalStateException(body.toString())
             )
-        } else {
-            throw UnknownAPIException(
-                response.status.value,
-                OpenAIError(
-                    OpenAIErrorDetails(
-                        code = null,
-                        message = body.getString("error", "Unknown error"),
-                        param = null,
-                        type = null
-                    )
-                ),
-                IllegalStateException(body.toString())
-            )
         }
+
+        throw UnknownAPIException(
+            response.status.value,
+            OpenAIError(
+                OpenAIErrorDetails(
+                    code = null,
+                    message = body.getString("error", "Unknown error"),
+                    param = null,
+                    type = null
+                )
+            ),
+            IllegalStateException(body.toString())
+        )
     }
 
     override fun getAvailableModelNames() = MODELS
