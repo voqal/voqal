@@ -59,85 +59,36 @@ class GoogleApiClient(
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val baseUrl = "https://generativelanguage.googleapis.com"
+    private val providerUrl = "https://generativelanguage.googleapis.com"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
         val modelName = request.model.id
-        val providerUrl = "${baseUrl}/v1beta/models/$modelName:generateContent?key=$providerKey"
-        try {
-            val requestJson = toRequestJson(request, directive)
-            val response = client.post(providerUrl) {
+        val requestJson = toRequestJson(request, directive)
+
+        val response = try {
+            client.post("${providerUrl}/v1beta/models/$modelName:generateContent?key=$providerKey") {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
             }
-            val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
-            log.debug("Google API response status: ${response.status} in $roundTripTime ms")
-
-            if (response.status.isSuccess()) { //todo: better
-                val json = JsonObject(response.bodyAsText())
-                log.debug("Completion: $json")
-
-                val completion = ChatCompletion(
-                    id = UUID.randomUUID().toString(),
-                    created = System.currentTimeMillis(),
-                    model = ModelId(request.model.id),
-                    choices = toChatChoices(json.getJsonArray("candidates")),
-                    usage = toUsage(json.getJsonObject("usageMetadata"))
-                )
-                return completion
-            } else if (response.status.value == 401) {
-                throw AuthenticationException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Unauthorized access to Google API. Please check your API key and try again.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else if (response.status.value == 429) {
-                var errorMessage = "Rate limit exceeded. Please try again later."
-                try {
-                    val jsonBody = JsonObject(response.bodyAsText())
-                    if (jsonBody.containsKey("error")) {
-                        errorMessage = jsonBody.getJsonObject("error").getString("message")
-                    }
-                } catch (_: Exception) {
-                }
-                throw RateLimitException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = errorMessage,
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else {
-                throw InvalidRequestException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Invalid request to Google API. Please check your configuration and try again.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
+        log.debug("Google API response status: ${response.status} in $roundTripTime ms")
+
+        throwIfError(response)
+        val body = JsonObject(response.bodyAsText())
+        log.debug("Completion: $body")
+        val completion = ChatCompletion(
+            id = UUID.randomUUID().toString(),
+            created = System.currentTimeMillis(),
+            model = ModelId(request.model.id),
+            choices = toChatChoices(body.getJsonArray("candidates")),
+            usage = toUsage(body.getJsonObject("usageMetadata"))
+        )
+        return completion
     }
 
     override suspend fun streamChatCompletion(
@@ -145,10 +96,9 @@ class GoogleApiClient(
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
         val modelName = request.model.id
-        val providerUrl = "${baseUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey"
         try {
             val requestJson = toRequestJson(request, directive)
-            client.preparePost(providerUrl) {
+            client.preparePost("${providerUrl}/v1beta/models/$modelName:streamGenerateContent?key=$providerKey") {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
@@ -234,6 +184,59 @@ class GoogleApiClient(
         }
 
         return requestJson
+    }
+
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
+
+        if (response.status.value == 401) {
+            throw AuthenticationException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = "Unauthorized access to Google API. Please check your API key and try again.",
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, response.bodyAsText())
+            )
+        } else if (response.status.value == 429) {
+            var errorMessage = "Rate limit exceeded. Please try again later."
+            try {
+                val jsonBody = JsonObject(response.bodyAsText())
+                if (jsonBody.containsKey("error")) {
+                    errorMessage = jsonBody.getJsonObject("error").getString("message")
+                }
+            } catch (_: Exception) {
+            }
+            throw RateLimitException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = errorMessage,
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, response.bodyAsText())
+            )
+        }
+
+        throw InvalidRequestException(
+            response.status.value,
+            OpenAIError(
+                OpenAIErrorDetails(
+                    code = null,
+                    message = "Invalid request to Google API. Please check your configuration and try again.",
+                    param = null,
+                    type = null
+                )
+            ),
+            ClientRequestException(response, response.bodyAsText())
+        )
     }
 
     private fun toChatChoices(json: JsonArray): List<ChatChoice> {
