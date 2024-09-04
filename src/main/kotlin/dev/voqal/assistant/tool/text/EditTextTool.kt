@@ -83,11 +83,12 @@ class EditTextTool : VoqalTool() {
         editText = editText.replace("↕", "") //remove any carets
 
         //check for vui interactions
-        if (TextSearcher.checkForVuiInteraction("cancel", editText)) {
+        val streaming = args.getBoolean("streaming") ?: false
+        if (!streaming && TextSearcher.checkForVuiInteraction("cancel", editText)) {
             log.debug("Cancelling editing")
             project.service<VoqalToolService>().blindExecute(CancelTool())
             return
-        } else if (TextSearcher.checkForVuiInteraction("accept", editText)) {
+        } else if (!streaming && TextSearcher.checkForVuiInteraction("accept", editText)) {
             log.debug("Accepting editing")
             project.service<VoqalToolService>().blindExecute(LooksGoodTool())
             return
@@ -95,7 +96,6 @@ class EditTextTool : VoqalTool() {
 
         log.debug("Editing started")
         project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
-        val streaming = args.getBoolean("streaming") ?: false
         val newHighlighters = doDocumentEdits(project, editText, editor, streaming)
         val allHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + newHighlighters
         editor.putUserData(VOQAL_HIGHLIGHTERS, allHighlighters)
