@@ -129,7 +129,7 @@ class LocalMemorySlice(
         var completion: ChatCompletion? = null
         try {
             val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
-            if (promptSettings.streamCompletions && llmProvider.isStreamable()) {
+            if (promptSettings.promptName == "Edit Mode" && promptSettings.streamCompletions && llmProvider.isStreamable()) {
                 val chunks = mutableListOf<ChatCompletionChunk>()
                 var deltaRole: Role? = null
                 val fullText = StringBuilder()
