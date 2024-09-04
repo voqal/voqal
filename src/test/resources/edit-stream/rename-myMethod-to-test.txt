@@ -1,0 +1,8 @@
+public class FileOne {
+    public void test() {
+    }
+
+    public void callsIt() {
+        test();
+    }
+}

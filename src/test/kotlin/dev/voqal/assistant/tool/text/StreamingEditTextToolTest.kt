@@ -274,4 +274,39 @@ class StreamingEditTextToolTest : JBTest() {
 
         assertEquals(testEditor.document.text, originalText) //no changes
     }
+
+    fun `test streaming edit ignore offsets outside current file`() {
+        val responseCode = File("src/test/resources/edit-stream/rename-myMethod-to-test.txt").readText()
+            .replace("\r\n", "\n")
+        val fileOneText = File("src/test/resources/edit-stream/FileOne.java").readText()
+            .replace("\r\n", "\n")
+        val fileTwoText = File("src/test/resources/edit-stream/FileTwo.java").readText()
+            .replace("\r\n", "\n")
+
+        val fileOnePsi = myFixture.addFileToProject("FileOne.java", fileOneText)
+        myFixture.addFileToProject("FileTwo.java", fileTwoText)
+
+        val testDocument = fileOnePsi.fileDocument
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(3, voqalHighlighters.size)
+
+                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(2, editHighlighters.size)
+                assertTrue(editHighlighters[0].let { it.startOffset == 39 && it.endOffset == 43 })
+                assertTrue(editHighlighters[1].let { it.startOffset == 91 && it.endOffset == 95 })
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            testEditor.document.text,
+            fileOneText.replace("myMethod", "test")
+        )
+    }
 }

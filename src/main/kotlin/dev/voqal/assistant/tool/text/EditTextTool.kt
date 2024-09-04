@@ -448,7 +448,7 @@ class EditTextTool : VoqalTool() {
                         renameProcessor.executeEx(usageInfos)
                     })
                     ReadAction.compute(ThrowableComputable {
-                        usageInfos.forEach {
+                        usageInfos.filter { it.element?.containingFile === element.containingFile }.forEach {
                             val navigationRange = it.navigationRange
                             diffOffsets.add(Pair(navigationRange.startOffset, renameOffset))
 
