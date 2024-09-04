@@ -11,13 +11,13 @@ data class PromptSettings(
     val promptUrl: String = "",
     val modelName: String = "",
     val showPartialResults: Boolean = false,
-    val decomposeDirectives: Boolean = true,
-    val codeSmellCorrection: Boolean = true,
+    val decomposeDirectives: Boolean = false,
+    val codeSmellCorrection: Boolean = false,
     val vectorStoreId: String = "",
     val assistantId: String = "",
     val assistantThreadId : String = "",
     val editFormat: EditFormat = EditFormat.FULL_TEXT,
-    val streamCompletions: Boolean = true
+    val streamCompletions: Boolean = false
 ) : ConfigurableSettings {
 
     /**
@@ -31,13 +31,13 @@ data class PromptSettings(
         promptUrl = json.getString("promptUrl", ""),
         modelName = json.getString("modelName", ""),
         showPartialResults = json.getBoolean("showPartialResults", false),
-        decomposeDirectives = json.getBoolean("decomposeDirectives", true),
-        codeSmellCorrection = json.getBoolean("codeSmellCorrection", true),
+        decomposeDirectives = json.getBoolean("decomposeDirectives", false),
+        codeSmellCorrection = json.getBoolean("codeSmellCorrection", false),
         vectorStoreId = json.getString("vectorStoreId", ""),
         assistantId = json.getString("assistantId", ""),
         assistantThreadId = json.getString("assistantThreadId", ""),
         editFormat = EditFormat.valueOf(json.getString("editFormat", EditFormat.FULL_TEXT.name)),
-        streamCompletions = json.getBoolean("streamCompletions", true)
+        streamCompletions = json.getBoolean("streamCompletions", false)
     )
 
     override fun toJson(): JsonObject {
