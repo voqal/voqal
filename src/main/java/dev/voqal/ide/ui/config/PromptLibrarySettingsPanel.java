@@ -319,6 +319,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         urlTextField.setText(prompt.getPromptUrl());
         promptComboBox.setSelectedItem(prompt.getProvider().getDisplayName());
         decompCheckBox.setSelected(prompt.getDecomposeDirectives());
+        streamCompletionsCheckBox.setSelected(prompt.getStreamCompletions());
         codeSmellCheckBox.setSelected(prompt.getCodeSmellCorrection());
         vectorStoreIdTextField.setText(prompt.getVectorStoreId());
         assistantIdTextField.setText(prompt.getAssistantId());
