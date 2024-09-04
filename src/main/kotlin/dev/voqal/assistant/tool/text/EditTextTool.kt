@@ -255,10 +255,25 @@ class EditTextTool : VoqalTool() {
             }
             var indicatorLine = editor.document.getLineNumber(textRange.endOffset + visibleRangeLineOffset)
 
-            //contains modification instead of addition on last change, can not append remaining original text
+            //may contain modification instead of addition on last change, if so can't append remaining original text
             if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
                 streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
                 return null
+            }
+
+            //some LLMs (groq in particular?) screw up spacing, if so can't append remaining text
+            val beforeLastDiff = simpleDiffs.dropLast(1).lastOrNull()
+            if (beforeLastDiff != null) {
+                val originalLineNumber = beforeLastDiff.fragment.startLine1
+                val editLineNumber = beforeLastDiff.fragment.startLine2
+                val originalLine = origText.lines().getOrNull(originalLineNumber)
+                val editLine = fullTextWithEdits.lines().getOrNull(editLineNumber)
+                if (originalLine != null && editLine != null) {
+                    if (originalLine != editLine && originalLine.trimStart() == editLine.trimStart()) {
+                        streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
+                        return null
+                    }
+                }
             }
 
             //wait for changes to be applied on edited lines before progressing stream indicator

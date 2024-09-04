@@ -224,4 +224,54 @@ class StreamingEditTextToolTest : JBTest() {
             originalText.replace("import java.util.List;", "import java.util.List;\nimport java.util.Scanner;")
         )
     }
+
+    fun `test streaming edit groq bad spacing`() {
+        val responseCode = File("src/test/resources/edit-stream/groq-bad-spacing.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters.size)
+
+                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(testEditor.document.text, originalText) //no changes
+    }
+
+    fun `test streaming edit groq bad spacing2`() {
+        val responseCode = File("src/test/resources/edit-stream/groq-bad-spacing-2.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters.size)
+
+                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(testEditor.document.text, originalText) //no changes
+    }
 }
