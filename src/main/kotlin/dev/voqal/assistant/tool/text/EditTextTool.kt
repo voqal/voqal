@@ -93,7 +93,7 @@ class EditTextTool : VoqalTool() {
             return
         }
 
-        log.debug("Doing editing")
+        log.debug("Editing started")
         project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
         val streaming = args.getBoolean("streaming") ?: false
         val newHighlighters = doDocumentEdits(project, editText, editor, streaming)
@@ -137,6 +137,7 @@ class EditTextTool : VoqalTool() {
                 }
             }
         }
+        log.debug("Editing complete")
     }
 
     //todo: checking for code smells shouldn't be here (perhaps auto-added CheckCodeSmellsTool?)
