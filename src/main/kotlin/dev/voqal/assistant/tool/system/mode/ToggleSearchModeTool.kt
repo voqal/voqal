@@ -90,9 +90,9 @@ class ToggleSearchModeTool : VoqalTool() {
             if (prompt != null) {
                 log.debug("Entering edit mode with directive: $prompt")
                 val editDirective = project.service<VoqalDirectiveService>().asDirective(
-                    transcription = SpokenTranscript(prompt, directive.internal.speechId),
+                    transcription = SpokenTranscript(prompt, directive.assistant.speechId),
                     textOnly = directive.developer.textOnly,
-                    usingAudioModality = directive.internal.usingAudioModality,
+                    usingAudioModality = directive.assistant.usingAudioModality,
                     chatMessage = directive.developer.chatMessage,
                     "search mode"
                 )

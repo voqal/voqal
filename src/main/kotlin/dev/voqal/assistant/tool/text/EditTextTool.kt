@@ -99,7 +99,7 @@ class EditTextTool : VoqalTool() {
         }
 
         log.debug("Editing started")
-        project.service<VoqalMemoryService>().saveEditLabel(directive.internal.memorySlice.id, editor)
+        project.service<VoqalMemoryService>().saveEditLabel(directive.assistant.memorySlice.id, editor)
         val newHighlighters = doDocumentEdits(project, editText, editor, streaming)
         val allHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + newHighlighters
         editor.putUserData(VOQAL_HIGHLIGHTERS, allHighlighters)
@@ -131,7 +131,7 @@ class EditTextTool : VoqalTool() {
                     }
                 }
 
-                if (directive.internal.promptSettings?.codeSmellCorrection == true) {
+                if (directive.assistant.promptSettings?.codeSmellCorrection == true) {
                     log.debug("Checking for code smells")
                     checkCodeSmells(directive)
                 } else {

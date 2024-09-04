@@ -10,7 +10,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.template.ChunkTextExtension.ChunkTextFunction
 import dev.voqal.config.settings.PromptSettings
@@ -38,8 +38,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -48,6 +47,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -82,8 +82,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -92,6 +91,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -126,8 +126,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -136,6 +135,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -170,8 +170,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -180,6 +179,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -219,8 +219,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -229,6 +228,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -264,8 +264,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -274,6 +273,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -309,8 +309,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -319,6 +318,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -346,8 +346,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -356,6 +355,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -382,8 +382,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -392,6 +391,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),
@@ -417,8 +417,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
         }
 
         val directive = VoqalDirective(
-            ide = IdeContext(project, editorMock),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
@@ -427,6 +426,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 ),
                 languageModelSettings = mock {}
             ),
+            ide = IdeContext(project, editorMock),
             developer = DeveloperContext(
                 transcription = "",
                 viewingCode = ViewingCode(codeText),

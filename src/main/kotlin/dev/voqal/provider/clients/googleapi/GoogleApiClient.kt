@@ -149,7 +149,7 @@ class GoogleApiClient(
         val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject().put("contents", JsonArray(request.messages.map { it.toJson() }))
 
-        if (directive?.internal?.includeToolsInMarkdown == false) {
+        if (directive?.assistant?.includeToolsInMarkdown == false) {
             requestJson.put("tools", JsonArray().apply {
                 val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
                     ?.map { JsonObject(Json.encodeToString(it)) })
@@ -163,9 +163,9 @@ class GoogleApiClient(
             requestJson.put("tool_config", JsonObject().put("function_calling_config", JsonObject().put("mode", "ANY")))
         }
 
-        if (directive?.internal?.speechId != null && directive.internal.usingAudioModality) {
+        if (directive?.assistant?.speechId != null && directive.assistant.usingAudioModality) {
             log.debug("Using audio modality")
-            val speechId = directive.internal.speechId
+            val speechId = directive.assistant.speechId
             val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
             speechDirectory.mkdirs()
             val speechFile = File(speechDirectory, "developer-$speechId.wav")

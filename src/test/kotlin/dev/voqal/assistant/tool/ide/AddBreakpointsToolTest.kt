@@ -6,7 +6,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
@@ -31,19 +31,19 @@ class AddBreakpointsToolTest : JBTest() {
         val addMethodCode = addMethodFile.readText()
         val transcription = "Add a breakpoint to line 3"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = listOf(AddBreakpointsTool()),
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = transcription,
                 viewingCode = ViewingCode(addMethodCode)
             )
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(response.toString(), 1, response.toolCalls.size)
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -69,19 +69,19 @@ class AddBreakpointsToolTest : JBTest() {
         val addMethodCode = addMethodFile.readText()
         val transcription = "Add breakpoints to the print lines"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = listOf(AddBreakpointsTool()),
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = transcription,
                 viewingCode = ViewingCode(addMethodCode)
             )
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         if (response.toolCalls.size == 1) {
             assertEquals(response.toString(), 1, response.toolCalls.size)

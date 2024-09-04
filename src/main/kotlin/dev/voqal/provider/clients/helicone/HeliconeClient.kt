@@ -99,12 +99,12 @@ class HeliconeClient(
                     "helicone-request-id" to response.directive.requestId,
                     "helicone-user-id" to userId,
                     "helicone-property-directive-id" to response.directive.directiveId,
-                    "helicone-property-directive-mode" to response.directive.internal.directiveMode
+                    "helicone-property-directive-mode" to response.directive.assistant.directiveMode
                 ).apply {
                     if (cacheId != null) {
                         put("helicone-property-cache-id", cacheId)
                     }
-                    if (!response.directive.internal.directiveMode && functionName != null) {
+                    if (!response.directive.assistant.directiveMode && functionName != null) {
                         put("helicone-property-tool-name", functionName)
                     }
                 }

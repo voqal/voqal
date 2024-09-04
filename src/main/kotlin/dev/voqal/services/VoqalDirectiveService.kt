@@ -24,7 +24,7 @@ import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.SelectedCode
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.flaw.error.parse.ResponseParseError
@@ -239,18 +239,18 @@ class VoqalDirectiveService(private val project: Project) {
             (FileTypeManager.getInstance().getFileTypeByFile(file) as? LanguageFileType)?.language
         }
         val fullCommand = VoqalDirective(
-            ide = IdeContext(
-                project,
-                selectedTextEditor,
-                projectFileTree = projectFileStructure
-            ),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = project.service<VoqalMemoryService>().getCurrentMemory(promptSettings),
                 availableActions = toolService.getAvailableTools().values,
                 languageModelSettings = languageModelSettings,
                 promptSettings = promptSettings,
                 speechId = transcription.speechId,
                 usingAudioModality = usingAudioModality
+            ),
+            ide = IdeContext(
+                project,
+                selectedTextEditor,
+                projectFileTree = projectFileStructure
             ),
             developer = DeveloperContext(
                 transcription = transcription.transcript,
@@ -312,7 +312,7 @@ class VoqalDirectiveService(private val project: Project) {
         try {
             do {
                 try {
-                    handleResponse(directive.internal.memorySlice.addMessage(directive, !retry))
+                    handleResponse(directive.assistant.memorySlice.addMessage(directive, !retry))
                     retry = false
                 } catch (e: RateLimitException) {
                     execution.errors.add(e)
@@ -381,7 +381,7 @@ class VoqalDirectiveService(private val project: Project) {
                         log.warn("Response parse error: ${e.message}. Retrying...")
                         handledParseError = true
                         //todo: this is very hacky
-                        (directive.internal.memorySlice as LocalMemorySlice).messageList.add(
+                        (directive.assistant.memorySlice as LocalMemorySlice).messageList.add(
                             ChatMessage(
                                 ChatRole.User,
                                 TextContent(content = e.message)

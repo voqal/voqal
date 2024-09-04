@@ -76,7 +76,7 @@ class AddBreakpointsTool : VoqalTool() {
     override fun asTool(directive: VoqalDirective) = Tool.function(
         name = NAME,
         description = buildString {
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 append("Adds breakpoints to the specified directive. ")
                 append("Do not include line number(s) unless strictly instructed.")
             } else {
@@ -86,7 +86,7 @@ class AddBreakpointsTool : VoqalTool() {
         parameters = Parameters.fromJsonString(JsonObject().apply {
             put("type", "object")
             put("properties", JsonObject().apply {
-                if (directive.internal.directiveMode) {
+                if (directive.assistant.directiveMode) {
                     put("directive", JsonObject().apply {
                         put("type", "string")
                         put("description", "The directive to pass to the tool")
@@ -99,7 +99,7 @@ class AddBreakpointsTool : VoqalTool() {
                     })
                 }
             })
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 put("required", JsonArray().add("directive"))
             } else {
                 put("required", JsonArray().add("line_numbers"))

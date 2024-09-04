@@ -79,7 +79,7 @@ class LooksGoodTool : VoqalTool() {
     }
 
     override fun isVisible(directive: VoqalDirective): Boolean {
-        return directive.internal.promptSettings?.promptName?.lowercase() != "idle mode"
+        return directive.assistant.promptSettings?.promptName?.lowercase() != "idle mode"
     }
 
     override fun asTool(directive: VoqalDirective) = Tool.function(

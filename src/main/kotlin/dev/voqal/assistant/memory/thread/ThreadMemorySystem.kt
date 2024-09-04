@@ -41,7 +41,7 @@ class ThreadMemorySystem(
     private suspend fun setupAssistant(directive: VoqalDirective) {
         val log = project.getVoqalLogger(this::class)
         if (::assistant.isInitialized) return
-        val assistantId = directive.internal.promptSettings?.assistantId ?: ""
+        val assistantId = directive.assistant.promptSettings?.assistantId ?: ""
         if (assistantId.isNotEmpty()) {
             log.info("Loading existing assistant")
             getAssistant(assistantId)
@@ -54,7 +54,7 @@ class ThreadMemorySystem(
     private suspend fun setupThread(directive: VoqalDirective) {
         val log = project.getVoqalLogger(this::class)
         if (::threadId.isInitialized) return
-        val threadId = directive.internal.promptSettings?.assistantThreadId ?: ""
+        val threadId = directive.assistant.promptSettings?.assistantThreadId ?: ""
         if (threadId.isNotEmpty()) {
             log.info("Loading existing thread")
             getThread(threadId)

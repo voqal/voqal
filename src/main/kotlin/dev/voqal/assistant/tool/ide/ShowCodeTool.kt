@@ -86,7 +86,7 @@ class ShowCodeTool : VoqalTool() {
     }
 
     override fun isVisible(directive: VoqalDirective): Boolean {
-        return directive.internal.promptSettings?.promptName?.lowercase() == "search mode"
+        return directive.assistant.promptSettings?.promptName?.lowercase() == "search mode"
     }
 
     override fun asTool(directive: VoqalDirective) = Tool.function(

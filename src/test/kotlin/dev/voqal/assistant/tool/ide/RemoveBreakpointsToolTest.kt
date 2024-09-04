@@ -9,7 +9,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
@@ -39,13 +39,13 @@ class RemoveBreakpointsToolTest : JBTest() {
 
         val transcription = "Remove all breakpoints"
         val directive = VoqalDirective(
-            ide = IdeContext(project, editor),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = listOf(RemoveBreakpointsTool()),
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project, editor),
             developer = DeveloperContext(
                 transcription = transcription,
                 viewingCode = ViewingCode(removeBreakpointsCode),
@@ -54,7 +54,7 @@ class RemoveBreakpointsToolTest : JBTest() {
                 activeBreakpoints = listOf(3, 4)
             )
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(response.toString(), 1, response.toolCalls.size)
         val toolCall = response.toolCalls[0] as ToolCall.Function

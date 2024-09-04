@@ -35,7 +35,7 @@ class ViewPromptAction : AnAction() {
             var command = project.service<VoqalDirectiveService>()
                 .asDirective(SpokenTranscript("n/a", null), promptName = promptName)
             command = command.copy(
-                internal = command.internal.copy(
+                assistant = command.assistant.copy(
                     availableActions = toolService.getAvailableTools().values
                 )
             )

@@ -35,7 +35,7 @@ class LocalMemorySlice(
         addMessage: Boolean
     ): VoqalResponse {
         val log = project.getVoqalLogger(this::class)
-        val promptSettings = directive.internal.promptSettings
+        val promptSettings = directive.assistant.promptSettings
             ?: throw IllegalStateException("Prompt settings not found")
         val configService = project.service<VoqalConfigService>()
         val config = configService.getConfig()
@@ -59,7 +59,7 @@ class LocalMemorySlice(
         if (promptSettings.promptName == "Edit Mode") {
             project.service<VoqalStatusService>().updateText("Querying AI provider: ${lmSettings.name}")
         }
-        var includeToolsInMarkdown = directive.internal.includeToolsInMarkdown
+        var includeToolsInMarkdown = directive.assistant.includeToolsInMarkdown
         if (promptSettings.promptName == "Edit Mode") {
             includeToolsInMarkdown = true //todo: edit mode doesn't support function calls
         }
@@ -81,10 +81,10 @@ class LocalMemorySlice(
                 ChatCompletionRequest(
                     model = ModelId(lmSettings.modelName),
                     messages = getMessages(),
-                    tools = directive.internal.availableActions
+                    tools = directive.assistant.availableActions
                         .filter { it.isVisible(directive) }
                         .map {
-                            if (directive.internal.directiveMode && !it.supportsDirectiveMode()) {
+                            if (directive.assistant.directiveMode && !it.supportsDirectiveMode()) {
                                 it.asTool(directive).asDirectiveTool()
                             } else {
                                 it.asTool(directive)
@@ -113,7 +113,7 @@ class LocalMemorySlice(
                 ChatCompletionRequest(
                     model = ModelId(lmSettings.modelName),
                     messages = getMessages(),
-                    tools = directive.internal.availableActions
+                    tools = directive.assistant.availableActions
                         .filter { it.isVisible(directive) }
                         .map { it.asTool(directive) },
                     //responseFormat = ChatResponseFormat.JsonObject, //todo: config JsonFormat, non-markdown tools
@@ -159,7 +159,7 @@ class LocalMemorySlice(
                         project.service<VoqalToolService>().blindExecute(
                             tool = EditTextTool(),
                             args = JsonObject(argsString).put("streaming", true),
-                            memoryId = directive.internal.memorySlice.id
+                            memoryId = directive.assistant.memorySlice.id
                         )
                     } catch (e: Throwable) {
                         println(e)

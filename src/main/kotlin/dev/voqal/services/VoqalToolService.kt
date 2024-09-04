@@ -14,7 +14,7 @@ import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.MemorySlice
@@ -181,8 +181,7 @@ class VoqalToolService(private val project: Project) {
     ) {
         val editor = project.service<VoqalContextService>().getSelectedTextEditor()
         val mockDirective = VoqalDirective(
-            IdeContext(project, editor),
-            InternalContext(
+            AssistantContext(
                 memorySlice = object : MemorySlice {
                     override val id: String
                         get() = memoryId ?: throw UnsupportedOperationException("Not supported")
@@ -193,6 +192,7 @@ class VoqalToolService(private val project: Project) {
                 availableActions = emptyList(),
                 languageModelSettings = LanguageModelSettings()
             ),
+            IdeContext(project, editor),
             DeveloperContext("", chatMessage = chatMessage)
         )
         tool.actionPerformed(args, mockDirective)
@@ -218,12 +218,12 @@ class VoqalToolService(private val project: Project) {
         if (action != null) {
             log.info("Invoking tool: ${functionCall.name}")
             project.service<VoqalStatusService>().updateText(
-                "Invoking tool: ${functionCall.name} (Directive: ${response.directive.internal.directiveMode})",
+                "Invoking tool: ${functionCall.name} (Directive: ${response.directive.assistant.directiveMode})",
                 response
             )
             invokeAction(functionCall, action, response)
             project.service<VoqalStatusService>().updateText(
-                "Finished invoking tool: ${functionCall.name} (Directive: ${response.directive.internal.directiveMode})",
+                "Finished invoking tool: ${functionCall.name} (Directive: ${response.directive.assistant.directiveMode})",
                 response
             )
         } else {
@@ -296,9 +296,9 @@ class VoqalToolService(private val project: Project) {
                 var childDirective = project.service<VoqalDirectiveService>()
                     .asDirective(SpokenTranscript(args.getString("directive"), null), true)
                 childDirective = childDirective.copy(
-                    internal = childDirective.internal.copy(
+                    assistant = childDirective.assistant.copy(
                         directiveMode = false,
-                        availableActions = childDirective.internal.availableActions.filter {
+                        availableActions = childDirective.assistant.availableActions.filter {
                             it.name == functionCall.name
                         },
                         parentDirective = response.directive

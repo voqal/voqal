@@ -12,7 +12,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.config.settings.PromptSettings
 import dev.voqal.services.VoqalSearchService
 import dev.voqal.services.VoqalToolService
@@ -31,16 +31,16 @@ class OpenFileToolTest : JBTest() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = toolService.getAvailableTools().values,
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -81,16 +81,16 @@ class OpenFileToolTest : JBTest() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management class"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = toolService.getAvailableTools().values,
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -131,16 +131,16 @@ class OpenFileToolTest : JBTest() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = toolService.getAvailableTools().values,
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -172,16 +172,16 @@ class OpenFileToolTest : JBTest() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = toolService.getAvailableTools().values,
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.internal.memorySlice.addMessage(directive)
+        val response = directive.assistant.memorySlice.addMessage(directive)
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function

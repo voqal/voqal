@@ -90,13 +90,13 @@ class ViewSourceTool : VoqalTool() {
         return exactMatches.size == 1
     }
 
-    override fun isVisible(directive: VoqalDirective) = directive.internal.promptSettings?.decomposeDirectives == true
+    override fun isVisible(directive: VoqalDirective) = directive.assistant.promptSettings?.decomposeDirectives == true
     override fun supportsDirectiveMode() = true
 
     override fun asTool(directive: VoqalDirective) = Tool.function(
         name = NAME,
         description = buildString {
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 append("Adds the contents of the specified file to the current context to assist LLM in answering questions. ")
                 append("Order matters so make sure to call this tool before " + AnswerQuestionTool.NAME + ".")
             } else {
@@ -106,7 +106,7 @@ class ViewSourceTool : VoqalTool() {
         parameters = Parameters.fromJsonString(JsonObject().apply {
             put("type", "object")
             put("properties", JsonObject().apply {
-                if (directive.internal.directiveMode) {
+                if (directive.assistant.directiveMode) {
                     put("directive", JsonObject().apply {
                         put("type", "string")
                         put("description", "The directive to pass to the tool")
@@ -121,7 +121,7 @@ class ViewSourceTool : VoqalTool() {
                     })
                 }
             })
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 put("required", JsonArray().add("directive"))
             } else {
                 put("required", JsonArray().add("name"))

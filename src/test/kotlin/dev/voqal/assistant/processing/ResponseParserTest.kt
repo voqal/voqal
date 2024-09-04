@@ -5,7 +5,7 @@ import com.aallam.openai.api.model.ModelId
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.flaw.error.parse.ResponseParseError
 import dev.voqal.assistant.memory.local.LocalMemorySlice
 import dev.voqal.assistant.tool.code.CreateClassTool
@@ -51,8 +51,8 @@ class ResponseParserTest : JBTest() {
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -96,12 +96,12 @@ class ResponseParserTest : JBTest() {
                 )
             ),
             VoqalDirective(
-                ide = IdeContext(project, mock {}),
-                internal = InternalContext(
+                assistant = AssistantContext(
                     memorySlice = mock {},
                     availableActions = listOf(GotoTextTool()),
                     languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
                 ),
+                ide = IdeContext(project, mock {}),
                 developer = mock {},
             )
         )
@@ -134,8 +134,8 @@ class ResponseParserTest : JBTest() {
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -183,8 +183,8 @@ class ResponseParserTest : JBTest() {
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -231,8 +231,8 @@ class ResponseParserTest : JBTest() {
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -271,8 +271,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -309,12 +309,12 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
-                ide = IdeContext(project, mock {}),
-                internal = InternalContext(
+                assistant = AssistantContext(
                     memorySlice = mock {},
                     availableActions = listOf(CreateClassTool()),
                     languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
                 ),
+                ide = IdeContext(project, mock {}),
                 developer = mock {},
             )
         )
@@ -352,12 +352,12 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
-                ide = IdeContext(project, mock {}),
-                internal = InternalContext(
+                assistant = AssistantContext(
                     memorySlice = mock {},
                     availableActions = emptyList(),
                     languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
                 ),
+                ide = IdeContext(project, mock {}),
                 developer = mock {},
             )
         )
@@ -395,8 +395,8 @@ If the developer intends to test the system, they may provide a specific task or
                     )
                 ),
                 VoqalDirective(
+                    assistant = mock {},
                     ide = IdeContext(project, mock {}),
-                    internal = mock {},
                     developer = mock {},
                 )
             )
@@ -427,8 +427,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -460,8 +460,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -493,8 +493,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -529,8 +529,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -584,8 +584,8 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
+                assistant = mock {},
                 ide = IdeContext(project, mock {}),
-                internal = mock {},
                 developer = mock {},
             )
         )
@@ -626,12 +626,12 @@ If the developer intends to test the system, they may provide a specific task or
                     )
                 ),
                 VoqalDirective(
-                    ide = IdeContext(project, mock {}),
-                    internal = InternalContext(
+                    assistant = AssistantContext(
                         memorySlice = LocalMemorySlice(project),
                         availableActions = emptyList(),
                         languageModelSettings = mock {}
                     ),
+                    ide = IdeContext(project, mock {}),
                     developer = mock {},
                 )
             )
@@ -661,12 +661,12 @@ If the developer intends to test the system, they may provide a specific task or
                 )
             ),
             VoqalDirective(
-                ide = IdeContext(project, mock {}),
-                internal = InternalContext(
+                assistant = AssistantContext(
                     memorySlice = LocalMemorySlice(project),
                     availableActions = emptyList(),
                     languageModelSettings = mock {}
                 ),
+                ide = IdeContext(project, mock {}),
                 developer = mock {},
             )
         )

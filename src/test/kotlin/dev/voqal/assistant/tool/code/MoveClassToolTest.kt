@@ -63,7 +63,7 @@ class MoveClassToolTest : JBTest() {
                 textOnly = true
             )
 
-            val response = directive.internal.memorySlice.addMessage(directive)
+            val response = directive.assistant.memorySlice.addMessage(directive)
             assertEquals(1, response.toolCalls.size)
             val toolCall = response.toolCalls[0] as ToolCall.Function
             val functionCall = toolCall.function

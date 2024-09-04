@@ -7,7 +7,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.tool.ide.navigation.OpenFileTool
 import dev.voqal.config.settings.LanguageModelSettings
 import dev.voqal.config.settings.PromptSettings
@@ -106,13 +106,13 @@ class VoqalDirectiveServiceTest : JBTest() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = toolService.getAvailableTools().values,
                 promptSettings = PromptSettings(promptName = "Idle Mode"),
                 languageModelSettings = LanguageModelSettings(name = "mock")
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
 

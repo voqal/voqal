@@ -14,9 +14,9 @@ import org.yaml.snakeyaml.Yaml
 import java.io.StringWriter
 
 /**
- * Represents the internal context of Voqal.
+ * Represents the internal context of the Voqal Assistant.
  */
-data class InternalContext(
+data class AssistantContext(
     val memorySlice: MemorySlice,
     val availableActions: Collection<VoqalTool>,
     val includeToolsInMarkdown: Boolean = true,
@@ -57,7 +57,7 @@ data class InternalContext(
                         "name" to tool.function.name,
                         "yaml" to jsonToYaml(
                             Json.encodeToJsonElement(tool).toString(),
-                            directive.internal.directiveMode
+                            directive.assistant.directiveMode
                         )
                     )
                 }

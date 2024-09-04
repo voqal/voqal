@@ -23,7 +23,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.config.VoqalConfig
 import dev.voqal.config.settings.PromptSettings.EditFormat
@@ -180,12 +180,7 @@ class VoqalBenchmarking : JBTest() {
             editor?.let { editors.add(it) }
             benchPromise.startFloorTime()
             val directive = VoqalDirective(
-                ide = IdeContext(
-                    project = project,
-                    editor = editor,
-                    projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
-                ),
-                internal = InternalContext(
+                assistant = AssistantContext(
                     memorySlice = getMemorySystem().getMemorySlice(),
                     availableActions = project.service<VoqalToolService>().getAvailableTools().values,
                     promptSettings = contexts.filterIsInstance<PromptSettingsContext>().first().settings.copy(
@@ -194,6 +189,11 @@ class VoqalBenchmarking : JBTest() {
                     ),
                     languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
                     includeToolsInMarkdown = System.getenv("VQL_MARKDOWN_TOOLS") != "false"
+                ),
+                ide = IdeContext(
+                    project = project,
+                    editor = editor,
+                    projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
                 ),
                 developer = DeveloperContext(
                     transcription = transcription.text,

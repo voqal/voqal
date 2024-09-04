@@ -60,9 +60,9 @@ class VertexAiClient(
             .setTopP(0.95f) //todo: these
             .build()
 
-        val chatSession = if (chatMap[directive!!.internal.memorySlice.id] != null) {
+        val chatSession = if (chatMap[directive!!.assistant.memorySlice.id] != null) {
             log.debug("Using existing chat session")
-            chatMap[directive.internal.memorySlice.id]!!
+            chatMap[directive.assistant.memorySlice.id]!!
         } else {
             log.debug("Creating new chat session")
             val systemInstruction = ContentMaker.fromMultiModalData(request.messages.first().content)
@@ -73,14 +73,14 @@ class VertexAiClient(
                 .setSystemInstruction(systemInstruction)
                 .build()
             val chatSession = model.startChat()
-            chatMap[directive.internal.memorySlice.id] = chatSession
+            chatMap[directive.assistant.memorySlice.id] = chatSession
             chatSession
         }
 
         //todo: need to check response messages for the error messages voqal adds and add to this chat
 
-        val content = if (directive.internal.speechId != null && directive.internal.usingAudioModality) {
-            val speechId = directive.internal.speechId
+        val content = if (directive.assistant.speechId != null && directive.assistant.usingAudioModality) {
+            val speechId = directive.assistant.speechId
             val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
             speechDirectory.mkdirs()
             val speechFile = File(speechDirectory, "developer-$speechId.wav")

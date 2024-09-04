@@ -1,9 +1,9 @@
 package dev.voqal.assistant
 
 import com.intellij.openapi.components.service
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
 import dev.voqal.assistant.template.VoqalTemplateEngine
 import dev.voqal.config.settings.LanguageModelSettings
 import dev.voqal.services.VoqalConfigService
@@ -15,39 +15,39 @@ import java.io.StringWriter
 /**
  * Represents a processable command for the Voqal Assistant.
  *
+ * @property assistant Holds the current configuration of the assistant.
  * @property ide Holds the current state of the IDE.
- * @property internal Holds the current configuration of the Voqal Assistant.
  * @property developer Holds information provided by developer.
  */
 data class VoqalDirective(
+    val assistant: AssistantContext,
     val ide: IdeContext,
-    val internal: InternalContext,
     val developer: DeveloperContext
 ) {
 
-    val requestId by lazy { internal.memorySlice.id }
-    val directiveId by lazy { internal.parentDirective?.internal?.memorySlice?.id ?: internal.memorySlice.id }
+    val requestId by lazy { assistant.memorySlice.id }
+    val directiveId by lazy { assistant.parentDirective?.assistant?.memorySlice?.id ?: assistant.memorySlice.id }
     val project = ide.project
 
     fun toMarkdown(): String {
-        val promptSettings = internal.promptSettings ?: throw IllegalStateException("Prompt settings not found.")
+        val promptSettings = assistant.promptSettings ?: throw IllegalStateException("Prompt settings not found")
         val promptTemplate = ide.project.service<VoqalConfigService>().getPromptTemplate(promptSettings)
         val compiledTemplate = VoqalTemplateEngine.getTemplate(promptTemplate)
         val writer = StringWriter()
 
-        val internalMap = VoqalDirectiveService.convertJsonElementToMap(
-            Json.parseToJsonElement(internal.toJson(this).toString())
-        )
-        val developerMap = VoqalDirectiveService.convertJsonElementToMap(
-            Json.parseToJsonElement(developer.toJson().toString())
+        val assistantMap = VoqalDirectiveService.convertJsonElementToMap(
+            Json.parseToJsonElement(assistant.toJson(this).toString())
         )
         val ideMap = VoqalDirectiveService.convertJsonElementToMap(
             Json.parseToJsonElement(ide.toJson().toString())
         )
+        val developerMap = VoqalDirectiveService.convertJsonElementToMap(
+            Json.parseToJsonElement(developer.toJson().toString())
+        )
         val contextMap = mutableMapOf(
-            "assistant" to internalMap,
-            "developer" to developerMap,
+            "assistant" to assistantMap,
             "ide" to ideMap,
+            "developer" to developerMap,
             "directive" to this
         )
         compiledTemplate.evaluate(writer, contextMap)
@@ -88,14 +88,14 @@ data class VoqalDirective(
 
     fun toJson(): JsonObject {
         return JsonObject().apply {
-            put("assistant", internal.toJson(this@VoqalDirective))
-            put("developer", developer.toJson())
+            put("assistant", assistant.toJson(this@VoqalDirective))
             put("ide", ide.toJson())
+            put("developer", developer.toJson())
         }
     }
 
     fun getLanguageModelSettings(): LanguageModelSettings {
-        return internal.languageModelSettings
+        return assistant.languageModelSettings
     }
 
     override fun hashCode(): Int {

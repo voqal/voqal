@@ -31,7 +31,7 @@ class AnswerQuestionTool : VoqalTool() {
         }
         project.service<VoqalDirectiveService>().handleResponse(
             answer,
-            isTextOnly = directive.internal.parentDirective?.developer?.textOnly ?: directive.developer.textOnly
+            isTextOnly = directive.assistant.parentDirective?.developer?.textOnly ?: directive.developer.textOnly
         )
     }
 
@@ -42,7 +42,7 @@ class AnswerQuestionTool : VoqalTool() {
     override fun asTool(directive: VoqalDirective) = Tool.function(
         name = NAME,
         description = buildString {
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 append("Use this tool to answer the developer's question. ")
                 append("Change the directive to a question if it is not already. ")
                 append("The question should be from the developer's perspective. Not the assistant's. ")
@@ -59,7 +59,7 @@ class AnswerQuestionTool : VoqalTool() {
         parameters = Parameters.fromJsonString(JsonObject().apply {
             put("type", "object")
             put("properties", JsonObject().apply {
-                if (directive.internal.directiveMode) {
+                if (directive.assistant.directiveMode) {
                     put("directive", JsonObject().apply {
                         put("type", "string")
                         put("description", "The directive to pass to the tool. Must be in the form of a question")
@@ -71,7 +71,7 @@ class AnswerQuestionTool : VoqalTool() {
                     })
                 }
             })
-            if (directive.internal.directiveMode) {
+            if (directive.assistant.directiveMode) {
                 put("required", JsonArray().add("directive"))
             } else {
                 put("required", JsonArray().add("answer"))

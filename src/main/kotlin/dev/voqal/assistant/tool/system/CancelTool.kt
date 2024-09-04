@@ -56,7 +56,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
             val action = memoryService.removeLongTermUserData("voqal.edit.action.${memory.id}") as LocalHistoryAction?
             action?.finish()
             val label = memoryService.removeLongTermUserData("voqal.edit.${memory.id}") as Label?
-            label?.revert(project, editor!!.virtualFile)
+            label?.revert(project, editor!!.virtualFile) //todo: need to loop all changed files
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
         }
@@ -94,7 +94,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
     }
 
     override fun isVisible(directive: VoqalDirective): Boolean {
-        return directive.internal.promptSettings?.promptName?.lowercase() != "idle mode"
+        return directive.assistant.promptSettings?.promptName?.lowercase() != "idle mode"
     }
 
     override fun asTool(directive: VoqalDirective) = Tool.function(

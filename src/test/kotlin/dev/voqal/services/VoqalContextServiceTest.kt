@@ -9,7 +9,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
@@ -50,12 +50,7 @@ class VoqalContextServiceTest : JBTest() {
         val previousLanguageModelSettings = project.service<VoqalConfigService>().getConfig().languageModelsSettings
         val contextService = VoqalContextService(project)
         val directive = VoqalDirective(
-            ide = IdeContext(
-                project,
-                editor,
-                projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
-            ),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = emptyList(),
                 languageModelSettings = previousLanguageModelSettings.copy(
@@ -64,6 +59,11 @@ class VoqalContextServiceTest : JBTest() {
                     }
                 ).models.first(),
                 promptSettings = PromptSettings(promptName = "Idle Mode")
+            ),
+            ide = IdeContext(
+                project,
+                editor,
+                projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
             ),
             developer = DeveloperContext(
                 transcription = "",
@@ -95,13 +95,13 @@ class VoqalContextServiceTest : JBTest() {
 
     fun `test pretty prompt`() {
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = emptyList(),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
                 promptSettings = PromptSettings(promptName = "Idle Mode")
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = "",
                 viewingFile = null,
@@ -124,13 +124,13 @@ class VoqalContextServiceTest : JBTest() {
 
     fun `test pretty prompt ignores code block`() {
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = emptyList(),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
                 promptSettings = PromptSettings(promptName = "Idle Mode")
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = "",
                 viewingFile = null,
@@ -166,8 +166,7 @@ class VoqalContextServiceTest : JBTest() {
         val previousLanguageModelSettings = project.service<VoqalConfigService>().getConfig().languageModelsSettings
         val contextService = VoqalContextService(project)
         val directive = VoqalDirective(
-            ide = IdeContext(project, editor),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = emptyList(),
                 languageModelSettings = previousLanguageModelSettings.copy(
@@ -177,6 +176,7 @@ class VoqalContextServiceTest : JBTest() {
                 ).models.first(),
                 promptSettings = PromptSettings(promptName = "Edit Mode")
             ),
+            ide = IdeContext(project, editor),
             developer = DeveloperContext(
                 transcription = "",
                 viewingFile = null,

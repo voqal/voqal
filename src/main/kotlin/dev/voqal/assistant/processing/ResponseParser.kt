@@ -164,7 +164,7 @@ object ResponseParser {
                         )
                         return VoqalResponse(directive, toolCalls, completion)
                     } else {
-                        if (json.map.keys.size == 1 && directive.internal.availableActions.any { it.name == json.map.keys.first() }) {
+                        if (json.map.keys.size == 1 && directive.assistant.availableActions.any { it.name == json.map.keys.first() }) {
                             val toolName = json.map.keys.first()
                             val toolJson = json.getJsonObject(toolName).toString()
                             val toolCalls = listOf(
@@ -177,8 +177,8 @@ object ResponseParser {
                                 )
                             )
                             return VoqalResponse(directive, toolCalls, completion)
-                        } else if (directive.internal.availableActions.size == 1) {
-                            val toolName = directive.internal.availableActions.first().name
+                        } else if (directive.assistant.availableActions.size == 1) {
+                            val toolName = directive.assistant.availableActions.first().name
                             val toolJson = json.toString()
                             val toolCalls = listOf(
                                 ToolCall.Function(

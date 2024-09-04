@@ -6,7 +6,7 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.InternalContext
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.processing.ResponseParser
 import io.vertx.core.json.JsonObject
 import org.mockito.kotlin.mock
@@ -31,12 +31,12 @@ class AnswerQuestionToolTest : JBTest() {
             )
         )
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = ""
             )
@@ -62,12 +62,12 @@ class AnswerQuestionToolTest : JBTest() {
             )
         )
         val directive = VoqalDirective(
-            ide = IdeContext(project),
-            internal = InternalContext(
+            assistant = AssistantContext(
                 memorySlice = mock {},
                 availableActions = emptyList(),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first()
             ),
+            ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = ""
             )

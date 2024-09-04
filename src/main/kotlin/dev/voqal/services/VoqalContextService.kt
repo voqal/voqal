@@ -89,7 +89,7 @@ class VoqalContextService(private val project: Project) {
         val selectedTextEditor = croppedCommand.ide.editor
 
         //count tokens
-        var tokenLimit = fullDirective.internal.languageModelSettings.tokenLimit
+        var tokenLimit = fullDirective.assistant.languageModelSettings.tokenLimit
         if (tokenLimit == -1) {
             log.warn("Token limit not set. Using no limit")
             tokenLimit = Integer.MAX_VALUE
