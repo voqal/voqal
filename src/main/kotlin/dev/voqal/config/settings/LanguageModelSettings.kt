@@ -7,6 +7,7 @@ import dev.voqal.provider.clients.deepseek.DeepSeekClient
 import dev.voqal.provider.clients.fireworks.FireworksClient
 import dev.voqal.provider.clients.googleapi.GoogleApiClient
 import dev.voqal.provider.clients.groq.GroqClient
+import dev.voqal.provider.clients.mistralai.MistralAiClient
 import dev.voqal.provider.clients.openai.OpenAiClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import io.vertx.core.json.JsonObject
@@ -47,6 +48,7 @@ data class LanguageModelSettings(
                 LMProvider.GROQ -> LanguageModelSettings(provider, modelName = GroqClient.DEFAULT_MODEL)
                 LMProvider.FIREWORKS_AI -> LanguageModelSettings(provider, modelName = FireworksClient.DEFAULT_MODEL)
                 LMProvider.TOGETHER_AI -> LanguageModelSettings(provider, modelName = TogetherAiClient.DEFAULT_MODEL)
+                LMProvider.MISTRAL_AI -> LanguageModelSettings(provider, modelName = MistralAiClient.DEFAULT_MODEL)
                 //todo: others
                 else -> LanguageModelSettings(provider, modelName = "")
             }

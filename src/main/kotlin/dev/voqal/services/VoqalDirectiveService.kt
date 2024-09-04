@@ -31,9 +31,6 @@ import dev.voqal.assistant.flaw.error.parse.ResponseParseError
 import dev.voqal.assistant.focus.DirectiveExecution
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.local.LocalMemorySlice
-import dev.voqal.assistant.tool.VoqalTool
-import dev.voqal.assistant.tool.system.AnswerQuestionTool
-import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.config.settings.TextToSpeechSettings
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.status.VoqalStatus.*
@@ -41,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
 import java.io.File
+import java.nio.channels.UnresolvedAddressException
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.pow
 
@@ -90,19 +88,6 @@ class VoqalDirectiveService(private val project: Project) {
                 }
                 delay(30_000)
             }
-        }
-    }
-
-    /**
-     * Send the partial developer transcription to the appropriate Voqal mode for processing.
-     */
-    suspend fun handlePartialTranscription(spokenTranscript: SpokenTranscript) {
-        val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
-        if (promptSettings.showPartialResults && project.service<VoqalStatusService>().getStatus() == EDITING) {
-            project.service<VoqalToolService>().blindExecute(
-                EditTextTool(), io.vertx.core.json.JsonObject()
-                    .put("spokenTranscript", spokenTranscript.toJson())
-            )
         }
     }
 
@@ -244,8 +229,6 @@ class VoqalDirectiveService(private val project: Project) {
             .filter { it.fileUrl == selectedTextEditor?.virtualFile?.url }
             .map { (it.sourcePosition?.line ?: it.line) + 1 }
 
-        //val projectCodeStructure = project.service<VoqalSearchService>().getProjectCodeStructure()
-        //println(projectCodeStructure)
         val viewingCodeProblems = selectedTextEditor?.let {
             project.service<VoqalSearchService>().getActiveProblems(it)
         }
@@ -259,8 +242,7 @@ class VoqalDirectiveService(private val project: Project) {
             ide = IdeContext(
                 project,
                 selectedTextEditor,
-                projectFileTree = projectFileStructure,
-                //projectCodeStructure = projectCodeStructure
+                projectFileTree = projectFileStructure
             ),
             internal = InternalContext(
                 memorySlice = project.service<VoqalMemoryService>().getCurrentMemory(promptSettings),
@@ -368,14 +350,14 @@ class VoqalDirectiveService(private val project: Project) {
                     execution.errors.add(e)
                     if (e.statusCode in setOf(503)) {
                         if (++attempt >= maxAttempts) {
-                            log.warn("OpenAI API error. Maximum retry attempts reached.")
-                            handleResponse("OpenAI API error. Please try again later.", isTextOnly = textOnly)
+                            log.warn("LLM API error. Maximum retry attempts reached.")
+                            handleResponse("LLM API error. Please try again later.", isTextOnly = textOnly)
                             retry = false
                         } else {
                             val delayTime = (2.0.pow(attempt.toDouble()) * 1000).toLong()
-                            log.warn("OpenAI API error. Retrying in ${delayTime / 1000} seconds...")
+                            log.warn("LLM API error. Retrying in ${delayTime / 1000} seconds...")
                             handleResponse(
-                                "OpenAI API error. Retrying in ${delayTime / 1000} seconds...",
+                                "LLM API error. Retrying in ${delayTime / 1000} seconds...",
                                 isTextOnly = textOnly
                             )
                             delay(delayTime)
@@ -412,6 +394,12 @@ class VoqalDirectiveService(private val project: Project) {
                         handleResponse(errorMessage, isTextOnly = true)
                         retry = false
                     }
+                } catch (e: UnresolvedAddressException) {
+                    execution.errors.add(e)
+                    val errorMessage = "Internet connection unavailable"
+                    log.warn(errorMessage)
+                    handleResponse(errorMessage, isTextOnly = textOnly)
+                    retry = false
                 } catch (e: Exception) {
                     execution.errors.add(e)
                     val errorMessage = e.message ?: "An unknown error occurred"
@@ -496,34 +484,13 @@ class VoqalDirectiveService(private val project: Project) {
                     }
                 })
             }
-            project.service<VoqalStatusService>().updateText(executionStr, response)
+            if (toolCalls.size > 1) {
+                project.service<VoqalStatusService>().updateText(executionStr, response)
+            }
             log.debug(executionStr)
 
             val toolService = project.service<VoqalToolService>()
-            var sortedToolCalls = VoqalTool.asSortedToolCalls(toolCalls).toMutableList()
-//            if (sortedToolCalls.size == 1 && (sortedToolCalls.first() as? ToolCall.Function)?.function?.name == AnswerQuestionTool.NAME) {
-//                //if there is only one tool call and it is the answer question tool, execute it immediately
-//                log.debug("Executing directive answer question tool immediately")
-//                val function = sortedToolCalls.first() as ToolCall.Function
-//                sortedToolCalls = mutableListOf(function.copy(
-//                    function = function.function.copy(
-//                        argumentsOrNull = JsonObject(function.function.arguments)
-//                            .put("executeImmediately", true)
-//                            .toString()
-//                    )
-//                ))
-//            }
-
-            //ensure answer question tool is last
-            val answerQuestionTool = sortedToolCalls.find {
-                (it as? ToolCall.Function)?.function?.name == AnswerQuestionTool.NAME
-            }
-            if (answerQuestionTool != null) {
-                sortedToolCalls.remove(answerQuestionTool)
-                sortedToolCalls.add(answerQuestionTool)
-            }
-
-            sortedToolCalls.forEach {
+            toolCalls.forEach {
                 val toolCall = it as? ToolCall.Function
                 if (toolCall != null) {
                     toolService.handleFunctionCall(toolCall, response)

@@ -57,7 +57,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getVectorStoreId(),
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
-                            prompt.getEditFormat()
+                            prompt.getEditFormat(),
+                            prompt.getStreamCompletions()
                     )
             );
 
@@ -85,7 +86,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getVectorStoreId(),
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
                 selectedPromptChanged(project);
@@ -108,7 +110,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getVectorStoreId(),
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
                 selectedPromptChanged(project);
@@ -131,7 +134,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getVectorStoreId(),
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
-                            prompt.getEditFormat()
+                            prompt.getEditFormat(),
+                            prompt.getStreamCompletions()
                     )
             );
         });
@@ -151,7 +155,29 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getVectorStoreId(),
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
-                            prompt.getEditFormat()
+                            prompt.getEditFormat(),
+                            prompt.getStreamCompletions()
+                    )
+            );
+        });
+
+        streamCompletionsCheckBox.addActionListener(e -> {
+            var promptName = list1.getSelectedValue();
+            promptLibrary.computeIfPresent(promptName, (k, prompt) -> prompt.copy(
+                            prompt.getProvider(),
+                            prompt.getPromptName(),
+                            prompt.getPromptFile(),
+                            prompt.getPromptText(),
+                            prompt.getPromptUrl(),
+                            prompt.getModelName(),
+                            prompt.getShowPartialResults(),
+                            prompt.getDecomposeDirectives(),
+                            prompt.getCodeSmellCorrection(),
+                            prompt.getVectorStoreId(),
+                            prompt.getAssistantId(),
+                            prompt.getAssistantThreadId(),
+                            prompt.getEditFormat(),
+                            streamCompletionsCheckBox.isSelected()
                     )
             );
         });
@@ -171,7 +197,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getVectorStoreId(),
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
-                            prompt.getEditFormat()
+                            prompt.getEditFormat(),
+                            prompt.getStreamCompletions()
                     )
             );
         });
@@ -193,7 +220,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 vectorStoreIdTextField.getText(),
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
             }
@@ -215,7 +243,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getVectorStoreId(),
                                 assistantIdTextField.getText(),
                                 prompt.getAssistantThreadId(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
             }
@@ -237,7 +266,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getVectorStoreId(),
                                 prompt.getAssistantId(),
                                 assistantThreadIdTextField.getText(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
             }
@@ -259,7 +289,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getVectorStoreId(),
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
-                            editFormat
+                            editFormat,
+                            prompt.getStreamCompletions()
                     )
             );
         });
@@ -288,6 +319,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         urlTextField.setText(prompt.getPromptUrl());
         promptComboBox.setSelectedItem(prompt.getProvider().getDisplayName());
         decompCheckBox.setSelected(prompt.getDecomposeDirectives());
+        streamCompletionsCheckBox.setSelected(prompt.getStreamCompletions());
         codeSmellCheckBox.setSelected(prompt.getCodeSmellCorrection());
         vectorStoreIdTextField.setText(prompt.getVectorStoreId());
         assistantIdTextField.setText(prompt.getAssistantId());
@@ -296,6 +328,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
         if (prompt.getPromptName().equals("Idle Mode")) {
             decompCheckBox.setVisible(true);
+            streamCompletionsCheckBox.setVisible(false);
             codeSmellCheckBox.setVisible(false);
 
             label4.setVisible(false);
@@ -308,6 +341,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             assistantThreadIdTextField.setVisible(false);
         } else if (prompt.getPromptName().equals("Edit Mode")) {
             decompCheckBox.setVisible(false);
+            streamCompletionsCheckBox.setVisible(true);
             codeSmellCheckBox.setVisible(true);
 
             //todo: support edit format for edit mode
@@ -322,6 +356,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             assistantThreadIdTextField.setVisible(false);
         } else if (prompt.getPromptName().equals("Search Mode")) {
             decompCheckBox.setVisible(false);
+            streamCompletionsCheckBox.setVisible(false);
             codeSmellCheckBox.setVisible(false);
 
             label4.setVisible(false);
@@ -360,7 +395,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getVectorStoreId(),
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
-                            p.getEditFormat()
+                            p.getEditFormat(),
+                            p.getStreamCompletions()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_TEXT) {
@@ -377,7 +413,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getVectorStoreId(),
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
-                            p.getEditFormat()
+                            p.getEditFormat(),
+                            p.getStreamCompletions()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_FILE) {
@@ -394,7 +431,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getVectorStoreId(),
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
-                            p.getEditFormat()
+                            p.getEditFormat(),
+                            p.getStreamCompletions()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_URL) {
@@ -411,7 +449,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getVectorStoreId(),
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
-                            p.getEditFormat()
+                            p.getEditFormat(),
+                            p.getStreamCompletions()
                     )
             );
         } else {
@@ -480,7 +519,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getVectorStoreId(),
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
-                                prompt.getEditFormat()
+                                prompt.getEditFormat(),
+                                prompt.getStreamCompletions()
                         )
                 );
             }
@@ -579,6 +619,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         label2 = new JBLabel();
         assistantThreadIdTextField = new JBTextField();
         decompCheckBox = new JCheckBox();
+        streamCompletionsCheckBox = new JCheckBox();
         codeSmellCheckBox = new JCheckBox();
         scrollPane1 = new JBScrollPane();
         list1 = new JList<>();
@@ -602,6 +643,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                 "[fill]" +
                 "[grow,fill]",
                 // rows
+                "[]" +
                 "[]" +
                 "[]" +
                 "[]" +
@@ -671,10 +713,15 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             decompCheckBox.setSelected(true);
             panel1.add(decompCheckBox, "cell 0 8 2 1");
 
+            //---- streamCompletionsCheckBox ----
+            streamCompletionsCheckBox.setText("Enable Streaming Completions");
+            streamCompletionsCheckBox.setSelected(true);
+            panel1.add(streamCompletionsCheckBox, "cell 0 9 2 1");
+
             //---- codeSmellCheckBox ----
             codeSmellCheckBox.setText("Enable Code Smell Correction");
             codeSmellCheckBox.setSelected(true);
-            panel1.add(codeSmellCheckBox, "cell 0 9 2 1");
+            panel1.add(codeSmellCheckBox, "cell 0 10 2 1");
         }
         add(panel1, "cell 1 0");
 
@@ -721,6 +768,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
     private JBLabel label2;
     private JBTextField assistantThreadIdTextField;
     private JCheckBox decompCheckBox;
+    private JCheckBox streamCompletionsCheckBox;
     private JCheckBox codeSmellCheckBox;
     private JBScrollPane scrollPane1;
     private JList<String> list1;

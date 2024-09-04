@@ -25,8 +25,35 @@ object ResponseParser {
     private val lineNumberRegex = Regex("^\\d+\\|")
 
     fun parseEditMode(
-        completion: ChatCompletion,
+        chunk: ChatCompletionChunk,
         directive: VoqalDirective
+    ): VoqalResponse {
+        return parseEditMode(
+            ChatCompletion(
+                id = chunk.id,
+                created = chunk.created.toLong(),
+                model = chunk.model,
+                choices = chunk.choices.map { it.toChatChoice() },
+                usage = chunk.usage,
+                systemFingerprint = chunk.systemFingerprint
+            ), directive, true
+        )
+    }
+
+    private fun ChatChunk.toChatChoice(): ChatChoice {
+        return ChatChoice(
+            index = 0,
+            message = ChatMessage(
+                role = this.delta!!.role!!,
+                messageContent = TextContent(this.delta!!.content!! + "\n```")
+            )
+        )
+    }
+
+    fun parseEditMode(
+        completion: ChatCompletion,
+        directive: VoqalDirective,
+        streaming: Boolean = false
     ): VoqalResponse {
         val messageContent = completion.choices.firstOrNull()?.message?.messageContent
         val textContent = if (messageContent is TextContent) {
@@ -37,7 +64,11 @@ object ResponseParser {
         val codeBlock = CodeExtractor.extractCodeBlock(textContent)
 
         //remove line numbers (if present)
-        val codeBlockWithoutLineNumbers = if (codeBlock.lines().all { lineNumberRegex.containsMatchIn(it) }) {
+        val hasLineNumbers = codeBlock.lines().let {
+            //check without last line when streaming as we may have partial result
+            if (streaming) it.dropLast(1) else it
+        }.all { lineNumberRegex.containsMatchIn(it) }
+        val codeBlockWithoutLineNumbers = if (hasLineNumbers) {
             codeBlock.lines().joinToString("\n") { it.replaceFirst(lineNumberRegex, "") }
         } else {
             codeBlock

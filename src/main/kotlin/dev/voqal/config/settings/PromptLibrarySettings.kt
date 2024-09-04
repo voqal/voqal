@@ -35,7 +35,7 @@ data class PromptLibrarySettings(
     companion object {
         @JvmStatic
         val DEFAULT_PROMPTS = listOf(
-            PromptSettings(promptName = "Edit Mode", codeSmellCorrection = true),
+            PromptSettings(promptName = "Edit Mode", codeSmellCorrection = true, streamCompletions = true),
             PromptSettings(promptName = "Idle Mode", decomposeDirectives = true),
             PromptSettings(promptName = "Search Mode")
         )

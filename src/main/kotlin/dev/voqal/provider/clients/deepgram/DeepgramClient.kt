@@ -293,19 +293,6 @@ class DeepgramClient(
         }
     }
 
-    override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
-        throw UnsupportedOperationException("todo")
-    }
-
-    override fun dispose() {
-        disposed = true
-        if (isSttProvider) {
-            project.audioCapture.removeListener(this)
-            if (::readThread.isInitialized) readThread.interrupt()
-            if (::pingThread.isInitialized) pingThread.interrupt()
-        }
-    }
-
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
         val log = project.getVoqalLogger(this::class)
         try {
@@ -350,7 +337,20 @@ class DeepgramClient(
         }
     }
 
-    override fun isTestListener(): Boolean = testMode
+    override fun dispose() {
+        disposed = true
+        if (isSttProvider) {
+            project.audioCapture.removeListener(this)
+            if (::readThread.isInitialized) readThread.interrupt()
+            if (::pingThread.isInitialized) pingThread.interrupt()
+        }
+    }
+
+    override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
+        throw UnsupportedOperationException("Not supported")
+    }
+
+    override fun isTestListener() = testMode
     override fun isWavOutput() = true
     override fun isRawOutput() = false //todo: changing to true adds a pop sound to beginning of audio???
 }

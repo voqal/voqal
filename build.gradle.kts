@@ -241,6 +241,14 @@ tasks {
             include("dev/voqal/**")
         }
     }
+
+    named("compileKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask::class.java) {
+        compilerOptions {
+            if (System.getenv("CI") != "true") {
+                freeCompilerArgs.add("-Xdebug") //prevent vars getting optimized out
+            }
+        }
+    }
 }
 
 if (hasProperty("buildScan")) {

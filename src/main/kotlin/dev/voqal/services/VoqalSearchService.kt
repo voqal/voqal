@@ -531,6 +531,11 @@ class VoqalSearchService(private val project: Project) {
                 || psiElement::class.java.simpleName.startsWith("JSFileImpl")
     }
 
+    fun isIdentifier(psiElement: PsiElement): Boolean {
+        return psiElement.toString().contains("PsiIdentifier")
+                || psiElement.toString().contains("IDENTIFIER")
+    }
+
     fun PsiElement.isJvm(): Boolean {
         return this.language.id.lowercase() == "java" || this.language.id.lowercase() == "kotlin"
     }

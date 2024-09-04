@@ -166,6 +166,7 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
         } else {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[]{""}));
         }
+        modelNameComboBox.setSelectedItem(config.getModelName());
     }
 
     private void initComponents() {

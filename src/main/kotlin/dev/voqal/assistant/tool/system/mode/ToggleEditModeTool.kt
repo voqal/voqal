@@ -83,7 +83,7 @@ class ToggleEditModeTool : VoqalTool() {
             statusService.update(VoqalStatus.EDITING)
 
             val memory = project.service<VoqalMemoryService>().getCurrentMemory()
-            project.service<VoqalMemoryService>().saveEditLabel(memory.id)
+            project.service<VoqalMemoryService>().saveEditLabel(memory.id, editor)
 
             if (prompt != null) {
                 log.debug("Entering edit mode with directive: $prompt")

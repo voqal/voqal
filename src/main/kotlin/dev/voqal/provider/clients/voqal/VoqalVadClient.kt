@@ -60,7 +60,5 @@ class VoqalVadClient(
         }
     }
 
-    override fun dispose() {
-        project.audioCapture.removeListener(this)
-    }
+    override fun dispose() = project.audioCapture.removeListener(this)
 }

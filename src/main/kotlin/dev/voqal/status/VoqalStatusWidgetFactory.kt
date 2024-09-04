@@ -6,12 +6,8 @@ import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFact
 
 class VoqalStatusWidgetFactory : StatusBarEditorBasedWidgetFactory() {
 
-    override fun getId(): String = "dev.voqal.widget"
-    override fun getDisplayName(): String = "Voqal"
-
-    override fun createWidget(project: Project): StatusBarWidget {
-        return VoqalStatusBarWidget(project)
-    }
-
+    override fun getId() = "dev.voqal.widget"
+    override fun getDisplayName() = "Voqal"
+    override fun createWidget(project: Project) = VoqalStatusBarWidget(project)
     override fun disposeWidget(widget: StatusBarWidget) = Unit
 }

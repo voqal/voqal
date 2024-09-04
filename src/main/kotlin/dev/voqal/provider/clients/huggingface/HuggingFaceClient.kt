@@ -103,6 +103,6 @@ class HuggingFaceClient(
         }
     }
 
-    override fun getAvailableModelNames(): List<String> = emptyList()
+    override fun getAvailableModelNames() = emptyList<String>()
     override fun dispose() = client.close()
 }

@@ -7,6 +7,7 @@ import com.aallam.openai.api.assistant.AssistantRequest
 import com.aallam.openai.api.audio.SpeechRequest
 import com.aallam.openai.api.audio.TranscriptionRequest
 import com.aallam.openai.api.chat.ChatCompletion
+import com.aallam.openai.api.chat.ChatCompletionChunk
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.core.SortOrder
 import com.aallam.openai.api.file.FileSource
@@ -33,6 +34,7 @@ import dev.voqal.utils.Iso639Language
 import io.ktor.utils.io.*
 import io.vertx.core.Future
 import io.vertx.core.Promise
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import okio.buffer
 import okio.source
@@ -136,6 +138,13 @@ open class OpenAiClient(
         return openAI.chatCompletion(request)
     }
 
+    override suspend fun streamChatCompletion(
+        request: ChatCompletionRequest,
+        directive: VoqalDirective?
+    ): Flow<ChatCompletionChunk> {
+        return openAI.chatCompletions(request)
+    }
+
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
         return TtsProvider.RawAudio(
             ByteReadChannel(ByteBuffer.wrap(openAI.speech(request))),
@@ -223,6 +232,7 @@ open class OpenAiClient(
         return openAI.delete(id)
     }
 
-    override fun getAvailableModelNames(): List<String> = MODELS
+    override fun isStreamable() = true
+    override fun getAvailableModelNames() = MODELS
     override fun dispose() = openAI.close()
 }

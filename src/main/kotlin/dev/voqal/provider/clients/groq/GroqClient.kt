@@ -1,6 +1,7 @@
 package dev.voqal.provider.clients.groq
 
 import com.aallam.openai.api.chat.ChatCompletion
+import com.aallam.openai.api.chat.ChatCompletionChunk
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.exception.*
@@ -16,8 +17,11 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.*
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 
 class GroqClient(
@@ -54,61 +58,113 @@ class GroqClient(
         }
     }
 
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        install(ContentNegotiation) { json(jsonDecoder) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val url = "https://api.groq.com/openai/v1/chat/completions"
+    private val providerUrl = "https://api.groq.com/openai/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
-        try {
-            val requestJson = JsonObject()
-                .put("model", request.model.id)
-                .put("messages", JsonArray(request.messages.map { it.toJson() }))
-            val response = client.post(url) {
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+
+        val response = try {
+            client.post(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
             }
-            val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
-            log.debug("Groq response status: ${response.status} in $roundTripTime ms")
+        } catch (e: HttpRequestTimeoutException) {
+            throw OpenAITimeoutException(e)
+        }
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
+        log.debug("Groq response status: ${response.status} in $roundTripTime ms")
 
-            if (response.status.isSuccess()) {
-                val completion = response.body<ChatCompletion>()
-                log.debug("Completion: $completion")
-                return completion
-            } else if (response.status.value == 401) {
-                throw AuthenticationException(
-                    response.status.value,
-                    OpenAIError(
-                        OpenAIErrorDetails(
-                            code = null,
-                            message = "Unauthorized access to Groq. Please check your API key and try again.",
-                            param = null,
-                            type = null
-                        )
-                    ),
-                    ClientRequestException(response, response.bodyAsText())
-                )
-            } else {
-                val error = response.body<OpenAIError>()
-                throw InvalidRequestException(
-                    response.status.value,
-                    OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
-                    ClientRequestException(response, response.bodyAsText())
-                )
+        throwIfError(response)
+        val completion = response.body<ChatCompletion>()
+        log.debug("Completion: $completion")
+        return completion
+    }
+
+    override suspend fun streamChatCompletion(
+        request: ChatCompletionRequest,
+        directive: VoqalDirective?
+    ): Flow<ChatCompletionChunk> = flow {
+        val log = project.getVoqalLogger(this::class)
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+            .put("stream", true)
+
+        try {
+            client.preparePost(providerUrl) {
+                header("Content-Type", "application/json")
+                header("Accept", "application/json")
+                header("Authorization", "Bearer $providerKey")
+                setBody(requestJson.encode())
+            }.execute { response ->
+                throwIfError(response)
+
+                var hasError = false
+                val channel: ByteReadChannel = response.body()
+                while (!channel.isClosedForRead) {
+                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+
+                    if (line == "event: error") {
+                        hasError = true
+                        continue
+                    } else if (hasError) {
+                        val errorJson = JsonObject(line.substringAfter("data: "))
+                        log.warn("Received error while streaming completions: $errorJson")
+
+                        val statusCode = errorJson.getJsonObject("error").getInteger("status_code")
+                        throw UnknownAPIException(statusCode, jsonDecoder.decodeFromString(errorJson.toString()))
+                    }
+
+                    val chunkJson = line.substringAfter("data: ")
+                    if (chunkJson != "[DONE]") {
+                        emit(jsonDecoder.decodeFromString(chunkJson))
+                    }
+                }
             }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
     }
 
-    override fun getAvailableModelNames(): List<String> = MODELS
-    override fun dispose() = client.close()
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
 
-    private fun ChatMessage.toJson(): JsonObject {
-        return JsonObject().put("role", "user").put("content", content)
+        val responseBody = response.bodyAsText()
+        if (response.status.value == 401) {
+            throw AuthenticationException(
+                response.status.value,
+                OpenAIError(
+                    OpenAIErrorDetails(
+                        code = null,
+                        message = "Unauthorized access to Groq. Please check your API key and try again.",
+                        param = null,
+                        type = null
+                    )
+                ),
+                ClientRequestException(response, responseBody)
+            )
+        }
+
+        val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
+        throw InvalidRequestException(
+            response.status.value,
+            OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
+            ClientRequestException(response, responseBody)
+        )
     }
+
+    override fun isStreamable() = true
+    override fun getAvailableModelNames() = MODELS
+    override fun dispose() = client.close()
+    private fun ChatMessage.toJson() = JsonObject().put("role", "user").put("content", content)
 }

@@ -16,7 +16,8 @@ data class PromptSettings(
     val vectorStoreId: String = "",
     val assistantId: String = "",
     val assistantThreadId : String = "",
-    val editFormat: EditFormat = EditFormat.FULL_TEXT
+    val editFormat: EditFormat = EditFormat.FULL_TEXT,
+    val streamCompletions: Boolean = false
 ) : ConfigurableSettings {
 
     /**
@@ -30,12 +31,13 @@ data class PromptSettings(
         promptUrl = json.getString("promptUrl", ""),
         modelName = json.getString("modelName", ""),
         showPartialResults = json.getBoolean("showPartialResults", false),
-        decomposeDirectives = json.getBoolean("decomposeDirectives", true),
-        codeSmellCorrection = json.getBoolean("codeSmellCorrection", true),
+        decomposeDirectives = json.getBoolean("decomposeDirectives", false),
+        codeSmellCorrection = json.getBoolean("codeSmellCorrection", false),
         vectorStoreId = json.getString("vectorStoreId", ""),
         assistantId = json.getString("assistantId", ""),
         assistantThreadId = json.getString("assistantThreadId", ""),
-        editFormat = EditFormat.valueOf(json.getString("editFormat", EditFormat.FULL_TEXT.name))
+        editFormat = EditFormat.valueOf(json.getString("editFormat", EditFormat.FULL_TEXT.name)),
+        streamCompletions = json.getBoolean("streamCompletions", false)
     )
 
     override fun toJson(): JsonObject {
@@ -53,6 +55,7 @@ data class PromptSettings(
             put("assistantId", assistantId)
             put("assistantThreadId", assistantThreadId)
             put("editFormat", editFormat.name)
+            put("streamCompletions", streamCompletions)
         }
     }
 

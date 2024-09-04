@@ -29,5 +29,5 @@ class DeepSeekClient(
         }
     }
 
-    override fun getAvailableModelNames(): List<String> = MODELS
+    override fun getAvailableModelNames() = MODELS
 }
