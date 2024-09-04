@@ -84,13 +84,17 @@ class EditTextTool : VoqalTool() {
 
         //check for vui interactions
         val streaming = args.getBoolean("streaming") ?: false
-        if (!streaming && TextSearcher.checkForVuiInteraction("cancel", editText)) {
-            log.debug("Cancelling editing")
-            project.service<VoqalToolService>().blindExecute(CancelTool())
+        if (TextSearcher.checkForVuiInteraction("cancel", editText)) {
+            if (!streaming) {
+                log.debug("Cancelling editing")
+                project.service<VoqalToolService>().blindExecute(CancelTool())
+            }
             return
-        } else if (!streaming && TextSearcher.checkForVuiInteraction("accept", editText)) {
-            log.debug("Accepting editing")
-            project.service<VoqalToolService>().blindExecute(LooksGoodTool())
+        } else if (TextSearcher.checkForVuiInteraction("accept", editText)) {
+            if (!streaming) {
+                log.debug("Accepting editing")
+                project.service<VoqalToolService>().blindExecute(LooksGoodTool())
+            }
             return
         }
 
