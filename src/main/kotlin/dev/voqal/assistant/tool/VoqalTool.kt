@@ -8,6 +8,9 @@ import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
 import io.vertx.core.json.JsonObject
 
+/**
+ * LLM-executable functionality.
+ */
 abstract class VoqalTool {
 
     abstract val name: String

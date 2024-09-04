@@ -8,9 +8,9 @@ import com.intellij.psi.util.descendants
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.template.ChunkTextExtension.ChunkTextFunction
 import dev.voqal.config.settings.PromptSettings

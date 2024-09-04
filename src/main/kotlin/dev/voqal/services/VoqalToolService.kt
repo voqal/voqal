@@ -12,9 +12,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.concurrency.ThreadingAssertions
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.MemorySlice
@@ -50,7 +50,7 @@ class VoqalToolService(private val project: Project) {
         }
     }
 
-    private val availableIntents = setOf(
+    private val availableTools = setOf(
         DeleteTool(),
         BackspaceTool(),
         TabTool(),
@@ -104,7 +104,6 @@ class VoqalToolService(private val project: Project) {
         ShowCodeTool(),
         ToggleSearchModeTool(),
     )
-    private val availableTools = availableIntents
     private val availableToolsMap = availableTools.associateBy { it.name }
 
     fun getAvailableTools(): Map<String, VoqalTool> {
@@ -118,7 +117,7 @@ class VoqalToolService(private val project: Project) {
     private fun getIntentAction(intent: String): VoqalTool? {
         var intentAction: Any? = ActionManager.getInstance().getAction("voqal.$intent")
         if (intentAction == null) {
-            intentAction = availableIntents.firstOrNull { it.name == intent }
+            intentAction = availableTools.firstOrNull { it.name == intent }
         }
         if (intentAction == null) {
             intentAction = ActionManager.getInstance().getAction(intent)
@@ -134,7 +133,7 @@ class VoqalToolService(private val project: Project) {
 
     suspend fun intentCheck(spokenTranscript: SpokenTranscript): DetectedIntent? {
         var detectedIntent: DetectedIntent? = null
-        for (intent in availableIntents) {
+        for (intent in availableTools) {
             detectedIntent = intent.getTranscriptIntent(project, spokenTranscript)
             if (detectedIntent != null) {
                 break

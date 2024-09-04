@@ -61,8 +61,6 @@ data class VoqalResponse(
         )
     }
 
-    val project = directive.ide.project
-
     fun getSpentCurrency(): Double {
         try {
             return calculateTotalPrice(
@@ -71,7 +69,7 @@ data class VoqalResponse(
                 backingResponse.usage!!.completionTokens!!
             )
         } catch (e: Exception) {
-            val log = project.getVoqalLogger(this::class)
+            val log = directive.project.getVoqalLogger(this::class)
             log.warn("Model " + backingResponse!!.model.id + " not found in the price table")
             return -1.0
         }

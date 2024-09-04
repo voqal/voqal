@@ -4,8 +4,8 @@ import com.aallam.openai.api.chat.*
 import com.aallam.openai.api.model.ModelId
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
-import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.AssistantContext
+import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.flaw.error.parse.ResponseParseError
 import dev.voqal.assistant.memory.local.LocalMemorySlice
 import dev.voqal.assistant.tool.code.CreateClassTool

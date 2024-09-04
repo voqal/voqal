@@ -10,9 +10,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.replaceService
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.config.settings.PromptSettings
 import dev.voqal.services.VoqalSearchService
 import dev.voqal.services.VoqalToolService

@@ -2,7 +2,6 @@ package dev.voqal.assistant.context.code
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.openapi.editor.Caret
-import com.intellij.psi.PsiElement
 import dev.voqal.assistant.context.VoqalContext
 import io.vertx.core.json.JsonObject
 
@@ -11,7 +10,6 @@ data class ViewingCode(
     val codeWithLineNumbers: String? = code?.withLineNumbers(),
     override val language: String = "",
     override val filename: String? = null,
-    val psiAtCaret: PsiElement? = null,
     val caret: Caret? = null,
     val caretId: Int? = caret?.let { System.identityHashCode(it) },
     val caretOffset: Int? = caret?.offset,

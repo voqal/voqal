@@ -24,7 +24,7 @@ class ClearChatTool : VoqalTool() {
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
         val project = directive.project
         val log = project.getVoqalLogger(this::class)
-        log.info("Triggering clear chat intent")
+        log.info("Triggering clear chat")
         project.service<ChatToolWindowContentManager>().clearChat()
     }
 

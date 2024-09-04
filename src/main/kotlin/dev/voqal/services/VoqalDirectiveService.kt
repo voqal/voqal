@@ -22,9 +22,9 @@ import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.SelectedCode
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.flaw.error.parse.ResponseParseError

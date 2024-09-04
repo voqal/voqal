@@ -21,9 +21,9 @@ import com.intellij.testFramework.utils.vfs.getDocument
 import com.intellij.util.WaitFor
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.config.VoqalConfig
 import dev.voqal.config.settings.PromptSettings.EditFormat
@@ -159,7 +159,7 @@ class VoqalBenchmarking : JBTest() {
         }
     }
 
-    private suspend fun run(benchPromise: BenchmarkPromise) {
+    private fun run(benchPromise: BenchmarkPromise) {
         val log = project.getVoqalLogger(this::class)
         System.setProperty("voqal.benchmark.name", benchPromise.testName)
         val contexts = benchPromise.callable.call(benchPromise.instance, benchPromise) as List<*>

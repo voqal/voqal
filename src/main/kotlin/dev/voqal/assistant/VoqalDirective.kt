@@ -29,6 +29,9 @@ data class VoqalDirective(
     val directiveId by lazy { assistant.parentDirective?.assistant?.memorySlice?.id ?: assistant.memorySlice.id }
     val project = ide.project
 
+    /**
+     * Creates the final prompt which will be sent to LLM.
+     */
     fun toMarkdown(): String {
         val promptSettings = assistant.promptSettings ?: throw IllegalStateException("Prompt settings not found")
         val promptTemplate = ide.project.service<VoqalConfigService>().getPromptTemplate(promptSettings)

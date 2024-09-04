@@ -6,7 +6,7 @@ import dev.voqal.assistant.memory.MemorySystem
 import dev.voqal.services.getVoqalLogger
 
 /**
- * A memory system that stores the chat messages in local memory.
+ * Memory system that stores the chat messages in local memory.
  */
 class LocalMemorySystem(private val project: Project) : MemorySystem {
 

@@ -5,9 +5,9 @@ import com.aallam.openai.api.model.ModelId
 import com.intellij.openapi.components.service
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.tool.ide.navigation.OpenFileTool
 import dev.voqal.config.settings.LanguageModelSettings
 import dev.voqal.config.settings.PromptSettings

@@ -5,9 +5,9 @@ import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.tool.ide.AddBreakpointsTool
-import dev.voqal.assistant.tool.ide.navigation.OpenFileTool
 import dev.voqal.assistant.tool.ide.PlayProgramTool
 import dev.voqal.assistant.tool.ide.StopProgramTool
+import dev.voqal.assistant.tool.ide.navigation.OpenFileTool
 import dev.voqal.services.VoqalToolService
 import io.vertx.core.json.JsonObject
 import org.mockito.kotlin.mock

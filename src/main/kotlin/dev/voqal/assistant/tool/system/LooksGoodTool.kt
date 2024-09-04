@@ -29,7 +29,7 @@ class LooksGoodTool : VoqalTool() {
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
         val project = directive.project
         val log = project.getVoqalLogger(this::class)
-        log.info("Triggering looks good intent")
+        log.info("Triggering looks good")
 
         val editor = directive.ide.editor
         if (editor == null) {

@@ -4,9 +4,9 @@ import com.aallam.openai.api.chat.*
 import com.aallam.openai.api.model.ModelId
 import dev.voqal.JBTest
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
-import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.processing.ResponseParser
 import io.vertx.core.json.JsonObject
 import org.mockito.kotlin.mock

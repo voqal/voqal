@@ -61,6 +61,18 @@ class VoqalModeCaret(
     private fun isEditorFocused(): Boolean = editor.contentComponent.isFocusOwner
     private fun getEditorBounds(): Rectangle = editor.scrollingModel.visibleArea
 
+//    private fun getCaretPosition(caret: Caret): Point {
+//        val p: Point = editor.visualPositionToXY(caret.visualPosition)
+//        p.translate(-location.x, -location.y)
+//        return p
+//    }
+//
+//    private fun getCaretHeight(caret: Caret): Int {
+//        val p1 = editor.visualPositionToXY(caret.visualPosition)
+//        val p2 = editor.visualPositionToXY(VisualPosition(caret.visualPosition.line + 1, caret.visualPosition.column))
+//        return p2.y - p1.y
+//    }
+
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         if (!isEditorFocused()) return

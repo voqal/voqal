@@ -27,7 +27,7 @@ import kotlinx.coroutines.delay
 import java.util.*
 
 /**
- * A memory system that stores the chat messages via Assistant API.
+ * Memory system that stores the chat messages via Assistant API.
  */
 @OptIn(BetaOpenAI::class)
 class ThreadMemorySystem(

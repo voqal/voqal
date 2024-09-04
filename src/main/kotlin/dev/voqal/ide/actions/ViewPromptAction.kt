@@ -32,19 +32,19 @@ class ViewPromptAction : AnAction() {
                 return@launch
             }
 
-            var command = project.service<VoqalDirectiveService>()
+            var nopDirective = project.service<VoqalDirectiveService>()
                 .asDirective(SpokenTranscript("n/a", null), promptName = promptName)
-            command = command.copy(
-                assistant = command.assistant.copy(
+            nopDirective = nopDirective.copy(
+                assistant = nopDirective.assistant.copy(
                     availableActions = toolService.getAvailableTools().values
                 )
             )
-            val systemPrompt = command.toMarkdown()
+            val prompt = nopDirective.toMarkdown()
 
             val scratchFile = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 ScratchRootType.getInstance().createScratchFile(
                     project,
-                    "generated-prompt.md", null, systemPrompt
+                    "generated-prompt.md", null, prompt
                 )
             })
             if (scratchFile != null) {

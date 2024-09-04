@@ -55,15 +55,7 @@ class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBu
 
         splitter.firstComponent = panel
         splitter.secondComponent = JPanel().apply {
-            val levelComboBox = JComboBox(
-                arrayOf(
-                    "TRACE",
-                    "DEBUG",
-                    "INFO",
-                    "WARN",
-                    "ERROR"
-                )
-            ).apply {
+            val levelComboBox = JComboBox(arrayOf("TRACE", "DEBUG", "INFO", "WARN", "ERROR")).apply {
                 selectedItem = logLevel
                 addActionListener {
                     logLevel = (it.source as JComboBox<*>).selectedItem as String

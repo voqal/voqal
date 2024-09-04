@@ -31,7 +31,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
         val project = directive.project
         val log = project.getVoqalLogger(this::class)
-        log.info("Triggering cancel intent")
+        log.info("Triggering cancel")
 
         val statusService = project.service<VoqalStatusService>()
         if (statusService.getStatus() == VoqalStatus.IDLE) {
