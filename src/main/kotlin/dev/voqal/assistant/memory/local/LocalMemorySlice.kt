@@ -13,10 +13,7 @@ import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.processing.ResponseParser
 import dev.voqal.assistant.tool.text.EditTextTool
-import dev.voqal.services.VoqalConfigService
-import dev.voqal.services.VoqalStatusService
-import dev.voqal.services.VoqalToolService
-import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.*
 import io.vertx.core.json.JsonObject
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.*
@@ -197,6 +194,14 @@ class LocalMemorySlice(
                     op.asyncLog(project, request, response, requestTime, responseTime)
                 }
             }
+
+            //todo: TPS should be a part of observability
+            val tokenCount = project.service<VoqalContextService>().getTokenCount(textContent)
+            val elapsedTimeMs = responseTime - requestTime
+            val elapsedTimeSeconds = elapsedTimeMs / 1000.0
+            val tps = if (elapsedTimeSeconds > 0) tokenCount / elapsedTimeSeconds else 0.0
+            log.debug("Response TPS: $tps")
+
             return response
         } catch (e: Throwable) {
             val responseTime = System.currentTimeMillis()
