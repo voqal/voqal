@@ -98,51 +98,50 @@ class GoogleApiClient(
         val modelName = request.model.id
         val requestJson = toRequestJson(request, directive)
 
-        val response = try {
+        try {
             client.preparePost("$providerUrl/v1beta/models/$modelName:streamGenerateContent?key=$providerKey") {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 setBody(requestJson.encode())
-            }.execute()
+            }.execute { response ->
+                throwIfError(response)
+
+                val fullResponse = StringBuilder()
+                val channel: ByteReadChannel = response.body()
+                while (!channel.isClosedForRead) {
+                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+                    fullResponse.append(line)
+
+                    try {
+                        val resultArray = JsonArray("$fullResponse}]")
+                        if (!resultArray.isEmpty) {
+                            val lastResult = resultArray.getJsonObject(resultArray.size() - 1)
+                            val choices = toChatChoices(lastResult.getJsonArray("candidates"))
+
+                            emit(
+                                ChatCompletionChunk(
+                                    id = UUID.randomUUID().toString(),
+                                    created = 0, //todo: System.currentTimeMillis(),
+                                    model = ModelId(request.model.id),
+                                    choices = choices.mapIndexed { index, it ->
+                                        ChatChunk(
+                                            index = index,
+                                            delta = ChatDelta(
+                                                role = choices[0].message.role,
+                                                content = it.message.content
+                                            )
+                                        )
+                                    },
+                                    usage = toUsage(lastResult.getJsonObject("usageMetadata"))
+                                )
+                            )
+                        }
+                    } catch (_: Exception) {
+                    }
+                }
+            }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
-        }
-        throwIfError(response)
-
-        val fullText = StringBuilder()
-        val fullResponse = StringBuilder()
-        val channel: ByteReadChannel = response.body()
-        while (!channel.isClosedForRead) {
-            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-            fullResponse.append(line)
-
-            try {
-                val resultArray = JsonArray("$fullResponse}]")
-                if (!resultArray.isEmpty) {
-                    val lastResult = resultArray.getJsonObject(resultArray.size() - 1)
-                    val choices = toChatChoices(lastResult.getJsonArray("candidates"))
-                    fullText.append(choices[0].message.content!!)
-
-                    emit(
-                        ChatCompletionChunk(
-                            id = UUID.randomUUID().toString(),
-                            created = 0, //todo: System.currentTimeMillis(),
-                            model = ModelId(request.model.id),
-                            choices = listOf(
-                                ChatChunk(
-                                    index = 0,
-                                    ChatDelta(
-                                        role = choices[0].message.role,
-                                        content = fullText.toString()
-                                    )
-                                )
-                            ),
-                            usage = toUsage(lastResult.getJsonObject("usageMetadata"))
-                        )
-                    )
-                }
-            } catch (_: Exception) {
-            }
         }
     }
 

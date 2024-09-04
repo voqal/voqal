@@ -9,7 +9,6 @@ import com.aallam.openai.api.audio.TranscriptionRequest
 import com.aallam.openai.api.chat.ChatCompletion
 import com.aallam.openai.api.chat.ChatCompletionChunk
 import com.aallam.openai.api.chat.ChatCompletionRequest
-import com.aallam.openai.api.core.Role
 import com.aallam.openai.api.core.SortOrder
 import com.aallam.openai.api.file.FileSource
 import com.aallam.openai.api.logging.LogLevel
@@ -36,7 +35,6 @@ import io.ktor.utils.io.*
 import io.vertx.core.Future
 import io.vertx.core.Promise
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import okio.buffer
 import okio.source
@@ -143,28 +141,8 @@ open class OpenAiClient(
     override suspend fun streamChatCompletion(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
-    ): Flow<ChatCompletionChunk> = flow {
-        var deltaRole: Role? = null
-        val fullText = StringBuilder()
-        openAI.chatCompletions(request).collect { completionChunk ->
-            if (deltaRole == null) {
-                deltaRole = completionChunk.choices[0].delta?.role
-            }
-            fullText.append(completionChunk.choices[0].delta?.content ?: "")
-
-            emit(
-                completionChunk.copy(
-                    choices = completionChunk.choices.map {
-                        it.copy(
-                            delta = it.delta?.copy(
-                                role = deltaRole,
-                                content = fullText.toString()
-                            )
-                        )
-                    }
-                )
-            )
-        }
+    ): Flow<ChatCompletionChunk> {
+        return openAI.chatCompletions(request)
     }
 
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {

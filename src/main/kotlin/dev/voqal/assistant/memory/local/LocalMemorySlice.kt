@@ -2,6 +2,7 @@ package dev.voqal.assistant.memory.local
 
 import com.aallam.openai.api.chat.*
 import com.aallam.openai.api.core.Parameters
+import com.aallam.openai.api.core.Role
 import com.aallam.openai.api.exception.OpenAIAPIException
 import com.aallam.openai.api.model.ModelId
 import com.intellij.openapi.application.ApplicationManager
@@ -11,7 +12,6 @@ import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.processing.ResponseParser
-import dev.voqal.assistant.processing.ResponseParser.toChatChoice
 import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.VoqalStatusService
@@ -134,23 +134,42 @@ class LocalMemorySlice(
             val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
             if (promptSettings.streamCompletions && llmProvider.isStreamable()) {
                 val chunks = mutableListOf<ChatCompletionChunk>()
+                var deltaRole: Role? = null
+                val fullText = StringBuilder()
                 llmProvider.streamChatCompletion(request, directive).collect {
                     chunks.add(it)
+                    if (deltaRole == null) {
+                        deltaRole = it.choices[0].delta?.role
+                    }
+                    fullText.append(it.choices[0].delta?.content ?: "")
+                    if (it.choices[0].delta?.content?.contains("\n") == false) {
+                        return@collect //wait till new line to progress streaming edit
+                    }
 
-                    val response = try {
-                        ResponseParser.parseEditMode(it, directive)
+                    try {
+                        val chunk = it.copy(
+                            choices = it.choices.map {
+                                it.copy(
+                                    delta = it.delta!!.copy(
+                                        role = deltaRole,
+                                        content = fullText.toString()
+                                    )
+                                )
+                            }
+                        )
+                        val response = ResponseParser.parseEditMode(chunk, directive)
+                        val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
+                        project.service<VoqalToolService>().blindExecute(
+                            tool = EditTextTool(),
+                            args = JsonObject(argsString).put("streaming", true),
+                            memoryId = directive.internal.memorySlice.id
+                        )
                     } catch (e: Throwable) {
                         println(e)
                         return@collect
                     }
-                    val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
-                    project.service<VoqalToolService>().blindExecute(
-                        tool = EditTextTool(),
-                        args = JsonObject(argsString).put("streaming", true),
-                        memoryId = directive.internal.memorySlice.id
-                    )
                 }
-                completion = toChatCompletion(chunks)
+                completion = toChatCompletion(chunks, fullText.toString())
             } else {
                 completion = llmProvider.chatCompletion(request, directive)
             }
@@ -213,13 +232,22 @@ class LocalMemorySlice(
         }
     }
 
-    private fun toChatCompletion(chunks: List<ChatCompletionChunk>): ChatCompletion {
+    private fun toChatCompletion(chunks: List<ChatCompletionChunk>, fullText: String): ChatCompletion {
         val chunk = chunks.last()
+        val role = chunks.first().choices.first().delta!!.role!!
         return ChatCompletion(
             id = chunk.id,
             created = chunk.created.toLong(),
             model = chunk.model,
-            choices = chunk.choices.map { it.toChatChoice() },
+            choices = chunk.choices.map {
+                ChatChoice(
+                    index = 0,
+                    message = ChatMessage(
+                        role = role,
+                        messageContent = TextContent(fullText)
+                    )
+                )
+            },
             usage = chunk.usage,
             systemFingerprint = chunk.systemFingerprint
         )

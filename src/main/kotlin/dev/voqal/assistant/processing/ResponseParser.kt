@@ -40,7 +40,7 @@ object ResponseParser {
         )
     }
 
-    fun ChatChunk.toChatChoice(): ChatChoice {
+    private fun ChatChunk.toChatChoice(): ChatChoice {
         return ChatChoice(
             index = 0,
             message = ChatMessage(

@@ -1,7 +1,6 @@
 package dev.voqal.provider.clients.togetherai
 
 import com.aallam.openai.api.chat.*
-import com.aallam.openai.api.core.Role
 import com.aallam.openai.api.core.Usage
 import com.aallam.openai.api.exception.*
 import com.aallam.openai.api.model.ModelId
@@ -58,14 +57,14 @@ class TogetherAiClient(
         install(ContentNegotiation) { json(jsonDecoder) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val providerUrl = "https://api.together.xyz/v1/completions"
+    private val providerUrl = "https://api.together.xyz/v1/completions" //todo: /chat/completions?
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
         val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request)
 
         val response = try {
-            client.post(providerUrl) { //todo: /chat/completions?
+            client.post(providerUrl) {
                 header("Accept", "application/json")
                 header("Content-Type", "application/json")
                 header("Authorization", "Bearer $providerKey")
@@ -107,46 +106,42 @@ class TogetherAiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
+        val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request).put("stream", true)
 
-        val response = try {
+        try {
             client.preparePost(providerUrl) {
                 header("Accept", "application/json")
                 header("Content-Type", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
-            }.execute()
+            }.execute { response ->
+                throwIfError(response)
+
+                var hasError = false
+                val channel: ByteReadChannel = response.body()
+                while (!channel.isClosedForRead) {
+                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+
+                    if (line == "event: error") {
+                        hasError = true
+                        continue
+                    } else if (hasError) {
+                        val errorJson = JsonObject(line.substringAfter("data: "))
+                        log.warn("Received error while streaming completions: $errorJson")
+
+                        val statusCode = errorJson.getJsonObject("error").getInteger("status_code")
+                        throw UnknownAPIException(statusCode, jsonDecoder.decodeFromString(errorJson.toString()))
+                    }
+
+                    val chunkJson = line.substringAfter("data: ")
+                    if (chunkJson != "[DONE]") {
+                        emit(jsonDecoder.decodeFromString(chunkJson))
+                    }
+                }
+            }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
-        }
-        throwIfError(response)
-
-        var deltaRole: Role? = null
-        val fullText = StringBuilder()
-        val channel: ByteReadChannel = response.body()
-        while (!channel.isClosedForRead) {
-            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-            val chunkJson = line.substringAfter("data: ")
-            if (chunkJson != "[DONE]") {
-                val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
-                if (deltaRole == null) {
-                    deltaRole = completionChunk.choices[0].delta?.role
-                }
-                fullText.append(completionChunk.choices[0].delta?.content ?: "")
-
-                emit(
-                    completionChunk.copy(
-                        choices = completionChunk.choices.map {
-                            it.copy(
-                                delta = it.delta?.copy(
-                                    role = deltaRole,
-                                    content = fullText.toString()
-                                )
-                            )
-                        }
-                    )
-                )
-            }
         }
     }
 

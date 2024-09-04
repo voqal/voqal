@@ -4,7 +4,6 @@ import com.aallam.openai.api.chat.ChatCompletion
 import com.aallam.openai.api.chat.ChatCompletionChunk
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
-import com.aallam.openai.api.core.Role
 import com.aallam.openai.api.exception.*
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.VoqalDirective
@@ -101,56 +100,39 @@ class GroqClient(
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
             .put("stream", true)
 
-        val response = try {
+        try {
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
                 header("Accept", "application/json")
                 header("Authorization", "Bearer $providerKey")
                 setBody(requestJson.encode())
-            }.execute()
+            }.execute { response ->
+                throwIfError(response)
+
+                var hasError = false
+                val channel: ByteReadChannel = response.body()
+                while (!channel.isClosedForRead) {
+                    val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
+
+                    if (line == "event: error") {
+                        hasError = true
+                        continue
+                    } else if (hasError) {
+                        val errorJson = JsonObject(line.substringAfter("data: "))
+                        log.warn("Received error while streaming completions: $errorJson")
+
+                        val statusCode = errorJson.getJsonObject("error").getInteger("status_code")
+                        throw UnknownAPIException(statusCode, jsonDecoder.decodeFromString(errorJson.toString()))
+                    }
+
+                    val chunkJson = line.substringAfter("data: ")
+                    if (chunkJson != "[DONE]") {
+                        emit(jsonDecoder.decodeFromString(chunkJson))
+                    }
+                }
+            }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
-        }
-        throwIfError(response)
-
-        var hasError = false
-        var deltaRole: Role? = null
-        val fullText = StringBuilder()
-        val channel: ByteReadChannel = response.body()
-        while (!channel.isClosedForRead) {
-            val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-            if (line == "event: error") {
-                hasError = true
-                continue
-            } else if (hasError) {
-                val errorJson = JsonObject(line.substringAfter("data: "))
-                log.warn("Received error while streaming completions: $errorJson")
-
-                val statusCode = errorJson.getJsonObject("error").getInteger("status_code")
-                throw UnknownAPIException(statusCode, jsonDecoder.decodeFromString(errorJson.toString()))
-            }
-
-            val chunkJson = line.substringAfter("data: ")
-            if (chunkJson != "[DONE]") {
-                val completionChunk = jsonDecoder.decodeFromString<ChatCompletionChunk>(chunkJson)
-                if (deltaRole == null) {
-                    deltaRole = completionChunk.choices[0].delta?.role
-                }
-                fullText.append(completionChunk.choices[0].delta?.content ?: "")
-
-                emit(
-                    completionChunk.copy(
-                        choices = completionChunk.choices.map {
-                            it.copy(
-                                delta = it.delta?.copy(
-                                    role = deltaRole,
-                                    content = fullText.toString()
-                                )
-                            )
-                        }
-                    )
-                )
-            }
         }
     }
 
