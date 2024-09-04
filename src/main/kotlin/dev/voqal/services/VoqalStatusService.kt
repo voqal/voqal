@@ -83,9 +83,6 @@ class VoqalStatusService(private val project: Project) {
     private fun playIdleNotification(oldStatus: VoqalStatus) {
         if (oldStatus !in setOf(EDITING)) return
         var nextIdleToPlay = 1
-//        if (oldStatus == CODING) {
-//            nextIdleToPlay = 2
-//        } else
         if (oldStatus == EDITING) {
             nextIdleToPlay = 3
         }
