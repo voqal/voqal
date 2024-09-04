@@ -2,7 +2,7 @@
 # libraries
 annotations = "24.1.0"
 ktor = "2.3.12"
-vertx = "4.5.9"
+vertx = "4.5.10"
 openai-client = "3.8.2"
 protobuf = "2.3.12"
 jlayer = "1.0.1"
