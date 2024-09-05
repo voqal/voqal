@@ -32,6 +32,8 @@ class VertexAiClient(
 ) : LlmProvider, StmProvider {
 
     companion object {
+        const val DEFAULT_MODEL = "gemini-1.5-flash-preview-0514"
+
         @JvmStatic
         fun getTokenLimit(modelName: String): Int {
             return when (modelName) {

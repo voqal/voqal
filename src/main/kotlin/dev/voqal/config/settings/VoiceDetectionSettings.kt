@@ -20,9 +20,9 @@ data class VoiceDetectionSettings(
             json.getString("provider") ?: VoiceDetectionProvider.Voqal.name
         ),
         providerKey = json.getString("providerKey", ""),
-        sensitivity = json.getInteger("sensitivity") ?: 0,
-        sustainDuration = json.getLong("sustainDuration") ?: 100,
-        voiceSilenceThreshold = json.getLong("voiceSilenceThreshold") ?: 75,
+        sensitivity = json.getInteger("sensitivity") ?: 3,
+        sustainDuration = json.getLong("sustainDuration") ?: 200,
+        voiceSilenceThreshold = json.getLong("voiceSilenceThreshold") ?: 100,
         speechSilenceThreshold = json.getLong("speechSilenceThreshold") ?: 1000
     )
 

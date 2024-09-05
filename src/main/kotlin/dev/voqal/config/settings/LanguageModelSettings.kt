@@ -10,6 +10,7 @@ import dev.voqal.provider.clients.groq.GroqClient
 import dev.voqal.provider.clients.mistralai.MistralAiClient
 import dev.voqal.provider.clients.openai.OpenAiClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
+import dev.voqal.provider.clients.vertexai.VertexAiClient
 import io.vertx.core.json.JsonObject
 import javax.swing.Icon
 
@@ -49,8 +50,11 @@ data class LanguageModelSettings(
                 LMProvider.FIREWORKS_AI -> LanguageModelSettings(provider, modelName = FireworksClient.DEFAULT_MODEL)
                 LMProvider.TOGETHER_AI -> LanguageModelSettings(provider, modelName = TogetherAiClient.DEFAULT_MODEL)
                 LMProvider.MISTRAL_AI -> LanguageModelSettings(provider, modelName = MistralAiClient.DEFAULT_MODEL)
-                //todo: others
-                else -> LanguageModelSettings(provider, modelName = "")
+                LMProvider.VERTEX_AI -> LanguageModelSettings(provider, modelName = VertexAiClient.DEFAULT_MODEL)
+
+                LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
+                LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
+                LMProvider.CUSTOM -> LanguageModelSettings(provider, modelName = "")
             }
         }
     }

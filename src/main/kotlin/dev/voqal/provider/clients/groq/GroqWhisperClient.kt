@@ -23,10 +23,10 @@ class GroqWhisperClient(
     private val providerKey: String
 ) : SttProvider {
 
-    private val providerUrl = "https://api.groq.com/openai/v1/audio/transcriptions"
     private val client = HttpClient {
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
+    private val providerUrl = "https://api.groq.com/openai/v1/audio/transcriptions"
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
         val log = project.getVoqalLogger(this::class)

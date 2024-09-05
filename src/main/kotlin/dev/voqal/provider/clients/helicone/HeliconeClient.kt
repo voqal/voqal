@@ -27,15 +27,13 @@ class HeliconeClient(
     private val client = HttpClient {
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
-    private val basePath = "https://api.hconeai.com"
+    private val providerUrl = "https://api.hconeai.com/oai/v1/log"
 
     private suspend fun log(logData: Map<String, Any>) {
         val log = project.getVoqalLogger(this::class)
-        val url = "$basePath/oai/v1/log"
-
         log.debug("Sending observability data to Helicone")
         try {
-            val response: HttpResponse = client.post(url) {
+            val response: HttpResponse = client.post(providerUrl) {
                 header("Authorization", "Bearer $providerKey")
                 header("Content-Type", "application/json")
                 setBody(JsonObject(logData).toString())
