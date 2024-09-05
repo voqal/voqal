@@ -159,9 +159,8 @@ class VoqalToolService(private val project: Project) {
                     }
                 }
                 .build()
-            val inputEvent = null
             val actionEvent = AnActionEvent(
-                inputEvent,
+                null,
                 dataContext,
                 "Voqal",
                 action.templatePresentation.clone(),
@@ -185,7 +184,7 @@ class VoqalToolService(private val project: Project) {
                     override val id: String
                         get() = memoryId ?: throw UnsupportedOperationException("Not supported")
 
-                    override suspend fun addMessage(directive: VoqalDirective, addMessage: Boolean): VoqalResponse =
+                    override suspend fun addMessage(directive: VoqalDirective, addMessage: Boolean) =
                         throw UnsupportedOperationException("Not supported")
                 },
                 availableActions = emptyList(),

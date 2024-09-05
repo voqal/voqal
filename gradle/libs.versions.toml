@@ -11,7 +11,6 @@ jackson-databind = "2.17.2"
 joor = "0.9.15"
 commons-text = "1.12.0"
 pebble = "3.2.2"
-github-core = "2.1.5"
 jtokkit = "1.1.0"
 libfvad-jni = "1.0.0"
 vertexai = "1.8.0"
@@ -50,7 +49,6 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 joor = { module = "org.jooq:joor", version.ref="joor" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref="commons-text" }
 pebble = { module = "io.pebbletemplates:pebble", version.ref="pebble" }
-github-core = { module = "org.eclipse.mylyn.github:org.eclipse.egit.github.core", version.ref="github-core" }
 jtokkit = { module = "com.knuddels:jtokkit", version.ref="jtokkit" }
 libfvad-jni = { module = "io.github.givimad:libfvad-jni", version.ref="libfvad-jni" }
 vertexai = { module = "com.google.cloud:google-cloud-vertexai", version.ref="vertexai" }

@@ -60,7 +60,6 @@ dependencies {
     implementation(libs.joor)
     implementation(libs.commons.text)
     implementation(libs.pebble)
-    implementation(libs.github.core)
     implementation(libs.jtokkit)
     implementation(libs.libfvad.jni)
     implementation(libs.vertexai)

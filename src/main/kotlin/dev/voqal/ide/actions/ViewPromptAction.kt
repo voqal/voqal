@@ -16,22 +16,10 @@ class ViewPromptAction : AnAction() {
 
     override fun actionPerformed(event: AnActionEvent) {
         val project = event.project ?: return
-        val log = project.getVoqalLogger(this::class)
         project.scope.launch {
             val configService = project.service<VoqalConfigService>()
             val toolService = project.service<VoqalToolService>()
             val promptName = configService.getCurrentPromptMode()
-            val promptSettings = configService.getPromptSettings(promptName)
-            val models = configService.getConfig().languageModelsSettings.models
-            val languageModelSettings = models.firstOrNull {
-                it.name == promptSettings.modelName
-            } ?: models.firstOrNull()
-            if (languageModelSettings == null) {
-                log.warn("No language model found for: $promptName")
-                project.service<VoqalStatusService>().updateText("No language model found for: $promptName")
-                return@launch
-            }
-
             var nopDirective = project.service<VoqalDirectiveService>()
                 .asDirective(SpokenTranscript("n/a", null), promptName = promptName)
             nopDirective = nopDirective.copy(

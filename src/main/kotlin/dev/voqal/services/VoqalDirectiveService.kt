@@ -206,10 +206,7 @@ class VoqalDirectiveService(private val project: Project) {
         val openFiles = project.service<VoqalContextService>().getOpenFiles(selectedTextEditor)
         val configService = project.service<VoqalConfigService>()
         val promptSettings = configService.getPromptSettings(promptName)
-        val models = configService.getConfig().languageModelsSettings.models
-        val languageModelSettings = models.firstOrNull {
-            it.name == promptSettings.modelName
-        } ?: models.first()
+        val languageModelSettings = configService.getLanguageModelSettings(promptSettings)
 
         val caretOffset = ReadAction.compute(ThrowableComputable {
             val caretModel = selectedTextEditor?.caretModel
@@ -229,19 +226,17 @@ class VoqalDirectiveService(private val project: Project) {
             .filter { it.fileUrl == selectedTextEditor?.virtualFile?.url }
             .map { (it.sourcePosition?.line ?: it.line) + 1 }
 
-        val viewingCodeProblems = selectedTextEditor?.let {
-            project.service<VoqalSearchService>().getActiveProblems(it)
-        }
-        val projectFileStructure = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
-        val toolService = project.service<VoqalToolService>()
+        val searchService = project.service<VoqalSearchService>()
+        val viewingCodeProblems = selectedTextEditor?.let { searchService.getActiveProblems(it) }
+        val projectFileStructure = searchService.getProjectStructureAsMarkdownTree()
         val languageOfFile = selectedTextEditor?.let {
             val file = it.virtualFile ?: return@let null
             (FileTypeManager.getInstance().getFileTypeByFile(file) as? LanguageFileType)?.language
         }
-        val fullCommand = VoqalDirective(
+        val fullDirective = VoqalDirective(
             assistant = AssistantContext(
                 memorySlice = project.service<VoqalMemoryService>().getCurrentMemory(promptSettings),
-                availableActions = toolService.getAvailableTools().values,
+                availableActions = project.service<VoqalToolService>().getAvailableTools().values,
                 languageModelSettings = languageModelSettings,
                 promptSettings = promptSettings,
                 speechId = transcription.speechId,
@@ -274,7 +269,7 @@ class VoqalDirectiveService(private val project: Project) {
                 chatMessage = chatMessage
             )
         )
-        return project.service<VoqalContextService>().cropAsNecessary(fullCommand)
+        return project.service<VoqalContextService>().cropAsNecessary(fullDirective)
     }
 
     suspend fun executeDirective(directive: VoqalDirective) {
@@ -468,9 +463,7 @@ class VoqalDirectiveService(private val project: Project) {
         if (toolCalls.isEmpty()) {
             log.warn("No tool calls available: $response")
             finishDirective(response.directive)
-            handleResponse(
-                "No tool calls available: $response"
-            )
+            handleResponse("No tool calls available: $response")
         } else {
             val executionStr = buildString {
                 append("Executing ")
@@ -496,9 +489,7 @@ class VoqalDirectiveService(private val project: Project) {
                     toolService.handleFunctionCall(toolCall, response)
                 } else {
                     log.warn("Missing function call. Message: $response")
-                    handleResponse(
-                        "Missing function call. Message: $response"
-                    )
+                    handleResponse("Missing function call. Message: $response")
                     return@forEach
                 }
             }
