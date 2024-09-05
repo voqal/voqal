@@ -26,6 +26,24 @@ import java.io.File
 
 class EditTextToolTest : JBTest() {
 
+    fun `test edit empty file`() {
+        val content = "package test;\n\npublic class Test {\n}"
+        val testDocument = EditorFactory.getInstance().createDocument("")
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+
+        val newHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+            runBlocking {
+                EditTextTool().doDocumentEdits(project, content, testEditor)
+            }
+        })
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(1, newHighlighters.size)
+        assertEquals(0, newHighlighters[0].startOffset)
+        assertEquals(content.length, newHighlighters[0].endOffset)
+        assertEquals(testEditor.document.text, content)
+    }
+
     fun `test code edit`() {
         val json =
             JsonObject("{ \"content\": \"public class User {\\n    private String username;\\n    private String password;\\n    private String email;\\n}\" }")
@@ -33,19 +51,16 @@ class EditTextToolTest : JBTest() {
         val testDocument = EditorFactory.getInstance().createDocument("")
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
 
-        val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+        val newHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
             runBlocking {
                 EditTextTool().doDocumentEdits(project, content, testEditor)
             }
         })
         EditorFactory.getInstance().releaseEditor(testEditor)
 
-        assertEquals(1, rangeHighlighters.size)
-        assertEquals(0, rangeHighlighters[0].startOffset)
-        assertEquals(
-            content.length,
-            rangeHighlighters[0].endOffset
-        )
+        assertEquals(1, newHighlighters.size)
+        assertEquals(0, newHighlighters[0].startOffset)
+        assertEquals(content.length, newHighlighters[0].endOffset)
     }
 
     fun `test replace visible range edit2`() {

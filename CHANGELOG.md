@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Incorrect text placement when editing blank files
+
 ## [2024.10.0] - 2024-09-04
 
 ### Added

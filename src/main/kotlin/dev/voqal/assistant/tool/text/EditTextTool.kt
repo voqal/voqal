@@ -3,6 +3,7 @@ package dev.voqal.assistant.tool.text
 import com.intellij.codeInsight.CodeSmellInfo
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.fragments.DiffFragmentImpl
+import com.intellij.diff.fragments.LineFragmentImpl
 import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.diff.tools.simple.SimpleDiffChange
 import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
@@ -372,9 +373,7 @@ class EditTextTool : VoqalTool() {
             val visibleTextDiff = async { getVisibleTextDiff(project, editor, newText) }
             diffList.add(visibleTextDiff)
 
-            val indentedVisibleTextDiff = async {
-                getVisibleTextDiff(project, editor, newText, true)
-            }
+            val indentedVisibleTextDiff = async { getVisibleTextDiff(project, editor, newText, true) }
             diffList.add(indentedVisibleTextDiff)
 
             val commonIndentedVisibleTextDiff = async {
@@ -655,6 +654,11 @@ class EditTextTool : VoqalTool() {
     }
 
     private fun getSimpleDiffChanges(oldText: String, newText: String, project: Project): List<SimpleDiffChange> {
+        if (oldText.isEmpty()) {
+            val singleFragment = LineFragmentImpl(0, 1, 0, newText.lines().count(), 0, 0, 0, newText.length)
+            return listOf(SimpleDiffChange(0, singleFragment))
+        }
+
         val disposable = Disposer.newDisposable()
         val oldContent = DiffContentFactory.getInstance().create(oldText)
         val newContent = DiffContentFactory.getInstance().create(newText)
