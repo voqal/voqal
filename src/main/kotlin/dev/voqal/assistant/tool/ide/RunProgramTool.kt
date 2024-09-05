@@ -95,52 +95,6 @@ class RunProgramTool : VoqalTool() {
         }
     }
 
-    override fun isVisible(directive: VoqalDirective): Boolean {
-        val fileRunConfigs = directive.ide.editor?.let {
-            getFileRunConfigs(directive.project, it)
-        } ?: JsonArray()
-        val projectRunConfigs = getProjectRunConfigs(directive.project)
-        return !fileRunConfigs.isEmpty || !projectRunConfigs.isEmpty
-    }
-
-    override fun asTool(directive: VoqalDirective): Tool {
-        val fileRunConfigs = directive.ide.editor?.let { getFileRunConfigs(directive.ide.project, it) } ?: JsonArray()
-        val projectRunConfigs = getProjectRunConfigs(directive.ide.project)
-
-        return Tool.function(
-            name = NAME,
-            description = buildString {
-                append("Executes/runs a particular file, file run configuration, or project run configuration. ")
-                append("Prefer file run configurations over project run configurations over file names. ")
-                append("If you only have one run configuration, consider that the 'this' in 'run this'.")
-            },
-            parameters = Parameters.fromJsonString(JsonObject().apply {
-                put("type", "object")
-                put("properties", JsonObject().apply {
-                    if (!fileRunConfigs.isEmpty) {
-                        put("file_run_configuration", JsonObject().apply {
-                            put("type", "string")
-                            put("description", "The file run configuration to run.")
-                            put("enum", fileRunConfigs)
-                        })
-                    }
-                    if (!projectRunConfigs.isEmpty) {
-                        put("project_run_configuration", JsonObject().apply {
-                            put("type", "project_run_configuration")
-                            put("description", "The project run configuration to run.")
-                            put("enum", projectRunConfigs)
-                        })
-                    }
-                    put("debug_mode", JsonObject().apply {
-                        put("type", "boolean")
-                        put("description", "Whether or not to run in debug mode, default is false")
-                        put("default", false)
-                    })
-                })
-            }.toString())
-        )
-    }
-
     private fun getFileRunConfigs(project: Project, editor: Editor): JsonArray {
         val fileRunConfigs = DaemonCodeAnalyzerImpl.getLineMarkers(editor.document, project).filter {
             it::class.java.name.contains("RunLineMarkerInfo")
@@ -185,5 +139,51 @@ class RunProgramTool : VoqalTool() {
             namedFileRunConfigs.add(cleanedRunConfigName)
         }
         return namedFileRunConfigs
+    }
+
+    override fun isVisible(directive: VoqalDirective): Boolean {
+        val fileRunConfigs = directive.ide.editor?.let {
+            getFileRunConfigs(directive.project, it)
+        } ?: JsonArray()
+        val projectRunConfigs = getProjectRunConfigs(directive.project)
+        return !fileRunConfigs.isEmpty || !projectRunConfigs.isEmpty
+    }
+
+    override fun asTool(directive: VoqalDirective): Tool {
+        val fileRunConfigs = directive.ide.editor?.let { getFileRunConfigs(directive.ide.project, it) } ?: JsonArray()
+        val projectRunConfigs = getProjectRunConfigs(directive.ide.project)
+
+        return Tool.function(
+            name = NAME,
+            description = buildString {
+                append("Executes/runs a particular file, file run configuration, or project run configuration. ")
+                append("Prefer file run configurations over project run configurations over file names. ")
+                append("If you only have one run configuration, consider that the 'this' in 'run this'.")
+            },
+            parameters = Parameters.fromJsonString(JsonObject().apply {
+                put("type", "object")
+                put("properties", JsonObject().apply {
+                    if (!fileRunConfigs.isEmpty) {
+                        put("file_run_configuration", JsonObject().apply {
+                            put("type", "string")
+                            put("description", "The file run configuration to run.")
+                            put("enum", fileRunConfigs)
+                        })
+                    }
+                    if (!projectRunConfigs.isEmpty) {
+                        put("project_run_configuration", JsonObject().apply {
+                            put("type", "project_run_configuration")
+                            put("description", "The project run configuration to run.")
+                            put("enum", projectRunConfigs)
+                        })
+                    }
+                    put("debug_mode", JsonObject().apply {
+                        put("type", "boolean")
+                        put("description", "Whether or not to run in debug mode, default is false")
+                        put("default", false)
+                    })
+                })
+            }.toString())
+        )
     }
 }

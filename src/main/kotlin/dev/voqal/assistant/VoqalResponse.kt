@@ -18,8 +18,8 @@ data class VoqalResponse(
         fun calculateTotalPrice(model: String, incomingTokens: Int, outgoingTokens: Int): Double {
             val modelName = PRICE_TABLE.keys.find { it.contains(model) }
             val priceMap = PRICE_TABLE[modelName]!!
-            return ((priceMap[0] ?: 0.0) * (outgoingTokens / 1000.0)) + ((priceMap[1]
-                ?: 0.0) * (incomingTokens / 1000.0))
+            return ((priceMap[0] ?: 0.0) * (outgoingTokens / 1000.0)) +
+                    ((priceMap[1] ?: 0.0) * (incomingTokens / 1000.0))
         }
 
         private val PRICE_TABLE = mapOf(

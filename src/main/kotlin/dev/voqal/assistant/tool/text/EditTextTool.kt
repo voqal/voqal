@@ -224,8 +224,7 @@ class EditTextTool : VoqalTool() {
         val existingHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS)?.toMutableList()
 
         //when streaming, the last line may or may not be complete, drop to be safe
-        var fullTextWithEdits = responseCode
-        fullTextWithEdits = fullTextWithEdits.lines().dropLast(1).joinToString("\n")
+        var fullTextWithEdits = responseCode.lines().dropLast(1).joinToString("\n")
 
         //determine diff between original text and text streamed so far
         var origText = editor.document.text
