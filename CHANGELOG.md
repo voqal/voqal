@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.10.1] - 2024-09-05
+
 ### Fixed
 
 - Incorrect text placement when editing blank files
@@ -502,7 +504,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.0...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.1...HEAD
+[2024.10.1]: https://github.com/voqal/voqal/compare/v2024.10.0...v2024.10.1
 [2024.10.0]: https://github.com/voqal/voqal/compare/v2024.9.1...v2024.10.0
 [2024.9.1]: https://github.com/voqal/voqal/compare/v2024.9.0...v2024.9.1
 [2024.9.0]: https://github.com/voqal/voqal/compare/v2024.8.4...v2024.9.0
