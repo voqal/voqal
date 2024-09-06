@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
 import java.io.File
+import java.net.ConnectException
 import java.nio.channels.UnresolvedAddressException
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.pow
@@ -366,7 +367,9 @@ class VoqalDirectiveService(private val project: Project) {
                     }
                 } catch (e: OpenAIException) {
                     execution.errors.add(e)
-                    val errorMessage = e.message ?: "An unknown error occurred"
+                    val errorMessage = if (e.cause is ConnectException) {
+                        "Host connection unavailable"
+                    } else e.message ?: "An unknown error occurred"
                     log.warn(errorMessage)
                     handleResponse(errorMessage, isTextOnly = textOnly)
                     retry = false
@@ -391,7 +394,7 @@ class VoqalDirectiveService(private val project: Project) {
                     }
                 } catch (e: UnresolvedAddressException) {
                     execution.errors.add(e)
-                    val errorMessage = "Internet connection unavailable"
+                    val errorMessage = "Host connection unavailable"
                     log.warn(errorMessage)
                     handleResponse(errorMessage, isTextOnly = textOnly)
                     retry = false
