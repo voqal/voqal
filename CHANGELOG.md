@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Revert smart rename affected files on cancel
+- Inconsistent spacing in configuration UI
+
 ## [2024.10.1] - 2024-09-05
 
 ### Fixed
