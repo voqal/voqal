@@ -173,6 +173,12 @@ class EditTextTool : VoqalTool() {
         }
     }
 
+    /**
+     * Primary entry point for performing textual modifications to the current editor.
+     *
+     * @param editText the text to replace the current text in the editor
+     * @param streaming whether editText contains a partial or full text replacement
+     */
     suspend fun doDocumentEdits(
         project: Project,
         editText: String,
