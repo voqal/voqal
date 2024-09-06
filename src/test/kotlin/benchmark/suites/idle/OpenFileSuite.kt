@@ -17,7 +17,9 @@ class OpenFileSuite : BenchmarkSuite {
     /**
      * Open a single file (via name) in a project of two files.
      */
-    fun `open readme`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `open readme`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         command.verifyOpenFiles(listOf("README.MD"))
 
         return listOf(
@@ -30,7 +32,9 @@ class OpenFileSuite : BenchmarkSuite {
     /**
      * Open two files (via name) in a project of two files.
      */
-    fun `open test1 and test2`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `open test1 and test2`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         command.verifyOpenFiles(listOf("test1.txt", "test2.txt"))
 
         return listOf(
@@ -43,7 +47,9 @@ class OpenFileSuite : BenchmarkSuite {
     /**
      * Open three files (via semantic search) in a project of eight files.
      */
-    fun `open the files named after fruits`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `open the files named after fruits`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         command.verifyOpenFiles(listOf("apple.txt", "banana.txt", "cherry.txt"))
 
         //5 random files

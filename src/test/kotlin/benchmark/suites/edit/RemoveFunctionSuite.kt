@@ -17,7 +17,9 @@ class RemoveFunctionSuite : BenchmarkSuite {
     /**
      * Delete a function in a file with two functions.
      */
-    fun `delete the subtract function`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `delete the subtract function`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "RemoveMethod"
         val lang = getCurrentLang()
         val virtualFile = if (lang.id == "go") {
@@ -40,7 +42,9 @@ class RemoveFunctionSuite : BenchmarkSuite {
     /**
      * Delete two functions separated by a function which is not deleted.
      */
-    fun `delete the add and subtract functions`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `delete the add and subtract functions`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "ModifyBetween"
         val lang = getCurrentLang()
         val virtualFile = if (lang.id == "go") {

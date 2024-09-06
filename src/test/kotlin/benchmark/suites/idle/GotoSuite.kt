@@ -19,7 +19,9 @@ import io.vertx.core.json.JsonObject
  */
 class GotoSuite : BenchmarkSuite {
 
-    fun `ignoring the constructor jump to the third function`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `ignoring the constructor jump to the third function`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AdventureGame"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)
@@ -50,7 +52,9 @@ class GotoSuite : BenchmarkSuite {
         )
     }
 
-    fun `show me the simplest function`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `show me the simplest function`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AdventureGame"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)

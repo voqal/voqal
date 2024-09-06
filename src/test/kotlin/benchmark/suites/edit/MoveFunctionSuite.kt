@@ -11,7 +11,9 @@ import dev.voqal.config.settings.PromptSettings
 
 class MoveFunctionSuite : BenchmarkSuite {
 
-    fun `move the start game function to be below the exit game function`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `move the start game function to be below the exit game function`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AdventureGame"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)
@@ -53,7 +55,9 @@ class MoveFunctionSuite : BenchmarkSuite {
         )
     }
 
-    fun `move start game function to between view inventory and craft items functions`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `move start game function to between view inventory and craft items functions`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AdventureGame"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)
@@ -61,7 +65,7 @@ class MoveFunctionSuite : BenchmarkSuite {
         val code = psiFile.text
         val linesOfCode = code.lines().size
 
-        val expectedOrder =  mutableListOf(
+        val expectedOrder = mutableListOf(
             "gameLoop",
             "showStatus",
             "showOptions",

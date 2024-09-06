@@ -21,7 +21,9 @@ class AddBreakpointsSuite : BenchmarkSuite {
     /**
      * Add breakpoints to the two return statements.
      */
-    fun `add breakpoints to the return statements`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `add breakpoints to the return statements`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "RemoveMethod"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)

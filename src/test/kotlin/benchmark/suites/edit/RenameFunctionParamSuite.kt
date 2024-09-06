@@ -17,7 +17,9 @@ class RenameFunctionParamSuite : BenchmarkSuite {
     /**
      * Rename a single parameter in a function.
      */
-    fun `rename parameter x to first param`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `rename parameter x to first param`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AddMethod"
         val lang = getCurrentLang()
         val virtualFile = if (lang.id == "go") {
@@ -48,7 +50,9 @@ class RenameFunctionParamSuite : BenchmarkSuite {
     /**
      * Rename two parameters in a function.
      */
-    fun `rename parameters x and y to a and b`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `rename parameters x and y to a and b`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "AddMethod"
         val lang = getCurrentLang()
         val virtualFile = if (lang.id == "go") {

@@ -17,7 +17,9 @@ class ModifyFunctionSuite : BenchmarkSuite {
     /**
      * Add print() logging to two functions.
      */
-    fun `add print logging to the add and subtract functions`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `add print logging to the add and subtract functions`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "RemoveMethod"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)

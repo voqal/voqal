@@ -19,7 +19,9 @@ class AddFieldSuite : BenchmarkSuite {
      * Add a map field with specific name and type.
      */
     @SupportLanguages(languages = ["JAVA", "kotlin", "Groovy"]) //limit to JVM langs for now
-    fun `add a map field called users with string key string value`(command: BenchmarkPromise): List<VoqalContext> {
+    fun `add a map field called users with string key string value`(
+        command: BenchmarkPromise
+    ): List<VoqalContext> {
         val className = "EmptyClass"
         val lang = getCurrentLang()
         val virtualFile = getVirtualFile(className)
