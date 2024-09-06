@@ -48,14 +48,7 @@ class VoqalToolService(private val project: Project) {
         VoqalTool::class.java.isAssignableFrom(it) && !Modifier.isAbstract(it.modifiers)
     }.map { it.constructors[0].newInstance() as VoqalTool }.toSet()
     private val availableToolsMap = availableTools.associateBy { it.name }
-
-    fun getAvailableTools(): Map<String, VoqalTool> {
-        return availableTools.associateBy { it.name }.filter { (_, _) ->
-            when {
-                else -> true //action.isVisible(project, editor) //todo: this?
-            }
-        }
-    }
+    fun getAvailableTools() = availableToolsMap
 
     private fun getIntentAction(intent: String): VoqalTool? {
         var intentAction: Any? = ActionManager.getInstance().getAction("voqal.$intent")

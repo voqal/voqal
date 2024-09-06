@@ -199,7 +199,7 @@ class OpenFileToolTest : JBTest() {
         assertNull(result)
     }
 
-    fun `test open file shortcut1`(): Unit = runBlocking {
+    fun `test open file shortcut1`() {
         myFixture.addFileToProject("Main.java", "")
 
         val tool = OpenFileTool()
