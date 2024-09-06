@@ -77,12 +77,12 @@ class VoqalMemoryService(private val project: Project) : Disposable {
         }
 
         //invoking cancel during edit mode will now revert up to this point
-        putLongTermUserData(
-            "voqal.edit.$memoryId",
+        putUserData(
+            "voqal.edit",
             LocalHistory.getInstance().putSystemLabel(project, "voqal.edit.$memoryId")
         )
-        putLongTermUserData(
-            "voqal.edit.action.$memoryId",
+        putUserData(
+            "voqal.edit.action",
             LocalHistory.getInstance().startAction("voqal.edit.action.$memoryId")
         )
     }

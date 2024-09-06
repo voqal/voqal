@@ -44,6 +44,8 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
 
         val memoryService = project.service<VoqalMemoryService>()
         val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+        val action = memoryService.getUserData("voqal.edit.action") as LocalHistoryAction?
+        val label = memoryService.getUserData("voqal.edit") as Label?
         val memory = memoryService.getCurrentMemory()
         memoryService.resetMemory()
 
@@ -53,9 +55,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
             //nop
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
             log.info("Reverting changes to: ${memory.id}")
-            val action = memoryService.removeLongTermUserData("voqal.edit.action.${memory.id}") as LocalHistoryAction?
             action?.finish()
-            val label = memoryService.removeLongTermUserData("voqal.edit.${memory.id}") as Label?
             label?.revert(project, editor!!.virtualFile) //todo: need to loop all changed files
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
