@@ -26,10 +26,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.*
 import com.intellij.openapi.vcs.CodeSmellDetector
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
-import com.intellij.psi.PsiReference
+import com.intellij.psi.*
 import com.intellij.refactoring.rename.RenameProcessor
 import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
@@ -451,14 +448,22 @@ class EditTextTool : VoqalTool() {
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                         renameProcessor.executeEx(usageInfos)
                     })
-                    ReadAction.compute(ThrowableComputable {
-                        usageInfos.filter { it.element?.containingFile === element.containingFile }.forEach {
-                            val navigationRange = it.navigationRange
-                            diffOffsets.add(Pair(navigationRange.startOffset, renameOffset))
 
-                            val newTextRange = TextRange(navigationRange.startOffset, navigationRange.endOffset)
-                            val highlighter = createActiveEdit(editor, newTextRange)
-                            activeHighlighters.add(highlighter)
+                    val affectedFiles = mutableListOf<PsiFile>()
+                    project.service<VoqalMemoryService>().putUserData("affectedFiles", affectedFiles)
+
+                    ReadAction.compute(ThrowableComputable {
+                        usageInfos.forEach {
+                            if (it.element?.containingFile === element.containingFile) {
+                                val navigationRange = it.navigationRange
+                                diffOffsets.add(Pair(navigationRange.startOffset, renameOffset))
+
+                                val newTextRange = TextRange(navigationRange.startOffset, navigationRange.endOffset)
+                                val highlighter = createActiveEdit(editor, newTextRange)
+                                activeHighlighters.add(highlighter)
+                            } else {
+                                it.element?.containingFile?.let { f -> affectedFiles.add(f) }
+                            }
                         }
                     })
                 } else {

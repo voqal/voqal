@@ -7,6 +7,7 @@ import com.intellij.history.LocalHistoryAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFile
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
@@ -44,6 +45,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
 
         val memoryService = project.service<VoqalMemoryService>()
         val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+        val affectedFiles = memoryService.getUserData("affectedFiles")
         val action = memoryService.getUserData("voqal.edit.action") as LocalHistoryAction?
         val label = memoryService.getUserData("voqal.edit") as Label?
         val memory = memoryService.getCurrentMemory()
@@ -56,7 +58,8 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
             log.info("Reverting changes to: ${memory.id}")
             action?.finish()
-            label?.revert(project, editor!!.virtualFile) //todo: need to loop all changed files
+            label?.revert(project, editor!!.virtualFile)
+            (affectedFiles as? List<*>)?.let { it.forEach { f -> label?.revert(project, (f as PsiFile).virtualFile) } }
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
         }
