@@ -1,5 +1,6 @@
 package dev.voqal.ide.ui.config;
 
+import java.awt.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -10,6 +11,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.uiDesigner.core.*;
 import dev.voqal.config.settings.LanguageModelSettings;
 import dev.voqal.config.settings.PromptLibrarySettings;
 import dev.voqal.config.settings.PromptSettings;
@@ -637,91 +639,151 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
         //======== panel1 ========
         {
-            panel1.setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[fill]" +
-                "[grow,fill]",
-                // rows
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]"));
+            panel1.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), 5, -1));
 
             //---- promptComboBox ----
             promptComboBox.setModel(new DefaultComboBoxModel<>(PromptSettings.PProvider.getEntries()
                     .stream().map(PromptSettings.PProvider::getDisplayName).toArray(String[]::new)));
-            panel1.add(promptComboBox, "cell 1 0");
+            panel1.add(promptComboBox, new GridConstraints(0, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label9 ----
-            label9.setText("Provider");
-            panel1.add(label9, "cell 0 0");
+            label9.setText("Provider:");
+            panel1.add(label9, new GridConstraints(0, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- promptFileLabel ----
-            promptFileLabel.setText("File");
-            panel1.add(promptFileLabel, "cell 0 1");
-            panel1.add(promptFileTextField, "cell 1 1");
+            promptFileLabel.setText("File:");
+            panel1.add(promptFileLabel, new GridConstraints(1, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+            panel1.add(promptFileTextField, new GridConstraints(1, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- urlLabel ----
-            urlLabel.setText("Url");
-            panel1.add(urlLabel, "cell 0 2");
-            panel1.add(urlTextField, "cell 1 2");
+            urlLabel.setText("URL:");
+            panel1.add(urlLabel, new GridConstraints(2, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+            panel1.add(urlTextField, new GridConstraints(2, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- languageModelComboBox ----
             languageModelComboBox.setEditable(true);
-            panel1.add(languageModelComboBox, "cell 1 3");
+            panel1.add(languageModelComboBox, new GridConstraints(3, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label5 ----
-            label5.setText("Language Model");
-            panel1.add(label5, "cell 0 3");
+            label5.setText("Language Model:");
+            panel1.add(label5, new GridConstraints(3, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label4 ----
-            label4.setText("Edit Format");
-            panel1.add(label4, "cell 0 4");
+            label4.setText("Edit Format:");
+            panel1.add(label4, new GridConstraints(4, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- editFormatComboBox ----
             editFormatComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
                 "Full Text",
                 "Diff"
             }));
-            panel1.add(editFormatComboBox, "cell 1 4");
+            panel1.add(editFormatComboBox, new GridConstraints(4, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label3 ----
-            label3.setText("Vector Store Id");
-            panel1.add(label3, "cell 0 5");
-            panel1.add(vectorStoreIdTextField, "cell 1 5");
+            label3.setText("Vector Store Id:");
+            panel1.add(label3, new GridConstraints(5, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+            panel1.add(vectorStoreIdTextField, new GridConstraints(5, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label1 ----
-            label1.setText("Assistant Id");
-            panel1.add(label1, "cell 0 6");
-            panel1.add(assistantIdTextField, "cell 1 6");
+            label1.setText("Assistant Id:");
+            panel1.add(label1, new GridConstraints(6, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+            panel1.add(assistantIdTextField, new GridConstraints(6, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- label2 ----
-            label2.setText("Assistant Thread Id");
-            panel1.add(label2, "cell 0 7");
-            panel1.add(assistantThreadIdTextField, "cell 1 7");
+            label2.setText("Assistant Thread Id:");
+            panel1.add(label2, new GridConstraints(7, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+            panel1.add(assistantThreadIdTextField, new GridConstraints(7, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- decompCheckBox ----
             decompCheckBox.setText("Enable Directive Decomposition");
             decompCheckBox.setSelected(true);
-            panel1.add(decompCheckBox, "cell 0 8 2 1");
+            panel1.add(decompCheckBox, new GridConstraints(8, 0, 1, 2,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- streamCompletionsCheckBox ----
             streamCompletionsCheckBox.setText("Enable Streaming Completions");
             streamCompletionsCheckBox.setSelected(true);
-            panel1.add(streamCompletionsCheckBox, "cell 0 9 2 1");
+            panel1.add(streamCompletionsCheckBox, new GridConstraints(9, 0, 1, 2,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
 
             //---- codeSmellCheckBox ----
             codeSmellCheckBox.setText("Enable Code Smell Correction");
             codeSmellCheckBox.setSelected(true);
-            panel1.add(codeSmellCheckBox, "cell 0 10 2 1");
+            panel1.add(codeSmellCheckBox, new GridConstraints(10, 0, 1, 2,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
         }
         add(panel1, "cell 1 0");
 

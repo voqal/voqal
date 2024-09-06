@@ -9,10 +9,10 @@ new FormModel {
 			"$rowConstraints": "[][grow]"
 		} ) {
 			name: "this"
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class net.miginfocom.swing.MigLayout ) {
-				"$columnConstraints": "[fill][grow,fill]"
-				"$rowConstraints": "[][][][][][][][][][][]"
-				"$layoutConstraints": "hidemode 3"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+				"$columnCount": 2
+				"$rowCount": 11
+				"hGap": 5
 			} ) {
 				name: "panel1"
 				add( new FormComponent( "javax.swing.JComboBox" ) {
@@ -22,54 +22,70 @@ new FormModel {
 						addElement( "Default" )
 						addElement( "Custom File" )
 					}
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 0"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label9"
-					"text": "Provider"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 0"
+					"text": "Provider:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "promptFileLabel"
-					"text": "File"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 1"
+					"text": "File:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 1
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JTextField" ) {
 					name: "promptFileTextField"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 1
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "urlLabel"
-					"text": "Url"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 2"
+					"text": "URL:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 2
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JTextField" ) {
 					name: "urlTextField"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 2"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 2
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JComboBox" ) {
 					name: "languageModelComboBox"
 					"editable": true
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 3"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 3
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label5"
-					"text": "Language Model"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 3"
+					"text": "Language Model:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 3
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label4"
-					"text": "Edit Format"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 4"
+					"text": "Edit Format:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 4
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JComboBox" ) {
 					name: "editFormatComboBox"
@@ -78,62 +94,82 @@ new FormModel {
 						addElement( "Full Text" )
 						addElement( "Diff" )
 					}
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 4"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 4
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label3"
-					"text": "Vector Store Id"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 5"
+					"text": "Vector Store Id:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 5
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JTextField" ) {
 					name: "vectorStoreIdTextField"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 5"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 5
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label1"
-					"text": "Assistant Id"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 6"
+					"text": "Assistant Id:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 6
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JTextField" ) {
 					name: "assistantIdTextField"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 6"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 6
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label2"
-					"text": "Assistant Thread Id"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 7"
+					"text": "Assistant Thread Id:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 7
+					"anchor": 8
+					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JTextField" ) {
 					name: "assistantThreadIdTextField"
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 1 7"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 7
+					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JCheckBox" ) {
 					name: "decompCheckBox"
 					"text": "Enable Directive Decomposition"
 					"selected": true
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 8 2 1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 8
+					"colSpan": 2
+					"anchor": 8
 				} )
 				add( new FormComponent( "javax.swing.JCheckBox" ) {
 					name: "streamCompletionsCheckBox"
 					"text": "Enable Streaming Completions"
 					"selected": true
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 9 2 1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 9
+					"colSpan": 2
+					"anchor": 8
 				} )
 				add( new FormComponent( "javax.swing.JCheckBox" ) {
 					name: "codeSmellCheckBox"
 					"text": "Enable Code Smell Correction"
 					"selected": true
-				}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
-					"value": "cell 0 10 2 1"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 10
+					"colSpan": 2
+					"anchor": 8
 				} )
 			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
 				"value": "cell 1 0"

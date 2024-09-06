@@ -4,10 +4,10 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.uiDesigner.core.*;
 import dev.voqal.config.settings.SpeechToTextSettings;
 import dev.voqal.config.settings.SpeechToTextSettings.STTProvider;
 import dev.voqal.utils.Iso639Language;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -190,82 +190,131 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
         queryParamsLabel = new JBLabel();
         queryParamsTextField = new JBTextField();
         queryParamsTextField.getEmptyText().setText("query=param&query2=param2");
+        var vSpacer1 = new Spacer();
 
         //======== this ========
-        setLayout(new MigLayout(
-            "hidemode 3",
-            // columns
-            "[fill]" +
-            "[fill]" +
-            "[grow,fill]",
-            // rows
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]"));
+        setLayout(new GridLayoutManager(8, 2, new Insets(0, 0, 0, 0), 5, -1));
 
         //---- label1 ----
-        label1.setText("Provider");
-        add(label1, "cell 0 0");
+        label1.setText("Provider:");
+        add(label1, new GridConstraints(0, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- providerComboBox ----
         providerComboBox.setModel(new DefaultComboBoxModel<>(SpeechToTextSettings.STTProvider.getEntries()
                 .stream().map(SpeechToTextSettings.STTProvider::getDisplayName).toArray(String[]::new)));
-        add(providerComboBox, "cell 1 0 2 1");
+        add(providerComboBox, new GridConstraints(0, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label3 ----
-        label3.setText("Key");
-        add(label3, "cell 0 1");
+        label3.setText("Key:");
+        add(label3, new GridConstraints(1, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- providerPasswordField ----
         providerPasswordField.setPreferredSize(new Dimension(0, 0));
-        add(providerPasswordField, "cell 1 1 2 1");
+        add(providerPasswordField, new GridConstraints(1, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label7 ----
-        label7.setText("Organization Id");
-        add(label7, "cell 0 2");
+        label7.setText("Organization Id:");
+        add(label7, new GridConstraints(2, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- orgIdTextField ----
         orgIdTextField.setPreferredSize(new Dimension(0, 0));
-        add(orgIdTextField, "cell 1 2 2 1");
+        add(orgIdTextField, new GridConstraints(2, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label5 ----
-        label5.setText("URL");
-        add(label5, "cell 0 3");
+        label5.setText("URL:");
+        add(label5, new GridConstraints(3, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- urlTextField ----
         urlTextField.setPreferredSize(new Dimension(0, 0));
-        add(urlTextField, "cell 1 3 2 1");
+        add(urlTextField, new GridConstraints(3, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label4 ----
-        label4.setText("Model Name");
-        add(label4, "cell 0 4");
+        label4.setText("Model Name:");
+        add(label4, new GridConstraints(4, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- modelNameComboBox ----
         modelNameComboBox.setEditable(true);
         modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
             "whisper-1"
         }));
-        add(modelNameComboBox, "cell 1 4 2 1");
+        add(modelNameComboBox, new GridConstraints(4, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label2 ----
-        label2.setText("Language");
-        add(label2, "cell 0 5");
+        label2.setText("Language:");
+        add(label2, new GridConstraints(5, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- languageComboBox ----
         languageComboBox.setEditable(true);
         languageComboBox.setModel(new DefaultComboBoxModel<>(Iso639Language.getEntries()
                 .stream().map(Iso639Language::getDisplayName).toArray(String[]::new)));
         languageComboBox.setSelectedItem(Iso639Language.ENGLISH.getDisplayName());
-        add(languageComboBox, "cell 1 5 2 1");
+        add(languageComboBox, new GridConstraints(5, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- queryParamsLabel ----
-        queryParamsLabel.setText("Query Params");
-        add(queryParamsLabel, "cell 0 6");
-        add(queryParamsTextField, "cell 1 6 2 1");
+        queryParamsLabel.setText("Query Params:");
+        add(queryParamsLabel, new GridConstraints(6, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(queryParamsTextField, new GridConstraints(6, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(vSpacer1, new GridConstraints(7, 0, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
+            null, null, null));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 

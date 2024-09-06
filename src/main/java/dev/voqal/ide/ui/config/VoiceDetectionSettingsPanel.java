@@ -1,5 +1,6 @@
 package dev.voqal.ide.ui.config;
 
+import java.awt.*;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
@@ -8,6 +9,7 @@ import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBPasswordField;
+import com.intellij.uiDesigner.core.*;
 import dev.voqal.config.settings.VoiceDetectionSettings;
 import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider;
 import dev.voqal.ide.logging.LoggerFactory;
@@ -16,7 +18,6 @@ import dev.voqal.provider.clients.picovoice.PicovoiceCobraClient;
 import dev.voqal.provider.clients.voqal.VoqalVadClient;
 import dev.voqal.utils.SharedAudioCapture;
 import io.github.givimad.libfvadjni.VoiceActivityDetector;
-import net.miginfocom.swing.MigLayout;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -226,7 +227,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         log.debug("Updating VAD provider");
         var provider = VoiceDetectionProvider.lenientValueOf(providerComboBox.getSelectedItem().toString());
         if (provider == VoiceDetectionProvider.Voqal) {
-            label3.setText("Mode");
+            label3.setText("Mode:");
             var sensitivity = ((VoiceActivityDetector.Mode) sensitivitySpinner.getValue()).ordinal();
             var vad = VoqalVadClient.getVad();
             if (vad == null) {
@@ -276,7 +277,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 );
             }
         } else if (provider == VoiceDetectionProvider.Picovoice) {
-            label3.setText("Probability (%)");
+            label3.setText("Probability (%):");
             if (vadProvider instanceof PicovoiceCobraClient picovoice) {
                 //update
                 log.debug("Updating Picovoice provider");
@@ -473,71 +474,120 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         speechSilenceSpinner = new JSpinner();
         separator1 = new JSeparator();
         label4 = new JBLabel();
+        var vSpacer1 = new Spacer();
 
         //======== this ========
         setBorder (IdeBorderFactory.createTitledBorder("Voice Detection Settings"));
-        setLayout(new MigLayout(
-            "hidemode 3",
-            // columns
-            "[fill]" +
-            "[grow,fill]",
-            // rows
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]" +
-            "[]"));
+        setLayout(new GridLayoutManager(9, 2, new Insets(0, 0, 0, 0), 5, -1));
 
         //---- label1 ----
-        label1.setText("Provider");
-        add(label1, "cell 0 0");
+        label1.setText("Provider:");
+        add(label1, new GridConstraints(0, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- providerComboBox ----
         providerComboBox.setModel(new DefaultComboBoxModel<>(VoiceDetectionSettings.VoiceDetectionProvider.getEntries()
                 .stream().map(VoiceDetectionSettings.VoiceDetectionProvider::getDisplayName).toArray(String[]::new)));
-        add(providerComboBox, "cell 1 0");
+        add(providerComboBox, new GridConstraints(0, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label2 ----
-        label2.setText("Key");
-        add(label2, "cell 0 1");
-        add(providerPasswordField, "cell 1 1");
+        label2.setText("Key:");
+        add(label2, new GridConstraints(1, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(providerPasswordField, new GridConstraints(1, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label3 ----
-        label3.setText("Probability (%)");
-        add(label3, "cell 0 2");
-        add(sensitivitySpinner, "cell 1 2");
+        label3.setText("Probability (%):");
+        add(label3, new GridConstraints(2, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(sensitivitySpinner, new GridConstraints(2, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label7 ----
-        label7.setText("Sustain duration (ms)");
-        add(label7, "cell 0 3");
+        label7.setText("Sustain duration (ms):");
+        add(label7, new GridConstraints(3, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-        //---- probabilityDurationSpinner ----
+        //---- sustainDurationSpinner ----
         sustainDurationSpinner.setModel(new SpinnerNumberModel(100, 0, 500, 1));
-        add(sustainDurationSpinner, "cell 1 3");
+        add(sustainDurationSpinner, new GridConstraints(3, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label5 ----
-        label5.setText("Voice silence (ms)");
-        add(label5, "cell 0 4 2 1");
+        label5.setText("Voice silence (ms):");
+        add(label5, new GridConstraints(4, 0, 1, 2,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- voiceSilenceSpinner ----
         voiceSilenceSpinner.setModel(new SpinnerNumberModel(75, 1, 500, 1));
-        add(voiceSilenceSpinner, "cell 1 4");
+        add(voiceSilenceSpinner, new GridConstraints(4, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- label6 ----
-        label6.setText("Speech silence (ms)");
-        add(label6, "cell 0 5");
+        label6.setText("Speech silence (ms):");
+        add(label6, new GridConstraints(5, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
         //---- speechSilenceSpinner ----
         speechSilenceSpinner.setModel(new SpinnerNumberModel(2000, 500, null, 1));
-        add(speechSilenceSpinner, "cell 1 5");
-        add(separator1, "cell 0 6 2 1");
+        add(speechSilenceSpinner, new GridConstraints(5, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(separator1, new GridConstraints(6, 0, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_FIXED,
+            null, null, null));
 
         //---- label4 ----
         label4.setText("Voice Detected: N - Speech Detected: N");
-        add(label4, "cell 0 7 2 1,alignx center,growx 0");
+        add(label4, new GridConstraints(7, 0, 1, 2,
+            GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(vSpacer1, new GridConstraints(8, 0, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
+            null, null, null));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
 

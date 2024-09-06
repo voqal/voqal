@@ -83,7 +83,7 @@ public class PluginSettingsPanel extends JBPanel<PluginSettingsPanel> {
         add(enabledCheckBox, "cell 0 0");
 
         //---- label1 ----
-        label1.setText("Microphone");
+        label1.setText("Microphone:");
         add(label1, "cell 0 1");
         add(comboBox1, "cell 1 1 2 1");
 

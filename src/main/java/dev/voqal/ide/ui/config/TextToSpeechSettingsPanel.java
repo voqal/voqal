@@ -2,13 +2,13 @@ package dev.voqal.ide.ui.config;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.*;
+import com.intellij.uiDesigner.core.*;
 import dev.voqal.config.settings.TextToSpeechSettings;
 import dev.voqal.config.settings.TextToSpeechSettings.TTSProvider;
 import dev.voqal.provider.clients.deepgram.DeepgramClient;
 import dev.voqal.provider.clients.openai.OpenAiClient;
 import dev.voqal.provider.clients.picovoice.PicovoiceOrcaClient;
 import dev.voqal.services.VoqalVoiceService;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -204,7 +204,6 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
-        panel1 = new JBPanel<>();
         label6 = new JBLabel();
         providerComboBox = new JComboBox<>();
         label7 = new JBLabel();
@@ -228,141 +227,207 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
         volumeSlider = new JBSlider();
         resetButton = new JButton();
         listenButton = new JButton();
+        var vSpacer1 = new Spacer();
 
         //======== this ========
-        setLayout(new BorderLayout());
+        setLayout(new GridLayoutManager(12, 3, new Insets(0, 0, 0, 0), 5, -1));
 
-        //======== panel1 ========
-        {
-            panel1.setLayout(new MigLayout(
-                "hidemode 3",
-                // columns
-                "[fill]" +
-                "[fill]" +
-                "[84,grow,fill]",
-                // rows
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]" +
-                "[]"));
+        //---- label6 ----
+        label6.setText("Provider:");
+        add(label6, new GridConstraints(0, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label6 ----
-            label6.setText("Provider");
-            panel1.add(label6, "cell 0 0");
+        //---- providerComboBox ----
+        providerComboBox.setModel(new DefaultComboBoxModel<>(TTSProvider.getEntries()
+                .stream().map(TTSProvider::getDisplayName).toArray(String[]::new)));
+        add(providerComboBox, new GridConstraints(0, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- providerComboBox ----
-            providerComboBox.setModel(new DefaultComboBoxModel<>(TTSProvider.getEntries()
-                    .stream().map(TTSProvider::getDisplayName).toArray(String[]::new)));
-            panel1.add(providerComboBox, "cell 1 0 2 1");
+        //---- label7 ----
+        label7.setText("Key:");
+        add(label7, new GridConstraints(1, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(providerPasswordField, new GridConstraints(1, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label7 ----
-            label7.setText("Key");
-            panel1.add(label7, "cell 0 1");
-            panel1.add(providerPasswordField, "cell 1 1 2 1");
+        //---- label9 ----
+        label9.setText("Organization Id:");
+        add(label9, new GridConstraints(2, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(orgIdTextField, new GridConstraints(2, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label9 ----
-            label9.setText("Organization Id");
-            panel1.add(label9, "cell 0 2");
-            panel1.add(orgIdTextField, "cell 1 2 2 1");
+        //---- label8 ----
+        label8.setText("Model:");
+        add(label8, new GridConstraints(3, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label8 ----
-            label8.setText("Model");
-            panel1.add(label8, "cell 0 3");
+        //---- modelNameComboBox ----
+        modelNameComboBox.setEditable(true);
+        modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
+            "tts-1",
+            "tts-1-hd"
+        }));
+        add(modelNameComboBox, new GridConstraints(3, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- modelNameComboBox ----
-            modelNameComboBox.setEditable(true);
-            modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
-                "tts-1",
-                "tts-1-hd"
-            }));
-            panel1.add(modelNameComboBox, "cell 1 3 2 1");
+        //---- label2 ----
+        label2.setText("Voice:");
+        add(label2, new GridConstraints(4, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label2 ----
-            label2.setText("Voice");
-            panel1.add(label2, "cell 0 4");
+        //---- voiceComboBox ----
+        voiceComboBox.setModel(new DefaultComboBoxModel<>(OpenAiClient.getVOICES()));
+        add(voiceComboBox, new GridConstraints(4, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(separator1, new GridConstraints(5, 0, 1, 3,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- voiceComboBox ----
-            voiceComboBox.setModel(new DefaultComboBoxModel<>(OpenAiClient.getVOICES()));
-            panel1.add(voiceComboBox, "cell 1 4 2 1");
-            panel1.add(separator1, "cell 0 5 3 1");
+        //---- label1 ----
+        label1.setText("Speed:");
+        add(label1, new GridConstraints(6, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label1 ----
-            label1.setText("Speed");
-            panel1.add(label1, "cell 0 6");
+        //---- speedSlider ----
+        speedSlider.setMaximum(200);
+        speedSlider.setValue(100);
+        add(speedSlider, new GridConstraints(6, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- speedSlider ----
-            speedSlider.setMaximum(200);
-            speedSlider.setValue(100);
-            panel1.add(speedSlider, "cell 1 6 2 1");
+        //---- label3 ----
+        label3.setText("Pitch:");
+        add(label3, new GridConstraints(7, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label3 ----
-            label3.setText("Pitch");
-            panel1.add(label3, "cell 0 7");
+        //---- pitchSlider ----
+        pitchSlider.setMaximum(200);
+        pitchSlider.setValue(100);
+        add(pitchSlider, new GridConstraints(7, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- pitchSlider ----
-            pitchSlider.setMaximum(200);
-            pitchSlider.setValue(100);
-            panel1.add(pitchSlider, "cell 1 7 2 1");
+        //---- label4 ----
+        label4.setText("Rate:");
+        add(label4, new GridConstraints(8, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label4 ----
-            label4.setText("Rate");
-            panel1.add(label4, "cell 0 8");
+        //---- rateSlider ----
+        rateSlider.setMaximum(200);
+        rateSlider.setValue(100);
+        add(rateSlider, new GridConstraints(8, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- rateSlider ----
-            rateSlider.setMaximum(200);
-            rateSlider.setValue(100);
-            panel1.add(rateSlider, "cell 1 8 2 1");
+        //---- label5 ----
+        label5.setText("Volume:");
+        add(label5, new GridConstraints(9, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- label5 ----
-            label5.setText("Volume");
-            panel1.add(label5, "cell 0 9");
+        //---- volumeSlider ----
+        volumeSlider.setMaximum(200);
+        volumeSlider.setValue(100);
+        add(volumeSlider, new GridConstraints(9, 1, 1, 2,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- volumeSlider ----
-            volumeSlider.setMaximum(200);
-            volumeSlider.setValue(100);
-            panel1.add(volumeSlider, "cell 1 9 2 1");
+        //---- resetButton ----
+        resetButton.setText("Reset");
+        add(resetButton, new GridConstraints(10, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
 
-            //---- resetButton ----
-            resetButton.setText("Reset");
-            panel1.add(resetButton, "cell 2 10");
-
-            //---- listenButton ----
-            listenButton.setText("Play Voice");
-            panel1.add(listenButton, "cell 2 10");
-        }
-        add(panel1, BorderLayout.CENTER);
+        //---- listenButton ----
+        listenButton.setText("Play Voice");
+        add(listenButton, new GridConstraints(10, 2, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(vSpacer1, new GridConstraints(11, 0, 1, 3,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
+            null, null, null));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     // Generated using JFormDesigner Evaluation license - unknown
-    private JPanel panel1;
-    private JLabel label6;
+    private JBLabel label6;
     private JComboBox<String> providerComboBox;
-    private JLabel label7;
+    private JBLabel label7;
     private JBPasswordField providerPasswordField;
-    private JLabel label9;
+    private JBLabel label9;
     private JBTextField orgIdTextField;
-    private JLabel label8;
+    private JBLabel label8;
     private JComboBox<String> modelNameComboBox;
-    private JLabel label2;
+    private JBLabel label2;
     private JComboBox<String> voiceComboBox;
     private JSeparator separator1;
-    private JLabel label1;
-    private JSlider speedSlider;
-    private JLabel label3;
-    private JSlider pitchSlider;
-    private JLabel label4;
-    private JSlider rateSlider;
-    private JLabel label5;
-    private JSlider volumeSlider;
+    private JBLabel label1;
+    private JBSlider speedSlider;
+    private JBLabel label3;
+    private JBSlider pitchSlider;
+    private JBLabel label4;
+    private JBSlider rateSlider;
+    private JBLabel label5;
+    private JBSlider volumeSlider;
     private JButton resetButton;
     private JButton listenButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
