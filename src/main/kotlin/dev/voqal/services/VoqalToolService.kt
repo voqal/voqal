@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.util.concurrency.ThreadingAssertions
+import com.jetbrains.rd.util.reflection.scanForClasses
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.context.AssistantContext
@@ -19,19 +20,12 @@ import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.tool.VoqalTool
-import dev.voqal.assistant.tool.code.CreateClassTool
-import dev.voqal.assistant.tool.code.MoveClassTool
 import dev.voqal.assistant.tool.custom.ExecTool
-import dev.voqal.assistant.tool.ide.*
-import dev.voqal.assistant.tool.ide.navigation.*
-import dev.voqal.assistant.tool.system.*
-import dev.voqal.assistant.tool.system.mode.ToggleEditModeTool
-import dev.voqal.assistant.tool.system.mode.ToggleSearchModeTool
-import dev.voqal.assistant.tool.text.*
 import dev.voqal.config.settings.LanguageModelSettings
 import io.vertx.core.json.JsonObject
 import org.yaml.snakeyaml.Yaml
 import java.io.StringReader
+import java.lang.reflect.Modifier
 import java.util.regex.Matcher
 
 @Service(Service.Level.PROJECT)
@@ -50,60 +44,9 @@ class VoqalToolService(private val project: Project) {
         }
     }
 
-    private val availableTools = setOf(
-        DeleteTool(),
-        BackspaceTool(),
-        TabTool(),
-        CloseFileTool(),
-        CreateFileTool(),
-        GotoLineTool(),
-        GotoTextTool(),
-        GotoNextTool(),
-        GotoPreviousTool(),
-        HideIdeTool(),
-        HideToolWindowTool(),
-        NewLineTool(),
-        DeleteLineTool(),
-        ScrollTool(),
-        UndoTool(),
-        RedoTool(),
-        ShowIdeTool(),
-        ShowToolWindowTool(),
-        StopListeningTool(),
-        ToggleEditModeTool(),
-        SelectAllTool(),
-        UnselectTool(),
-        CancelTool(),
-        LooksGoodTool(),
-        EndOfLineTool(),
-        StartOfLineTool(),
-        DeleteLinesTool(),
-        SelectLinesTool(),
-        SelectLineTool(),
-        PreviousTabTool(),
-        NextTabTool(),
-        ChangeThemeTool(),
-        ClearChatTool(),
-        CreateClassTool(),
-        MoveClassTool(),
-        AddBreakpointsTool(),
-        OpenFileTool(),
-        PlayProgramTool(),
-        RemoveBreakpointsTool(),
-        RunProgramTool(),
-        ShowTabTool(),
-        StopProgramTool(),
-        SmartEnterTool(),
-        AnswerQuestionTool(),
-        IgnoreTool(),
-        ViewSourceTool(),
-        ZoomInIdeTool(),
-        ZoomOutIdeTool(),
-        EditTextTool(),
-        ToggleZenModeTool(),
-        ShowCodeTool(),
-        ToggleSearchModeTool(),
-    )
+    private val availableTools = javaClass.classLoader.scanForClasses("dev.voqal.assistant.tool").filter {
+        VoqalTool::class.java.isAssignableFrom(it) && !Modifier.isAbstract(it.modifiers)
+    }.map { it.constructors[0].newInstance() as VoqalTool }.toSet()
     private val availableToolsMap = availableTools.associateBy { it.name }
 
     fun getAvailableTools(): Map<String, VoqalTool> {
@@ -259,11 +202,11 @@ class VoqalToolService(private val project: Project) {
                     val funcMap = map["function"] as Map<*, *>
                     if (funcMap["exec"] != null) {
                         val toolName = funcMap["name"].toString()
-                        val execTool = ExecTool(
+                        val execTool = object : ExecTool(
                             toolName,
                             (funcMap["exec"] as Map<*, *>)["command"].toString(),
                             (funcMap["exec"] as Map<*, *>)["type"]?.toString()
-                        )
+                        ) {}
                         customTools[toolName] = execTool
                     }
                 }

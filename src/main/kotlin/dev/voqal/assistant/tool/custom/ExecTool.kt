@@ -12,7 +12,7 @@ import java.io.File
 import java.io.StringReader
 import java.util.concurrent.TimeUnit
 
-class ExecTool(
+abstract class ExecTool(
     override val name: String,
     val command: String,
     val type: String? = null
