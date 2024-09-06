@@ -15,7 +15,7 @@ data class VoqalResponse(
     val exception: Throwable? = null
 ) {
     companion object {
-        fun calculateTotalPrice(model: String, incomingTokens: Int, outgoingTokens: Int): Double {
+        fun calculateTotalPrice(model: String, outgoingTokens: Int, incomingTokens: Int): Double {
             val modelName = PRICE_TABLE.keys.find { it.contains(model) }
             val priceMap = PRICE_TABLE[modelName]!!
             return ((priceMap[0] ?: 0.0) * (outgoingTokens / 1000.0)) +
