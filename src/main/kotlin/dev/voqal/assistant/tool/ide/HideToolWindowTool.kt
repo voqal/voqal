@@ -70,7 +70,7 @@ class HideToolWindowTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         if (rawString.startsWith("hide ") ||
             rawString.startsWith("high ") ||
             rawString.startsWith("height ") ||

@@ -71,7 +71,7 @@ class PreviousTabTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "previous tab" || rawString == "previous step") {
             Pair(NAME, mapOf())
         } else {

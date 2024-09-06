@@ -40,7 +40,7 @@ class ShowIdeTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString in setOf("show the ide", "show ide", "show, didi", "show the id")) {
             Pair(NAME, emptyMap())
         } else {

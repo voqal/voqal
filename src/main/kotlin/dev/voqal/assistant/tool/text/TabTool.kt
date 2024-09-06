@@ -39,7 +39,7 @@ class TabTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "tab" -> Pair(NAME, mapOf())
             "tap" -> Pair(NAME, mapOf())

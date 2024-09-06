@@ -56,7 +56,7 @@ class UnselectTool(private val updateText: Boolean = true) : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "unselect" -> Pair(NAME, mapOf())
             "and select" -> Pair(NAME, mapOf())

@@ -34,7 +34,7 @@ class IgnoreTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "thank you" -> Pair(NAME, mapOf("transcription" to rawString, "ignore_reason" to "IgnoreTool"))
             "thanks for watching" -> Pair(NAME, mapOf("transcription" to rawString, "ignore_reason" to "IgnoreTool"))

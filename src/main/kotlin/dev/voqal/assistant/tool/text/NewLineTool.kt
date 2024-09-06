@@ -62,7 +62,7 @@ class NewLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "new line" -> Pair(NAME, mapOf())
             "enter" -> Pair(NAME, mapOf())

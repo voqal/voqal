@@ -105,7 +105,7 @@ class ToggleEditModeTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "taco edit mode" -> Pair(NAME, mapOf())
             "edit edit mode" -> Pair(NAME, mapOf())

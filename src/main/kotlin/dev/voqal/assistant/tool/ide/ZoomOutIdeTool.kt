@@ -40,7 +40,7 @@ class ZoomOutIdeTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "zoom out ide") {
             Pair(NAME, mapOf())
         } else {

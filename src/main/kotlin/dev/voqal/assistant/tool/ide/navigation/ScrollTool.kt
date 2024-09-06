@@ -98,7 +98,7 @@ class ScrollTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         val regex1 = "^(scroll|page)( up| down)\$".toRegex()
         val matchResult1 = regex1.find(rawString)
         matchResult1?.let { match ->

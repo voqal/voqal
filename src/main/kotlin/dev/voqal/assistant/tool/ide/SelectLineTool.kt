@@ -56,7 +56,7 @@ class SelectLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         val parsedText = WordsToNumbersUtil.convertTextualNumbersInDocument(rawString)
 
         //needs to be in "select line x" format (ignore casing and punctuation)

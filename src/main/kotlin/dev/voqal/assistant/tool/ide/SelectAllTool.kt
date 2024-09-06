@@ -43,7 +43,7 @@ class SelectAllTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "select all") {
             Pair(NAME, mapOf())
         } else {

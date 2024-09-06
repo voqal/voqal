@@ -78,7 +78,7 @@ class ShowToolWindowTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         if (rawString.startsWith("show") || rawString.startsWith("open")) {
             val toolWindowType = rawString.substringAfter("show ").substringAfter("open ")
             if (TOOL_WINDOW_TYPES.contains(toolWindowType.lowercase())) {

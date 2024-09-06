@@ -71,7 +71,7 @@ class NextTabTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "next tab" || rawString == "next step") { //todo: boost words
             Pair(NAME, mapOf())
         } else {

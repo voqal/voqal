@@ -39,7 +39,7 @@ class BackspaceTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "backspace") {
             Pair(NAME, mapOf())
         } else {

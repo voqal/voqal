@@ -34,7 +34,7 @@ class StopListeningTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "stop listening") {
             Pair(NAME, mapOf())
         } else {

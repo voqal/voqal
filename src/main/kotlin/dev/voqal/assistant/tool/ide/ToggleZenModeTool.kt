@@ -39,7 +39,7 @@ class ToggleZenModeTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "toggle zen mode" -> Pair(NAME, mapOf())
             "toggles zen mode" -> Pair(NAME, mapOf())

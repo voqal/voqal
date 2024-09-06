@@ -53,7 +53,7 @@ class GotoLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         val parsedText = WordsToNumbersUtil.convertTextualNumbersInDocument(rawString)
 
         //needs to be in "go to line 123" format (ignore casing and punctuation)

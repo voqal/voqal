@@ -85,7 +85,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "cancel") {
             Pair(NAME, mapOf())
         } else {

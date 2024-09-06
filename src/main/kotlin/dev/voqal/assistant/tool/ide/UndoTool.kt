@@ -49,7 +49,7 @@ class UndoTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "undue" -> Pair(NAME, mapOf())
             "undo" -> Pair(NAME, mapOf())

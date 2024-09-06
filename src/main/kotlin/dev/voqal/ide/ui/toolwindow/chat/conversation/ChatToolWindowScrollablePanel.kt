@@ -8,12 +8,12 @@ import javax.swing.JPanel
 
 class ChatToolWindowScrollablePanel : ScrollablePanel(VerticalStackLayout()) {
 
-    private data class Test(
+    private data class DebuggableMessagePanel(
         val panel: JPanel,
         val isDebugMessage: Boolean
     )
 
-    private val allMessagePanels: MutableList<Test> = mutableListOf()
+    private val messagePanels = mutableListOf<DebuggableMessagePanel>()
     var debugVisible = false
 
     fun displayLandingView(landingView: JComponent?) {
@@ -22,7 +22,7 @@ class ChatToolWindowScrollablePanel : ScrollablePanel(VerticalStackLayout()) {
     }
 
     fun add(component: ChatMessagePanel) {
-        allMessagePanels.add(Test(component, component.isDebug))
+        messagePanels.add(DebuggableMessagePanel(component, component.isDebug))
         if (!component.isDebug || debugVisible) {
             super.add(component)
         }
@@ -31,7 +31,7 @@ class ChatToolWindowScrollablePanel : ScrollablePanel(VerticalStackLayout()) {
     fun addMessage(debugMessage: Boolean): JPanel {
         val messageWrapper = JPanel()
         messageWrapper.layout = BoxLayout(messageWrapper, BoxLayout.PAGE_AXIS)
-        allMessagePanels.add(Test(messageWrapper, debugMessage))
+        messagePanels.add(DebuggableMessagePanel(messageWrapper, debugMessage))
 
         if (!debugMessage || debugVisible) {
             add(messageWrapper)
@@ -40,7 +40,7 @@ class ChatToolWindowScrollablePanel : ScrollablePanel(VerticalStackLayout()) {
     }
 
     fun clearAll() {
-        allMessagePanels.clear()
+        messagePanels.clear()
         removeAll()
         update()
     }
@@ -52,7 +52,7 @@ class ChatToolWindowScrollablePanel : ScrollablePanel(VerticalStackLayout()) {
 
     fun reload() {
         removeAll()
-        allMessagePanels.forEach { (panel, isDebugMessage) ->
+        messagePanels.forEach { (panel, isDebugMessage) ->
             if (!isDebugMessage || debugVisible) {
                 add(panel)
             }

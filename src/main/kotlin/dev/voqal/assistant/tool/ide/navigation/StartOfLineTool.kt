@@ -52,7 +52,7 @@ class StartOfLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "start of the line" -> Pair(NAME, mapOf())
             "start the line" -> Pair(NAME, mapOf())

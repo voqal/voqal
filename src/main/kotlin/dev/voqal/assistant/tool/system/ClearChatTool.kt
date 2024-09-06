@@ -34,7 +34,7 @@ class ClearChatTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "clear chat") {
             Pair(NAME, mapOf())
         } else {

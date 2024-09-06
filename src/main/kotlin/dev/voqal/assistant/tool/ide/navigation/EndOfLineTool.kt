@@ -52,7 +52,7 @@ class EndOfLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "end of the line" -> Pair(NAME, mapOf())
             "end the line" -> Pair(NAME, mapOf())

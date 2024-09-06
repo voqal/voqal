@@ -67,7 +67,7 @@ class DeleteLineTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "delete line") {
             Pair(NAME, mapOf())
         } else {

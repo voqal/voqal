@@ -107,7 +107,7 @@ class ToggleSearchModeTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return when (rawString) {
             "taco search mode" -> Pair(NAME, mapOf())
             "search search mode" -> Pair(NAME, mapOf())

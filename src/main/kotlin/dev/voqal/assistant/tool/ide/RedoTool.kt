@@ -49,7 +49,7 @@ class RedoTool : VoqalTool() {
         }
     }
 
-    fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
+    internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
         return if (rawString == "redo") {
             Pair(NAME, mapOf())
         } else {
