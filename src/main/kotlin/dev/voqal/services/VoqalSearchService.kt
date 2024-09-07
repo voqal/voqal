@@ -167,10 +167,12 @@ class VoqalSearchService(private val project: Project) {
     }
 
     private suspend fun findFiles(name: String, exact: Boolean = false): List<VirtualFile> {
-        val relevantFiles = getAllFiles()
+        return findFiles(getAllFiles(), name, exact)
+    }
 
+    fun findFiles(searchFiles: Collection<VirtualFile>, name: String, exact: Boolean = false): List<VirtualFile> {
         //check for exact match
-        val exactMatch = relevantFiles.filter { it.name.equals(name, ignoreCase = true) }
+        val exactMatch = searchFiles.filter { it.name.equals(name, ignoreCase = true) }
         if (exactMatch.isNotEmpty()) {
             if (exactMatch.size == 1 || !exact) {
                 return exactMatch
@@ -178,13 +180,13 @@ class VoqalSearchService(private val project: Project) {
         }
 
         //check for exact match from root
-        val exactMatchFromRoot = relevantFiles.filter { it.path.endsWith(name, ignoreCase = true) }
+        val exactMatchFromRoot = searchFiles.filter { it.path.endsWith(name, ignoreCase = true) }
         if (exactMatchFromRoot.isNotEmpty()) {
             return exactMatchFromRoot
         }
 
         //check for exact match from root (removing extension)
-        val exactMatchFromRootNoExt = relevantFiles.filter {
+        val exactMatchFromRootNoExt = searchFiles.filter {
             if (it.extension != null) {
                 it.path.substringBeforeLast("." + it.extension!!).endsWith(name, ignoreCase = true) ||
                         it.path.substringBeforeLast("." + it.extension!!)
@@ -199,7 +201,7 @@ class VoqalSearchService(private val project: Project) {
             return emptyList()
         } else {
             //return by closest match
-            val filesByDistance = relevantFiles.sortedBy {
+            val filesByDistance = searchFiles.sortedBy {
                 levenshteinDistance.apply(name.lowercase(), it.name.substringBefore(".").lowercase()).toDouble()
             }
             return filesByDistance
