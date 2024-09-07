@@ -101,23 +101,26 @@ class VoqalDirectiveService(private val project: Project) {
         chatMessage: Boolean = false,
         usingAudioModality: Boolean = false
     ) {
-        if (spokenTranscript.transcript.isBlank()) {
-            log.debug("Ignoring empty transcription")
-            return
-        }
+        if (!usingAudioModality) {
+            if (spokenTranscript.transcript.isBlank()) {
+                log.debug("Ignoring empty transcription")
+                return
+            }
 
-        //add to chat window
-        project.service<ChatToolWindowContentManager>()
-            .addUserMessage(spokenTranscript.transcript, spokenTranscript.speechId)
+            //add to chat window
+            project.service<ChatToolWindowContentManager>()
+                .addUserMessage(spokenTranscript.transcript, spokenTranscript.speechId)
 
-        //final intent check
-        val detectedIntent = project.service<VoqalToolService>().intentCheck(spokenTranscript)
-        if (detectedIntent != null) {
-            log.debug("Blind executing detected intent: ${spokenTranscript.transcript}")
-            project.service<VoqalToolService>().blindExecute(
-                detectedIntent.executable, io.vertx.core.json.JsonObject.mapFrom(detectedIntent.args), chatMessage
-            )
-            return
+
+            //final intent check
+            val detectedIntent = project.service<VoqalToolService>().intentCheck(spokenTranscript)
+            if (detectedIntent != null) {
+                log.debug("Blind executing detected intent: ${spokenTranscript.transcript}")
+                project.service<VoqalToolService>().blindExecute(
+                    detectedIntent.executable, io.vertx.core.json.JsonObject.mapFrom(detectedIntent.args), chatMessage
+                )
+                return
+            }
         }
 
         val aiProvider = project.service<VoqalConfigService>().getAiProvider()

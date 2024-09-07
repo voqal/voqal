@@ -489,6 +489,8 @@ class VoqalConfigService(private val project: Project) {
                     log.warnChat("Missing language model provider key")
                 }
             }
+
+            LMProvider.NONE -> Unit //nop
         }
     }
 

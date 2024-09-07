@@ -15,10 +15,10 @@ import io.vertx.core.json.JsonObject
 import javax.swing.Icon
 
 data class LanguageModelSettings(
-    val provider: LMProvider = LMProvider.OPENAI,
+    val provider: LMProvider = LMProvider.NONE,
     val providerKey: String = "",
     val orgId: String = "",
-    val modelName: String = OpenAiClient.DEFAULT_MODEL,
+    val modelName: String = "",
     val seed: Int? = null,
     val temperature: Double? = null,
     val observabilityProvider: OProvider = OProvider.None,
@@ -55,6 +55,7 @@ data class LanguageModelSettings(
                 LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.CUSTOM -> LanguageModelSettings(provider, modelName = "")
+                LMProvider.NONE -> LanguageModelSettings(provider, modelName = "")
             }
         }
     }
@@ -63,10 +64,10 @@ data class LanguageModelSettings(
      * Need to set defaults so config changes don't reset stored config due to parse error.
      */
     constructor(json: JsonObject) : this(
-        provider = LMProvider.lenientValueOf(json.getString("provider") ?: LMProvider.OPENAI.name),
+        provider = LMProvider.lenientValueOf(json.getString("provider") ?: LMProvider.NONE.name),
         providerKey = json.getString("providerKey", ""),
         orgId = json.getString("orgId", ""),
-        modelName = json.getString("modelName", OpenAiClient.DEFAULT_MODEL),
+        modelName = json.getString("modelName", ""),
         seed = json.getInteger("seed"),
         temperature = json.getDouble("temperature"),
         observabilityProvider = OProvider.valueOf(json.getString("observabilityProvider") ?: OProvider.None.name),
@@ -77,10 +78,7 @@ data class LanguageModelSettings(
         apiHeaders = json.getString("apiHeaders", ""),
         projectId = json.getString("projectId", ""),
         location = json.getString("location", ""),
-        name = json.getString(
-            "name",
-            (LMProvider.lenientValueOf(json.getString("provider") ?: LMProvider.OPENAI.name)).name
-        ),
+        name = json.getString("name", LMProvider.NONE.displayName),
         audioModality = json.getBoolean("audioModality", false)
     )
 
@@ -128,6 +126,7 @@ data class LanguageModelSettings(
     }
 
     enum class LMProvider(val displayName: String) {
+        NONE("None"),
         OPENAI("OpenAI"),
         GOOGLE_API("Google API"),
         ANTHROPIC("Anthropic"),

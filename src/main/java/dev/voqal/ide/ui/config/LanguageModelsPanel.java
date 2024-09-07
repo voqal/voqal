@@ -52,6 +52,7 @@ public class LanguageModelsPanel {
 
     final List<AnAction> createActions = new ArrayList<>();
     for (final LanguageModelSettings.LMProvider provider : LanguageModelSettings.LMProvider.getEntries()) {
+      if (provider == LanguageModelSettings.LMProvider.NONE) continue;
       createActions.add(new AddLanguageModelAction(provider) {
         @Override
         protected LanguageModelSettings getSettings() {

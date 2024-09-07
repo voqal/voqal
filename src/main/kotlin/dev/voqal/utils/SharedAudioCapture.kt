@@ -4,6 +4,7 @@ import com.aallam.openai.api.exception.OpenAIException
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.focus.SpokenTranscript
+import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
@@ -278,6 +279,22 @@ class SharedAudioCapture(private val project: Project) {
                                 log.error(errorMessage, e)
                                 directiveService.handleResponse(errorMessage)
                             }
+                        } else if (aiProvider.isStmProvider()) {
+                            val audioInputStream = AudioSystem.getAudioInputStream(speechFile)
+                            val audioLengthSeconds = (audioInputStream.frameLength / audioInputStream.format.frameRate)
+                                .toDouble()
+                            val audioLengthFormat = if (audioLengthSeconds > 0) {
+                                String.format("%.2f", audioLengthSeconds) + "s"
+                            } else {
+                                "invalid duration"
+                            }
+                            project.service<ChatToolWindowContentManager>()
+                                .addUserMessage("Audio input: $audioLengthFormat", speechId)
+
+                            directiveService.handleTranscription(
+                                SpokenTranscript("", speechId),
+                                usingAudioModality = true
+                            )
                         } else {
                             log.warnChat("No speech-to-text provider available")
                         }
