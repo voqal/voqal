@@ -107,10 +107,10 @@ open class OpenAiClient(
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val openAI = OpenAI(openAiConfig)
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        val log = project.getVoqalLogger(this::class)
         log.info("Sending speech to TTS provider: openai")
 
         val durationInSeconds = getAudioDuration(speechFile)

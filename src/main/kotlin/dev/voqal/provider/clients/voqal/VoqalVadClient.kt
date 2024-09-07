@@ -17,7 +17,7 @@ class VoqalVadClient(
     override var sustainedDurationMillis: Long,
     override var amnestyPeriodMillis: Long = speechSilenceThreshold * 2,
     override var testMode: Boolean = false
-) : VadProvider() {
+) : VadProvider(project) {
 
     companion object {
         //todo: can't be static because multiple projects can be open
@@ -36,8 +36,9 @@ class VoqalVadClient(
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
+
     init {
-        val log = project.getVoqalLogger(this::class)
         vad?.setMode(VoiceActivityDetector.Mode.entries[sensitivity])
         log.debug("VAD sensitivity: $sensitivity")
 
@@ -51,9 +52,9 @@ class VoqalVadClient(
         for (i in 0 until samplesLength - step step step) {
             val frame = samples.copyOfRange(i, i + step)
             if (vad?.process(frame) == true) {
-                handleVoiceDetected(project)
+                handleVoiceDetected()
             } else {
-                handleVoiceNotDetected(project)
+                handleVoiceNotDetected()
             }
             detection.voiceDetected.set(isVoiceDetected)
             detection.speechDetected.set(isSpeechDetected)

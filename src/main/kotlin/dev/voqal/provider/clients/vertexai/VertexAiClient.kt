@@ -26,7 +26,7 @@ import java.io.FileInputStream
 
 class VertexAiClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     projectId: String,
     location: String
 ) : LlmProvider, StmProvider {
@@ -48,6 +48,7 @@ class VertexAiClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val chatMap = mutableMapOf<String, ChatSession>() //todo: disposals
     private val vertexAi = VertexAI.Builder()
         .setProjectId(projectId)
@@ -55,7 +56,6 @@ class VertexAiClient(
         .build()
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val generationConfig = GenerationConfig.newBuilder()
             .setMaxOutputTokens(8192)
             .setTemperature(1f)

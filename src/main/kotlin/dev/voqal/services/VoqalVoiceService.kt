@@ -36,6 +36,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @Service(Service.Level.PROJECT)
 class VoqalVoiceService(private val project: Project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private var activeAudio = AtomicBoolean()
 
     fun playSound(input: String, tts: TextToSpeechSettings? = null) {
@@ -45,7 +46,6 @@ class VoqalVoiceService(private val project: Project) {
     }
 
     private suspend fun playSoundAndWait(input: String, tts: TextToSpeechSettings?) {
-        val log = project.getVoqalLogger(this::class)
         if (System.getProperty("VQL_TEST_MODE") == "true") return
         try {
             log.info("Playing resource: $input")
@@ -64,7 +64,6 @@ class VoqalVoiceService(private val project: Project) {
     }
 
     suspend fun playVoiceAndWait(input: String, tts: TextToSpeechSettings? = null) {
-        val log = project.getVoqalLogger(this::class)
         if (System.getProperty("VQL_TEST_MODE") == "true") {
             log.debug("Skipping TTS audio for: $input")
             return
@@ -130,7 +129,6 @@ class VoqalVoiceService(private val project: Project) {
     }
 
     private suspend fun getVoice(input: String): File {
-        val log = project.getVoqalLogger(this::class)
         val configService = project.service<VoqalConfigService>()
         val textToSpeechSettings = configService.getConfig().textToSpeechSettings
 
@@ -167,7 +165,6 @@ class VoqalVoiceService(private val project: Project) {
     }
 
     private fun playAudio(stream: AudioInputStream, tts: TextToSpeechSettings) {
-        val log = project.getVoqalLogger(this::class)
         val format = stream.format
         val sampleRate = format.sampleRate.toInt()
         val numChannels = format.channels

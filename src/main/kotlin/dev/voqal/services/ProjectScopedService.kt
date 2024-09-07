@@ -16,16 +16,15 @@ import kotlin.reflect.KClass
 @Service(Service.Level.PROJECT)
 class ProjectScopedService(project: Project) : Disposable {
 
+    private val log = project.getVoqalLogger(this::class)
     private val messageBusConnection = project.messageBus.connect()
     internal val audioCapture by lazy { SharedAudioCapture(project) }
     internal val voqalLogsTab by lazy { VoqalLogsTab(project, messageBusConnection) }
 
     private val handler = CoroutineExceptionHandler { _, exception ->
-        val log = project.getVoqalLogger(this::class)
         log.error("Unhandled exception: ${exception.message}", exception)
     }
     private val job = Job().apply {
-        val log = project.getVoqalLogger(this::class)
         invokeOnCompletion { cause ->
             if (cause != null && !project.isDisposed) {
                 log.error("Voqal plugin failure. Please restart your IDE.", cause)

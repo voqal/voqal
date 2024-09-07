@@ -50,7 +50,6 @@ class VoqalBenchmarking : JBTest() {
     private var error: Error? = null
 
     fun `test run all suites`(): Unit = runBlocking {
-        val log = project.getVoqalLogger(this::class)
         val config = TEST_CONFIG
 
         //idle mode
@@ -160,7 +159,6 @@ class VoqalBenchmarking : JBTest() {
     }
 
     private fun run(benchPromise: BenchmarkPromise) {
-        val log = project.getVoqalLogger(this::class)
         System.setProperty("voqal.benchmark.name", benchPromise.testName)
         val contexts = benchPromise.callable.call(benchPromise.instance, benchPromise) as List<*>
         if (contexts.isEmpty()) {
@@ -214,7 +212,6 @@ class VoqalBenchmarking : JBTest() {
     }
 
     override fun tearDown() {
-        val log = project.getVoqalLogger(this::class)
         val err = error
         if (err != null) {
             super.tearDown()

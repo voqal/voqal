@@ -26,7 +26,7 @@ import kotlinx.serialization.json.Json
 
 class GroqClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : LlmProvider {
 
@@ -58,6 +58,7 @@ class GroqClient(
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
         install(ContentNegotiation) { json(jsonDecoder) }
@@ -66,7 +67,6 @@ class GroqClient(
     private val providerUrl = "https://api.groq.com/openai/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
@@ -94,7 +94,6 @@ class GroqClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))

@@ -57,6 +57,7 @@ import java.net.URL
 @Service(Service.Level.PROJECT)
 class VoqalConfigService(private val project: Project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private val name = project.name
     private val login = project.name
     private var cachedConfig: VoqalConfig? = null
@@ -118,7 +119,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun saveConfig(config: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         if (System.getProperty("VQL_TEST_MODE") != "true") {
             setEncryptedDate(config.toJson().toString())
         }
@@ -135,7 +135,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     fun getConfig(): VoqalConfig {
-        val log = project.getVoqalLogger(this::class)
         if (cachedConfig != null) {
             return cachedConfig!!.copy()
         }
@@ -186,7 +185,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     fun resetAiProvider() {
-        val log = project.getVoqalLogger(this::class)
         synchronized(syncLock) {
             log.info("Disposing AI provider")
             aiProvider?.let {
@@ -204,7 +202,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun initAiProvider(): AiProvider {
-        val log = project.getVoqalLogger(this::class)
         val voqalConfig = getConfig()
         log.debug("Initializing AI provider using config: ${voqalConfig.withKeysRemoved()}")
         val providersClient = AiProvidersClient(project).apply {
@@ -224,7 +221,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun AiProvidersClient.setupTextToSpeechProvider(voqalConfig: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         when (voqalConfig.textToSpeechSettings.provider) {
             TextToSpeechSettings.TTSProvider.NONE -> {
                 log.debug("No text-to-speech provider configured")
@@ -284,7 +280,6 @@ class VoqalConfigService(private val project: Project) {
 
     //todo: observability isn't per provider
     private fun AiProvidersClient.setupObservabilityProvider(voqalConfig: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         val anyObservedModelSettings = voqalConfig.languageModelsSettings.models.firstOrNull {
             it.observabilityProvider != OProvider.None
         } ?: return
@@ -314,7 +309,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun AiProvidersClient.setupLanguageModelProvider(modelSettings: LanguageModelSettings) {
-        val log = project.getVoqalLogger(this::class)
         when (modelSettings.provider) {
             LMProvider.OPENAI -> {
                 log.debug("Using OpenAI language model provider")
@@ -499,7 +493,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun AiProvidersClient.setupSpeechToTextProvider(voqalConfig: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         when (voqalConfig.speechToTextSettings.provider) {
             SpeechToTextSettings.STTProvider.NONE -> {
                 log.debug("No speech-to-text provider configured")
@@ -587,7 +580,6 @@ class VoqalConfigService(private val project: Project) {
     }
 
     private fun AiProvidersClient.setupVoiceActivityProvider(voqalConfig: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         when (voqalConfig.voiceDetectionSettings.provider) {
             VoiceDetectionSettings.VoiceDetectionProvider.Voqal -> {
                 log.debug("Using Voqal voice activity detection provider")
@@ -628,7 +620,6 @@ class VoqalConfigService(private val project: Project) {
 
     @VisibleForTesting
     fun setCachedConfig(config: VoqalConfig) {
-        val log = project.getVoqalLogger(this::class)
         log.info("Set cached config to: ${config.withKeysRemoved()}")
         cachedConfig = config.copy()
         resetAiProvider()

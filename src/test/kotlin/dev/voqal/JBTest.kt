@@ -55,6 +55,8 @@ abstract class JBTest : BasePlatformTestCase() {
         }
     }
 
+    val log by lazy { project.getVoqalLogger(this::class) }
+
     override fun setUp() {
         System.setProperty("VQL_TEST_MODE", "true")
         super.setUp()
@@ -64,7 +66,6 @@ abstract class JBTest : BasePlatformTestCase() {
     }
 
     fun getMemorySystem(type: String = System.getenv("VQL_MODE") ?: "local"): MemorySystem {
-        val log = project.getVoqalLogger(this::class)
         val memorySystem = when (type) {
             "local" -> LocalMemorySystem(project)
             "thread" -> ThreadMemorySystem(project)

@@ -23,6 +23,7 @@ class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBu
 
     val splitter: OnePixelSplitter
 
+    private val log = project.getVoqalLogger(this::class)
     private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS")
     private val emptyLogHtml = buildString {
         append("<html><body ")
@@ -92,7 +93,6 @@ class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBu
     }
 
     fun addLog(millis: Long, level: String, message: String?) {
-        val log = project.getVoqalLogger(this::class)
         if (message == null) return
         if (logLevel == "ERROR" && level != "ERROR") return
         if (logLevel == "WARN" && level !in listOf("ERROR", "WARN")) return

@@ -27,7 +27,7 @@ import kotlinx.serialization.json.Json
 
 class AnthropicClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : LlmProvider {
 
@@ -54,6 +54,7 @@ class AnthropicClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
         install(ContentNegotiation) { json(jsonDecoder) }
@@ -62,7 +63,6 @@ class AnthropicClient(
     private val providerUrl = "https://api.anthropic.com/v1/messages"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request)
 
         val response = try {
@@ -102,7 +102,6 @@ class AnthropicClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request).put("stream", true)
 
         try {
@@ -244,7 +243,6 @@ class AnthropicClient(
         } catch (_: Exception) {
         }
 
-        val log = project.getVoqalLogger(this::class)
         log.warn("Anthropic completion failed: ${response.status}. Message: ${response.bodyAsText()}")
         throw InvalidRequestException(
             response.status.value,

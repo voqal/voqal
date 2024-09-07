@@ -23,7 +23,7 @@ import kotlinx.serialization.json.Json
 
 class FireworksClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : LlmProvider {
 
@@ -48,6 +48,7 @@ class FireworksClient(
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
         install(ContentNegotiation) { json(jsonDecoder) }
@@ -56,7 +57,6 @@ class FireworksClient(
     private val providerUrl = "https://api.fireworks.ai/inference/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
@@ -84,7 +84,6 @@ class FireworksClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))

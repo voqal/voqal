@@ -32,7 +32,7 @@ import java.util.*
 
 class GoogleApiClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : LlmProvider, StmProvider {
 
@@ -55,6 +55,7 @@ class GoogleApiClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
@@ -62,7 +63,6 @@ class GoogleApiClient(
     private val providerUrl = "https://generativelanguage.googleapis.com"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val modelName = request.model.id
         val requestJson = toRequestJson(request, directive)
 
@@ -146,7 +146,6 @@ class GoogleApiClient(
     }
 
     private fun toRequestJson(request: ChatCompletionRequest, directive: VoqalDirective?): JsonObject {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject().put("contents", JsonArray(request.messages.map { it.toJson() }))
 
         if (directive?.assistant?.includeToolsInMarkdown == false) {

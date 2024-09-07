@@ -26,7 +26,7 @@ import kotlinx.serialization.json.Json
 
 class MistralAiClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : LlmProvider {
 
@@ -62,6 +62,7 @@ class MistralAiClient(
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
         install(ContentNegotiation) { json(jsonDecoder) }
@@ -70,7 +71,6 @@ class MistralAiClient(
     private val providerUrl = "https://api.mistral.ai/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
@@ -98,7 +98,6 @@ class MistralAiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = JsonObject()
             .put("model", request.model.id)
             .put("messages", JsonArray(request.messages.map { it.toJson() }))
@@ -171,7 +170,6 @@ class MistralAiClient(
             )
         }
 
-        val log = project.getVoqalLogger(this::class)
         log.error("Mistral completion failed: ${response.status}")
         throw Exception("Mistral completion failed: ${response.status}")
     }

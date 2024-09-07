@@ -68,12 +68,12 @@ class VoqalDirectiveService(private val project: Project) {
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val activeDirectives = mutableMapOf<VoqalDirective, DirectiveExecution>()
     private val executionHistory = mutableListOf<DirectiveExecution>()
     private val listeners: MutableList<(VoqalDirectiveService, DirectiveExecution) -> Unit> = CopyOnWriteArrayList()
 
     init {
-        val log = project.getVoqalLogger(this::class)
         project.scope.launch {
             while (!project.isDisposed) {
                 if (activeDirectives.isNotEmpty()) {
@@ -101,7 +101,6 @@ class VoqalDirectiveService(private val project: Project) {
         chatMessage: Boolean = false,
         usingAudioModality: Boolean = false
     ) {
-        val log = project.getVoqalLogger(this::class)
         if (spokenTranscript.transcript.isBlank()) {
             log.debug("Ignoring empty transcription")
             return
@@ -171,7 +170,6 @@ class VoqalDirectiveService(private val project: Project) {
         disposable: Disposable = project.service<ProjectScopedService>(),
         listener: (VoqalDirectiveService, DirectiveExecution) -> Unit
     ) {
-        val log = project.getVoqalLogger(this::class)
         listeners.add(listener)
         log.trace("Added directive execution listener. Available directive execution listeners: " + listeners.size)
 
@@ -274,7 +272,6 @@ class VoqalDirectiveService(private val project: Project) {
     }
 
     suspend fun executeDirective(directive: VoqalDirective) {
-        val log = project.getVoqalLogger(this::class)
         ThreadingAssertions.assertBackgroundThread()
         log.debug("Processing directive: ${directive.developer.transcription}")
         val execution = DirectiveExecution(directive)
@@ -424,7 +421,6 @@ class VoqalDirectiveService(private val project: Project) {
     }
 
     private fun finishDirective(directive: VoqalDirective) {
-        val log = project.getVoqalLogger(this::class)
         val execution = activeDirectives[directive]
         if (execution == null) {
             log.warn("No active directive found for response: $directive")
@@ -434,7 +430,6 @@ class VoqalDirectiveService(private val project: Project) {
     }
 
     private fun finishDirective(execution: DirectiveExecution) {
-        val log = project.getVoqalLogger(this::class)
         if (activeDirectives.remove(execution.directive) != null) {
             execution.endTime = System.currentTimeMillis()
             executionHistory.add(execution)
@@ -446,7 +441,6 @@ class VoqalDirectiveService(private val project: Project) {
     }
 
     private suspend fun handleResponse(response: VoqalResponse) {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Handling response for directive: ${response.directive.directiveId}")
         ThreadingAssertions.assertBackgroundThread()
 

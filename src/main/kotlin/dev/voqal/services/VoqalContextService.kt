@@ -27,6 +27,7 @@ import dev.voqal.assistant.context.code.ViewingCode
 @Service(Service.Level.PROJECT)
 class VoqalContextService(private val project: Project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private var registry = Encodings.newDefaultEncodingRegistry()
     private var enc = registry.getEncoding(EncodingType.CL100K_BASE)
 
@@ -80,7 +81,6 @@ class VoqalContextService(private val project: Project) {
     }
 
     fun cropAsNecessary(fullDirective: VoqalDirective): VoqalDirective {
-        val log = project.getVoqalLogger(this::class)
         ThreadingAssertions.assertBackgroundThread()
         var croppedCommand = fullDirective
         val openFiles = croppedCommand.developer.openFiles.toMutableList()

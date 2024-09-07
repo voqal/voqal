@@ -12,16 +12,15 @@ import org.apache.commons.lang3.SystemUtils
 import java.io.File
 
 class PicovoiceLeopardClient(
-    private val project: Project,
+    project: Project,
     picovoiceKey: String
 ) : SttProvider {
 
+    private val log = project.getVoqalLogger(this::class)
     private val native: LeopardNative
     private var leopard: Pointer
 
     init {
-        val log = project.getVoqalLogger(this::class)
-
         NativesExtractor.extractNatives(project)
         val pvleopardLibraryPath = if (SystemUtils.IS_OS_WINDOWS) {
             File(
@@ -54,7 +53,6 @@ class PicovoiceLeopardClient(
     }
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        val log = project.getVoqalLogger(this::class)
         val transcriptRef = PointerByReference()
         val numWordsRef = IntByReference()
         val wordsRef = PointerByReference()

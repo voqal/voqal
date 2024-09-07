@@ -19,18 +19,18 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 
 class HeliconeClient(
-    private val project: Project,
+    project: Project,
     private val providerKey: String,
     private val userId: String
 ) : ObservabilityProvider {
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
     private val providerUrl = "https://api.hconeai.com/oai/v1/log"
 
     private suspend fun log(logData: Map<String, Any>) {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Sending observability data to Helicone")
         try {
             val response: HttpResponse = client.post(providerUrl) {

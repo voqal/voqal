@@ -54,6 +54,7 @@ import org.joor.Reflect
 @Service(Service.Level.PROJECT)
 class VoqalSearchService(private val project: Project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private val levenshteinDistance = LevenshteinDistance()
 
     fun getActiveProblems(editor: Editor): List<HighlightInfo> {
@@ -68,7 +69,6 @@ class VoqalSearchService(private val project: Project) {
 
     @OptIn(BetaOpenAI::class)
     suspend fun syncLocalFilesToVectorStore(lmSettings: LanguageModelSettings) {
-        val log = project.getVoqalLogger(this::class)
         val filesToUpload = mutableListOf<VirtualFile>()
         ProjectFileIndex.getInstance(project).iterateContent(object : ContentIterator {
             override fun processFile(fileOrDir: VirtualFile): Boolean {
@@ -403,7 +403,6 @@ class VoqalSearchService(private val project: Project) {
      * ```
      */
     private fun summarizeCode(virtualFile: VirtualFile): String? {
-        val log = project.getVoqalLogger(this::class)
         val psiFile = ReadAction.compute(ThrowableComputable { PsiManager.getInstance(project).findFile(virtualFile) })
         if (psiFile == null) {
             log.warn("Failed to find PSI file for virtual file: $virtualFile")

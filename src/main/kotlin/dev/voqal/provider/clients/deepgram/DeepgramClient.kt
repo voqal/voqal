@@ -55,6 +55,7 @@ class DeepgramClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
         install(WebSockets)
@@ -102,7 +103,6 @@ class DeepgramClient(
 
     private fun restartConnection(): Boolean {
         ThreadingAssertions.assertBackgroundThread()
-        val log = project.getVoqalLogger(this::class)
         if (disposed) {
             log.warn("Deepgram client has been disposed")
             return false
@@ -163,7 +163,6 @@ class DeepgramClient(
     }
 
     private fun readLoop(): Thread {
-        val log = project.getVoqalLogger(this::class)
         return Thread {
             try {
                 val configService = project.service<VoqalConfigService>()
@@ -241,7 +240,6 @@ class DeepgramClient(
     }
 
     private fun pingLoop(): Thread {
-        val log = project.getVoqalLogger(this::class)
         return Thread {
             try {
                 while (true) {
@@ -260,8 +258,6 @@ class DeepgramClient(
     }
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        val log = project.getVoqalLogger(this::class)
-
         try {
             val params = getSttParams()
             val listenUrl = "$httpsProviderUrl/listen?$params"
@@ -294,7 +290,6 @@ class DeepgramClient(
     }
 
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
-        val log = project.getVoqalLogger(this::class)
         try {
             val sampleRate = 24000f
             val encoding = "linear16"

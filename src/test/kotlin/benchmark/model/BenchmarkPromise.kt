@@ -20,6 +20,8 @@ class BenchmarkPromise(
 ) {
 
     var testName = callable.name
+
+    private val log = project.getVoqalLogger(this::class)
     private var floorStartTime: Long = -1
     private var floorStopTime: Long = -1
     private var successCount = 0
@@ -69,7 +71,6 @@ class BenchmarkPromise(
                     tokenUsage.completionTokens!!
                 )
             } catch (e: Exception) {
-                val log = project.getVoqalLogger(this::class)
                 log.warn("Model $modelName not found in the price table")
                 -1.0
             }

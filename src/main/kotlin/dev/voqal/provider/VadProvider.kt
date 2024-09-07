@@ -8,7 +8,7 @@ import java.util.*
 /**
  * Provider that offers voice activity detection.
  */
-abstract class VadProvider : AiProvider, SharedAudioCapture.AudioDataListener {
+abstract class VadProvider(project: Project) : AiProvider, SharedAudioCapture.AudioDataListener {
 
     abstract var sustainedDurationMillis: Long
     abstract var amnestyPeriodMillis: Long
@@ -31,6 +31,7 @@ abstract class VadProvider : AiProvider, SharedAudioCapture.AudioDataListener {
     @Volatile
     var voiceProbability: Double = 0.0
 
+    private val log = project.getVoqalLogger(this::class)
     private var voiceFirstDetectedAt = 0L
     private var voiceLastDetectedAt = 0L
     private var begunTalkingTimeMillis = 0L
@@ -38,7 +39,7 @@ abstract class VadProvider : AiProvider, SharedAudioCapture.AudioDataListener {
     override fun isVadProvider() = true
     override fun isLiveDataListener() = true
 
-    fun handleVoiceNotDetected(project: Project) {
+    fun handleVoiceNotDetected() {
         val silenceTime = System.currentTimeMillis() - voiceLastDetectedAt
         val overVoiceSilenceTime = (silenceTime > voiceSilenceThreshold
                 && begunTalkingTimeMillis != voiceLastDetectedAt)
@@ -58,8 +59,7 @@ abstract class VadProvider : AiProvider, SharedAudioCapture.AudioDataListener {
         isVoiceCaptured = false
     }
 
-    fun handleVoiceDetected(project: Project) {
-        val log = project.getVoqalLogger(this::class)
+    fun handleVoiceDetected() {
         if (voiceFirstDetectedAt == 0L) {
             voiceFirstDetectedAt = System.currentTimeMillis()
         }

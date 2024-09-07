@@ -10,8 +10,9 @@ import dev.voqal.services.getVoqalLogger
  */
 class LocalMemorySystem(private val project: Project) : MemorySystem {
 
+    private val log = project.getVoqalLogger(this::class)
+
     override fun getMemorySlice(): MemorySlice {
-        val log = project.getVoqalLogger(this::class)
         val memorySlice = LocalMemorySlice(project)
         log.debug("Created memory slice id: ${memorySlice.id}")
         return memorySlice

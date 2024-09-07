@@ -20,18 +20,18 @@ import kotlinx.serialization.json.Json
 
 class HuggingFaceClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerKey: String,
     private val endpoint: String
 ) : LlmProvider {
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val jsonObject = JsonObject()
         jsonObject.put("model", "tgi")
         val messages = JsonArray()

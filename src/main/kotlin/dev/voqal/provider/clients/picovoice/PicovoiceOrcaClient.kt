@@ -17,7 +17,7 @@ import java.io.File
 import java.nio.ByteBuffer
 
 class PicovoiceOrcaClient(
-    private val project: Project,
+    project: Project,
     picovoiceKey: String
 ) : TtsProvider {
 
@@ -26,6 +26,7 @@ class PicovoiceOrcaClient(
         val VOICES = arrayOf("female", "male")
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val native: OrcaNative
     private val orca: Pointer
     private var synthesizeParams: Pointer
@@ -33,8 +34,6 @@ class PicovoiceOrcaClient(
     private var invalidCharactersRegex: Regex
 
     init {
-        val log = project.getVoqalLogger(this::class)
-
         NativesExtractor.extractNatives(project)
         val pvorcaLibraryPath = if (SystemUtils.IS_OS_WINDOWS) {
             File(
@@ -83,7 +82,6 @@ class PicovoiceOrcaClient(
     }
 
     override suspend fun speech(request: SpeechRequest): TtsProvider.RawAudio {
-        val log = project.getVoqalLogger(this::class)
         val sampleRateRef = IntByReference()
         val pcmRef = PointerByReference()
         val numAlignmentsRef = IntByReference()

@@ -24,6 +24,7 @@ class PicovoiceCheetahClient(
     picovoiceKey: String
 ) : SttProvider, Thread(), SharedAudioCapture.AudioDataListener {
 
+    private val log = project.getVoqalLogger(this::class)
     private val native: CheetahNative
     private val cheetah: Pointer
     private val audioQueue = LinkedBlockingQueue<ByteArray>()
@@ -33,7 +34,6 @@ class PicovoiceCheetahClient(
 
     init {
         require(currentThread().isDaemon)
-        val log = project.getVoqalLogger(this::class)
 
         NativesExtractor.extractNatives(project)
         val pvcheetahLibraryPath = if (SystemUtils.IS_OS_WINDOWS) {
@@ -74,7 +74,6 @@ class PicovoiceCheetahClient(
     }
 
     override fun run() {
-        val log = project.getVoqalLogger(this::class)
         project.service<VoqalStatusService>().onStatusChange(this) { status, _ ->
             editMode = status == VoqalStatus.EDITING
 //            if (editMode) {

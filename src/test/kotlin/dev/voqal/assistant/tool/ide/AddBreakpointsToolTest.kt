@@ -10,7 +10,6 @@ import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
-import dev.voqal.services.getVoqalLogger
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -18,7 +17,6 @@ import java.io.File
 class AddBreakpointsToolTest : JBTest() {
 
     fun `test add by line number`(): Unit = runBlocking {
-        val log = project.getVoqalLogger(this::class)
         if (System.getenv("VQL_LANG") !in setOf(null, "JAVA")) {
             log.info("Ignoring java test in non-java mode")
             return@runBlocking
@@ -56,7 +54,6 @@ class AddBreakpointsToolTest : JBTest() {
     }
 
     fun `test add to print lines`(): Unit = runBlocking {
-        val log = project.getVoqalLogger(this::class)
         if (System.getenv("VQL_LANG") !in setOf(null, "JAVA")) {
             log.info("Ignoring java test in non-java mode")
             return@runBlocking

@@ -30,11 +30,12 @@ class LocalMemorySlice(
     @VisibleForTesting
     val messageList = mutableListOf<ChatMessage>()
 
+    private val log = project.getVoqalLogger(this::class)
+
     override suspend fun addMessage(
         directive: VoqalDirective,
         addMessage: Boolean
     ): VoqalResponse {
-        val log = project.getVoqalLogger(this::class)
         val promptSettings = directive.assistant.promptSettings
             ?: throw IllegalStateException("Prompt settings not found")
         val configService = project.service<VoqalConfigService>()

@@ -15,10 +15,11 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 class AssemblyAiClient(
-    private val project: Project,
+    project: Project,
     private val providerKey: String
 ) : SttProvider {
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
@@ -40,7 +41,6 @@ class AssemblyAiClient(
     }
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Uploading audio: $speechFile")
         val fileUrl = upload(speechFile.readBytes())
         log.debug("Audio uploaded to: $fileUrl")

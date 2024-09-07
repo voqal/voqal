@@ -52,6 +52,7 @@ class TogetherAiClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
         install(ContentNegotiation) { json(jsonDecoder) }
@@ -60,7 +61,6 @@ class TogetherAiClient(
     private val providerUrl = "https://api.together.xyz/v1/completions" //todo: /chat/completions?
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request)
 
         val response = try {
@@ -106,7 +106,6 @@ class TogetherAiClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val log = project.getVoqalLogger(this::class)
         val requestJson = toRequestJson(request).put("stream", true)
 
         try {

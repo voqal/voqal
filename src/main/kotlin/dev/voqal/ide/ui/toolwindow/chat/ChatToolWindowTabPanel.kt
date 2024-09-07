@@ -39,6 +39,7 @@ class ChatToolWindowTabPanel(
     private val project: Project
 ) : Disposable {
 
+    private val log = project.getVoqalLogger(this::class)
     private val rootPanel: JPanel
     private val userPromptTextArea: UserPromptTextArea
     private val toolWindowScrollablePanel: ChatToolWindowScrollablePanel
@@ -64,7 +65,6 @@ class ChatToolWindowTabPanel(
     }
 
     private fun sendMessage(message: String) {
-        val log = project.getVoqalLogger(this::class)
         project.scope.launch {
             val configService = project.service<VoqalConfigService>()
             if (!configService.getConfig().pluginSettings.enabled) {
@@ -128,7 +128,6 @@ class ChatToolWindowTabPanel(
     }
 
     private fun playDeveloperSpeech(speechId: String) {
-        val log = project.getVoqalLogger(this::class)
         val speechDirectory = File(NativesExtractor.workingDirectory, "speech")
         speechDirectory.mkdirs()
         val speechFile = File(speechDirectory, "developer-$speechId.wav")
@@ -155,7 +154,6 @@ class ChatToolWindowTabPanel(
     }
 
     private fun viewPrompt(voqalResponse: VoqalResponse) {
-        val log = project.getVoqalLogger(this::class)
         project.scope.launch {
             val requestMarkdown = voqalResponse.directive.toMarkdown()
             var llmResponseJson = voqalResponse.backingResponse?.let { Json.encodePrettily(it) }

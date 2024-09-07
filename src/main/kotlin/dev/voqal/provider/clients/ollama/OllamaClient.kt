@@ -23,7 +23,7 @@ import java.util.*
 
 class OllamaClient(
     override val name: String,
-    private val project: Project,
+    project: Project,
     private val providerUrl: String
 ) : LlmProvider {
 
@@ -37,13 +37,13 @@ class OllamaClient(
         )
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val client = HttpClient {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val log = project.getVoqalLogger(this::class)
         try {
             val startTime = System.currentTimeMillis()
             val jsonObject = JsonObject()

@@ -26,14 +26,13 @@ class PicovoiceCobraClient(
     override var sustainedDurationMillis: Long,
     override var amnestyPeriodMillis: Long = speechSilenceThreshold * 2,
     override var testMode: Boolean = false
-) : VadProvider() {
+) : VadProvider(project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private val native: CobraNative
     private val cobra: Pointer
 
     init {
-        val log = project.getVoqalLogger(this::class)
-
         NativesExtractor.extractNatives(project)
         val pvcobraLibraryPath = if (SystemUtils.IS_OS_WINDOWS) {
             File(
@@ -83,9 +82,9 @@ class PicovoiceCobraClient(
         native.pv_cobra_process(cobra, pcm, isVoicedRef)
         voiceProbability = isVoicedRef.value * 100.00
         if (voiceProbability >= voiceDetectionThreshold) {
-            handleVoiceDetected(project)
+            handleVoiceDetected()
         } else {
-            handleVoiceNotDetected(project)
+            handleVoiceNotDetected()
         }
         detection.voiceCaptured.set(isVoiceCaptured)
         detection.voiceDetected.set(isVoiceDetected)

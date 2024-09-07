@@ -35,11 +35,12 @@ class ThreadMemorySystem(
 ) : MemorySystem, MemorySlice {
 
     override val id = UUID.randomUUID().toString()
+
+    private val log = project.getVoqalLogger(this::class)
     private lateinit var assistant: Assistant
     private lateinit var threadId: String
 
     private suspend fun setupAssistant(directive: VoqalDirective) {
-        val log = project.getVoqalLogger(this::class)
         if (::assistant.isInitialized) return
         val assistantId = directive.assistant.promptSettings?.assistantId ?: ""
         if (assistantId.isNotEmpty()) {
@@ -52,7 +53,6 @@ class ThreadMemorySystem(
     }
 
     private suspend fun setupThread(directive: VoqalDirective) {
-        val log = project.getVoqalLogger(this::class)
         if (::threadId.isInitialized) return
         val threadId = directive.assistant.promptSettings?.assistantThreadId ?: ""
         if (threadId.isNotEmpty()) {
@@ -65,7 +65,6 @@ class ThreadMemorySystem(
     }
 
     private suspend fun waitTillThreadReady() {
-        val log = project.getVoqalLogger(this::class)
         val openAI = project.service<VoqalConfigService>().getAiProvider().asAssistantProvider()
         var wait = true
         while (wait) {
@@ -83,7 +82,6 @@ class ThreadMemorySystem(
     override fun getMemorySlice() = this
 
     override suspend fun addMessage(directive: VoqalDirective, addMessage: Boolean): VoqalResponse {
-        val log = project.getVoqalLogger(this::class)
         setupAssistant(directive)
         setupThread(directive)
         waitTillThreadReady()
@@ -141,7 +139,6 @@ class ThreadMemorySystem(
         stepDetails: ToolCallStepDetails,
         threadRun: Run
     ): VoqalResponse {
-        val log = project.getVoqalLogger(this::class)
         log.info("Handling tool call response: $stepDetails")
         if ((stepDetails.toolCalls?.size ?: 0) > 1) {
             //todo: handle multiple tool calls
@@ -202,7 +199,6 @@ class ThreadMemorySystem(
         threadRun: Run,
         stepDetails: MessageCreationStepDetails
     ): VoqalResponse {
-        val log = project.getVoqalLogger(this::class)
         log.info("Handling message response: $stepDetails")
         val responseMessage = openAI.message(threadRun.threadId, stepDetails.messageCreation.messageId)
         val textContent = (responseMessage.content.first() as MessageContent.Text).text.value
@@ -246,7 +242,6 @@ class ThreadMemorySystem(
 
     @OptIn(BetaOpenAI::class)
     private suspend fun createAssistant(directive: VoqalDirective) {
-        val log = project.getVoqalLogger(this::class)
         val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
         val vectorStoreId = promptSettings.vectorStoreId
         if (vectorStoreId == "") {
@@ -273,7 +268,6 @@ class ThreadMemorySystem(
 
     @OptIn(BetaOpenAI::class)
     private suspend fun getAssistant(assistantId: String) {
-        val log = project.getVoqalLogger(this::class)
         val openAI = project.service<VoqalConfigService>().getAiProvider().asAssistantProvider()
         val existingAssistant = openAI.assistant(AssistantId(assistantId))
         if (existingAssistant == null) {
@@ -284,7 +278,6 @@ class ThreadMemorySystem(
     }
 
     private suspend fun createThread() {
-        val log = project.getVoqalLogger(this::class)
         val configService = project.service<VoqalConfigService>()
         val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
         val vectorStoreId = promptSettings.vectorStoreId
@@ -304,7 +297,6 @@ class ThreadMemorySystem(
     }
 
     private suspend fun getThread(threadId: String): Thread {
-        val log = project.getVoqalLogger(this::class)
         val openAI = project.service<VoqalConfigService>().getAiProvider().asAssistantProvider()
         val thread = openAI.thread(ThreadId(threadId))
         if (thread == null) {

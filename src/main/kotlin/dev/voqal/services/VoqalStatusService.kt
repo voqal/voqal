@@ -22,13 +22,13 @@ import java.util.concurrent.CopyOnWriteArrayList
 @Service(Service.Level.PROJECT)
 class VoqalStatusService(private val project: Project) {
 
+    private val log = project.getVoqalLogger(this::class)
     private val statusLock = Any()
     private var status: VoqalStatus = DISABLED
     private var message: String? = null
     private val listeners: MutableList<(VoqalStatus, String?) -> Unit> = CopyOnWriteArrayList()
 
     init {
-        val log = project.getVoqalLogger(this::class)
         val config = project.service<VoqalConfigService>().getConfig()
         if (config.pluginSettings.enabled) {
             log.info("Setting initial status to idle")
@@ -48,7 +48,6 @@ class VoqalStatusService(private val project: Project) {
     }
 
     fun update(status: VoqalStatus, message: String? = null) {
-        val log = project.getVoqalLogger(this::class)
         ThreadingAssertions.assertBackgroundThread()
         synchronized(statusLock) {
             val oldStatus = this.status
@@ -96,7 +95,6 @@ class VoqalStatusService(private val project: Project) {
         disposable: Disposable = project.service<ProjectScopedService>(),
         listener: (VoqalStatus, String?) -> Unit
     ) {
-        val log = project.getVoqalLogger(this::class)
         listeners.add(listener)
         log.trace("Added status listener. Available status listeners: " + listeners.size)
 
@@ -128,7 +126,6 @@ class VoqalStatusService(private val project: Project) {
         if (System.getProperty("VQL_TEST_MODE") == "true") {
             return
         }
-        val log = project.getVoqalLogger(this::class)
         ThreadingAssertions.assertBackgroundThread()
         log.debug("Updating text: $input")
         project.service<ChatToolWindowContentManager>().addResponse(input, response)

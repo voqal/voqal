@@ -44,13 +44,13 @@ class VoqalToolService(private val project: Project) {
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val availableTools = javaClass.classLoader.scanForClasses("dev.voqal.assistant.tool").filter {
         VoqalTool::class.java.isAssignableFrom(it) && !Modifier.isAbstract(it.modifiers)
     }.map {
         try {
             it.constructors[0].newInstance() as VoqalTool
         } catch (e: Throwable) {
-            val log = project.getVoqalLogger(this::class)
             log.error("Failed to create tool: " + it.name)
             throw e
         }
@@ -147,7 +147,6 @@ class VoqalToolService(private val project: Project) {
     }
 
     suspend fun handleFunctionCall(toolCall: ToolCall.Function, response: VoqalResponse) {
-        val log = project.getVoqalLogger(this::class)
         val functionCall = toolCall.function
         var action = availableToolsMap[functionCall.name]
         if (action == null) {
@@ -191,7 +190,6 @@ class VoqalToolService(private val project: Project) {
     }
 
     private fun getCustomTools(directive: VoqalDirective): MutableMap<String, VoqalTool> {
-        val log = project.getVoqalLogger(this::class)
         val customTools = mutableMapOf<String, VoqalTool>()
         val regexPattern = "```yaml\\r?\\n(.*?)```".toRegex(RegexOption.DOT_MATCHES_ALL)
         val matches = regexPattern.findAll(directive.toMarkdown())
@@ -219,7 +217,6 @@ class VoqalToolService(private val project: Project) {
     }
 
     private suspend fun invokeAction(functionCall: FunctionCall, action: VoqalTool, response: VoqalResponse) {
-        val log = project.getVoqalLogger(this::class)
         ThreadingAssertions.assertBackgroundThread()
         val args = try {
             JsonObject(fixIllegalDollarEscape(functionCall.arguments))

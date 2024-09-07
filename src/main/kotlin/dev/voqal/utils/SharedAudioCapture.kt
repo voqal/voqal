@@ -37,6 +37,7 @@ class SharedAudioCapture(private val project: Project) {
         }
     }
 
+    private val log = project.getVoqalLogger(this::class)
     private val listeners: MutableList<AudioDataListener> = CopyOnWriteArrayList()
     private var paused = false
     private var active = true
@@ -57,7 +58,6 @@ class SharedAudioCapture(private val project: Project) {
     }
 
     init {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Using audio format: $FORMAT")
         val configService = project.service<VoqalConfigService>()
         val config = configService.getConfig()
@@ -110,7 +110,6 @@ class SharedAudioCapture(private val project: Project) {
     }
 
     private fun startCapture() {
-        val log = project.getVoqalLogger(this::class)
         if (System.getProperty("VQL_TEST_MODE") == "true") return
         log.debug("Starting shared audio capture")
         active = true
@@ -122,8 +121,6 @@ class SharedAudioCapture(private val project: Project) {
     }
 
     fun registerListener(listener: AudioDataListener) {
-        val log = project.getVoqalLogger(this::class)
-
         //ensure no dupe listeners
         val listenersOfSameType = listeners.filter { it::class == listener::class }
         if (listener.isTestListener() && listenersOfSameType.any { it.isTestListener() }) {
@@ -139,13 +136,11 @@ class SharedAudioCapture(private val project: Project) {
     }
 
     fun removeListener(listener: AudioDataListener) {
-        val log = project.getVoqalLogger(this::class)
         listeners.remove(listener)
         log.debug("Removed audio data listener. Active listeners: ${listeners.size}")
     }
 
     private fun captureAudio() {
-        val log = project.getVoqalLogger(this::class)
         try {
             val availableMicrophones = getAvailableMicrophones()
             if (availableMicrophones.isEmpty()) {
@@ -317,7 +312,6 @@ class SharedAudioCapture(private val project: Project) {
     }
 
     private fun restart() {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Restarting audio capture")
         cancel()
         startCapture()
@@ -349,20 +343,17 @@ class SharedAudioCapture(private val project: Project) {
 
     fun pause() {
         if (paused) return
-        val log = project.getVoqalLogger(this::class)
         log.debug("Pausing audio capture")
         this.paused = true
     }
 
     fun resume() {
         if (!paused) return
-        val log = project.getVoqalLogger(this::class)
         log.debug("Resuming audio capture")
         this.paused = false
     }
 
     fun cancel() {
-        val log = project.getVoqalLogger(this::class)
         log.debug("Cancelling audio capture")
         this.active = false
         line?.close()

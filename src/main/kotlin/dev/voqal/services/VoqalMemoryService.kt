@@ -21,6 +21,7 @@ import dev.voqal.status.VoqalStatus
 @Service(Service.Level.PROJECT)
 class VoqalMemoryService(private val project: Project) : Disposable {
 
+    private val log = project.getVoqalLogger(this::class)
     //todo: memory system per mode?
     private var memorySystem: MemorySystem
     private var memory: MemorySlice? = null
@@ -37,7 +38,6 @@ class VoqalMemoryService(private val project: Project) : Disposable {
     }
 
     private fun setupMemorySystem(): MemorySystem {
-        val log = project.getVoqalLogger(this::class)
         return if (false) {
             log.info("Using thread memory system")
             ThreadMemorySystem(project)
