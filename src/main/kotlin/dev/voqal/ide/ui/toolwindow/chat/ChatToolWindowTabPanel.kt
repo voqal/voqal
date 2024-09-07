@@ -68,8 +68,7 @@ class ChatToolWindowTabPanel(
         project.scope.launch {
             val configService = project.service<VoqalConfigService>()
             if (!configService.getConfig().pluginSettings.enabled) {
-                log.debug("Plugin is disabled, not sending message")
-                project.service<VoqalStatusService>().updateText("Plugin is disabled")
+                log.warnChat("Plugin is disabled")
                 return@launch
             }
 
@@ -89,6 +88,16 @@ class ChatToolWindowTabPanel(
 
     fun clearChat() {
         toolWindowScrollablePanel.clearAll()
+    }
+
+    fun addErrorMessage(message: String, speechId: String? = null) {
+        val errorMessagePanel = createResponsePanel(true, speechId, null, true)
+        val messagePanel = toolWindowScrollablePanel.addMessage(false)
+        messagePanel.add(errorMessagePanel)
+
+        val responseContainer = errorMessagePanel.content as ChatMessageResponseBody
+        responseContainer.clear()
+        responseContainer.update(message)
     }
 
     fun addUserMessage(message: String, speechId: String? = null) {
@@ -113,9 +122,10 @@ class ChatToolWindowTabPanel(
     private fun createResponsePanel(
         isUser: Boolean,
         speechId: String?,
-        voqalResponse: VoqalResponse?
+        voqalResponse: VoqalResponse?,
+        isError: Boolean = false
     ): ChatMessagePanel {
-        return ChatMessagePanel(isUser, isDebug = voqalResponse != null)
+        return ChatMessagePanel(isUser, isDebug = voqalResponse != null, isError = isError)
             .apply {
                 if (voqalResponse != null) {
                     withViewPrompt { viewPrompt(voqalResponse) }

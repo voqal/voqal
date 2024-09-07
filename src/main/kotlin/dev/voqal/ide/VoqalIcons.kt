@@ -1,6 +1,7 @@
 package dev.voqal.ide
 
 import com.intellij.openapi.util.IconLoader
+import com.intellij.ui.JBColor
 import java.awt.Color
 import javax.swing.Icon
 
@@ -16,6 +17,7 @@ object VoqalIcons {
     val send = IconLoader.getIcon("/icons/send.svg", VoqalIcons::class.java)
 
     val Default: Icon = IconLoader.getIcon("/icons/voqal-avatar.svg", VoqalIcons::class.java)
+    val Error: Icon = IconLoader.getIcon("/icons/voqal-avatar-error.svg", VoqalIcons::class.java)
     val Debug: Icon = IconLoader.getIcon("/icons/voqal-avatar-debug.svg", VoqalIcons::class.java)
     val User: Icon = IconLoader.getIcon("/icons/user.svg", VoqalIcons::class.java)
 
@@ -36,4 +38,5 @@ object VoqalIcons {
     }
 
     val YELLOW = Color(0xF6CD6C)
+    val DARK_RED = JBColor(JBColor.PINK, Color(0x5E3838))
 }

@@ -238,7 +238,7 @@ class VoqalConfigService(private val project: Project) {
                     val openAI = OpenAiClient("", project, openAiConfig)
                     addTtsProvider(openAI)
                 } else {
-                    log.warn("Missing text-to-speech provider key")
+                    log.warnChat("Missing text-to-speech provider key")
                 }
             }
 
@@ -255,7 +255,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addTtsProvider(deepgramClient)
                 } else {
-                    log.warn("Missing text-to-speech provider key")
+                    log.warnChat("Missing text-to-speech provider key")
                 }
             }
 
@@ -269,10 +269,10 @@ class VoqalConfigService(private val project: Project) {
                         )
                         addTtsProvider(orcaClient)
                     } catch (e: PicovoiceError) {
-                        log.warn("Unable to validate text-to-speech provider key")
+                        log.warnChat("Unable to validate text-to-speech provider key")
                     }
                 } else {
-                    log.warn("Missing text-to-speech provider key")
+                    log.warnChat("Missing text-to-speech provider key")
                 }
             }
         }
@@ -294,7 +294,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addObservabilityProvider(heliconeClient)
                 } else {
-                    log.warn("Missing observability provider key")
+                    log.warnChat("Missing observability provider key")
                 }
             }
 
@@ -323,7 +323,7 @@ class VoqalConfigService(private val project: Project) {
                     addLlmProvider(openAI)
                     addAssistantProvider(openAI)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
 
@@ -337,7 +337,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(anthropicClient)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
 
@@ -351,7 +351,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(togetherAiClient)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
 
@@ -368,9 +368,9 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(huggingFaceClient)
                 } else if (!hasProviderKey) {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 } else {
-                    log.warn("Missing language model endpoint url")
+                    log.warnChat("Missing language model endpoint url")
                 }
             }
 
@@ -384,7 +384,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(mistralAiClient)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
 
@@ -398,7 +398,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(groqClient)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
 
@@ -412,7 +412,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(ollamaClient)
                 } else {
-                    log.warn("Missing language model endpoint url")
+                    log.warnChat("Missing language model endpoint url")
                 }
             }
 
@@ -431,7 +431,7 @@ class VoqalConfigService(private val project: Project) {
                     val customClient = OpenAiClient(modelSettings.name, project, customConfig)
                     addLlmProvider(customClient)
                 } else {
-                    log.warn("Missing language model endpoint url")
+                    log.warnChat("Missing language model endpoint url")
                 }
             }
 
@@ -486,7 +486,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addLlmProvider(fireworksClient)
                 } else {
-                    log.warn("Missing language model provider key")
+                    log.warnChat("Missing language model provider key")
                 }
             }
         }
@@ -509,10 +509,10 @@ class VoqalConfigService(private val project: Project) {
                             )
                         )
                     } catch (e: PicovoiceError) {
-                        log.warn("Unable to validate speech-to-text provider key")
+                        log.warnChat("Unable to validate speech-to-text provider key")
                     }
                 } else {
-                    log.warn("Missing speech-to-text provider key")
+                    log.warnChat("Missing speech-to-text provider key")
                 }
             }
 
@@ -521,7 +521,7 @@ class VoqalConfigService(private val project: Project) {
                 if (voqalConfig.speechToTextSettings.providerKey.isNotEmpty()) {
                     addSttProvider(AssemblyAiClient(project, voqalConfig.speechToTextSettings.providerKey))
                 } else {
-                    log.warn("Missing speech-to-text provider key")
+                    log.warnChat("Missing speech-to-text provider key")
                 }
             }
 
@@ -537,7 +537,7 @@ class VoqalConfigService(private val project: Project) {
                     val openAI = OpenAiClient("", project, openAiConfig)
                     addSttProvider(openAI)
                 } else {
-                    log.warn("Missing speech-to-text provider key")
+                    log.warnChat("Missing speech-to-text provider key")
                 }
             }
 
@@ -549,7 +549,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addSttProvider(whisperAsrClient)
                 } else {
-                    log.warn("Missing speech-to-text provider url")
+                    log.warnChat("Missing speech-to-text provider url")
                 }
             }
 
@@ -564,7 +564,7 @@ class VoqalConfigService(private val project: Project) {
                     )
                     addSttProvider(deepgramClient)
                 } else {
-                    log.warn("Missing speech-to-text provider key")
+                    log.warnChat("Missing speech-to-text provider key")
                 }
             }
 
@@ -609,10 +609,10 @@ class VoqalConfigService(private val project: Project) {
                             )
                         )
                     } catch (e: PicovoiceError) {
-                        log.warn("Unable to validate wake provider key")
+                        log.warnChat("Unable to validate wake provider key")
                     }
                 } else {
-                    log.warn("Missing wake provider key")
+                    log.warnChat("Missing wake provider key")
                 }
             }
         }

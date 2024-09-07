@@ -51,7 +51,7 @@ class VoqalToolService(private val project: Project) {
         try {
             it.constructors[0].newInstance() as VoqalTool
         } catch (e: Throwable) {
-            log.error("Failed to create tool: " + it.name)
+            log.errorChat("Failed to create tool: " + it.name)
             throw e
         }
     }.toSet()
@@ -181,10 +181,7 @@ class VoqalToolService(private val project: Project) {
                 project.service<VoqalStatusService>()
                     .updateText("Finished invoking intent: ${functionCall.name}", response)
             } else {
-                log.warn("Unable to find tool: ${functionCall.name}")
-                project.service<VoqalDirectiveService>().handleResponse(
-                    "Unable to find tool: ${functionCall.name}"
-                )
+                log.warnChat("Unable to find tool: ${functionCall.name}")
             }
         }
     }
@@ -221,10 +218,7 @@ class VoqalToolService(private val project: Project) {
         val args = try {
             JsonObject(fixIllegalDollarEscape(functionCall.arguments))
         } catch (e: Exception) {
-            log.warn("Failed to parse: ${functionCall.arguments}. Reason: ${e.message}")
-            project.service<VoqalDirectiveService>().handleResponse(
-                "Failed to parse: ${functionCall.name}. Please try again."
-            )
+            log.warnChat("Failed to parse: ${functionCall.arguments}. Reason: ${e.message}")
             return
         }
         try {
@@ -256,10 +250,7 @@ class VoqalToolService(private val project: Project) {
                 memoryService.putLongTermUserData("last_executed_tool_args", args)
             }
         } catch (e: Throwable) {
-            log.error("Failed to invoke action: ${functionCall.name}", e)
-            project.service<VoqalDirectiveService>().handleResponse(
-                "Failed to invoke action: ${functionCall.name}. Reason: ${e.message}"
-            )
+            log.errorChat("Failed to invoke action: ${functionCall.name}. Reason: ${e.message}", e)
         }
     }
 }

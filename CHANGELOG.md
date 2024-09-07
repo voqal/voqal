@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Display error messages in chat tool window
+
 ### Fixed
 
 - Revert smart rename affected files on cancel

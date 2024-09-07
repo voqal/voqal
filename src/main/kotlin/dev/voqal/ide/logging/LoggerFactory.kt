@@ -1,6 +1,8 @@
 package dev.voqal.ide.logging
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import dev.voqal.services.VoqalStatusService
 import dev.voqal.services.logsTab
 import org.slf4j.Logger
 import org.slf4j.Marker
@@ -15,10 +17,10 @@ import java.util.*
  */
 class LoggerFactory {
     companion object {
-        private val loggers = WeakHashMap<Project, MutableMap<String, Logger>>()
+        private val loggers = WeakHashMap<Project, MutableMap<String, VoqalLogger>>()
 
         @JvmStatic
-        fun <T> getLogger(project: Project, java: Class<out T>): Logger {
+        fun <T> getLogger(project: Project, java: Class<out T>): VoqalLogger {
             val loggers = loggers.getOrPut(project) { mutableMapOf() }
             val name = java.name
             if (loggers.containsKey(name)) {
@@ -41,6 +43,16 @@ class LoggerFactory {
         private val logsTab by lazy { project.logsTab }
         private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
             .withZone(ZoneOffset.UTC)
+
+        fun errorChat(input: String, e: Throwable? = null) {
+            error(input, e)
+            project.service<VoqalStatusService>().warnChat(input)
+        }
+
+        fun warnChat(input: String) {
+            warn(input)
+            project.service<VoqalStatusService>().warnChat(input)
+        }
 
         override fun getName(): String {
             return name

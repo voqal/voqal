@@ -21,6 +21,12 @@ class ChatToolWindowContentManager(private val project: Project) {
         }
     }
 
+    fun addErrorMessage(response: String, speechId: String? = null) {
+        project.invokeLater {
+            tryFindFirstChatTabContent().addErrorMessage(response, speechId)
+        }
+    }
+
     fun addUserMessage(response: String, speechId: String? = null) {
         project.invokeLater {
             tryFindFirstChatTabContent().addUserMessage(response, speechId)

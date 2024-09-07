@@ -130,4 +130,9 @@ class VoqalStatusService(private val project: Project) {
         log.debug("Updating text: $input")
         project.service<ChatToolWindowContentManager>().addResponse(input, response)
     }
+
+    fun warnChat(input: String) {
+        ThreadingAssertions.assertBackgroundThread()
+        project.service<ChatToolWindowContentManager>().addErrorMessage(input)
+    }
 }

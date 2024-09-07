@@ -279,8 +279,7 @@ class SharedAudioCapture(private val project: Project) {
                                 directiveService.handleResponse(errorMessage)
                             }
                         } else {
-                            log.warn("No speech-to-text provider available")
-                            directiveService.handleResponse("No speech-to-text provider available")
+                            log.warnChat("No speech-to-text provider available")
                         }
                     } else {
                         framesBeforeVoiceDetected.add(audioData)

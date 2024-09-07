@@ -5,14 +5,14 @@ import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.IntByReference
 import com.sun.jna.ptr.PointerByReference
+import dev.voqal.ide.logging.LoggerFactory.VoqalLogger
 import dev.voqal.provider.clients.picovoice.error.PicovoiceError
-import org.slf4j.Logger
 
 @Suppress("FunctionName")
 interface PicovoiceNative : Library {
 
     companion object {
-        fun throwIfError(log: Logger, native: PicovoiceNative, status: Int) {
+        fun throwIfError(log: VoqalLogger, native: PicovoiceNative, status: Int) {
             if (status != 0) {
                 var errorMessage = native.pv_status_to_string(status)
                 val messageStackRef = PointerByReference()

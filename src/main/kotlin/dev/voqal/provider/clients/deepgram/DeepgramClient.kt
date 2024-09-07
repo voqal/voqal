@@ -12,7 +12,6 @@ import dev.voqal.config.settings.SpeechToTextSettings.STTProvider
 import dev.voqal.provider.SttProvider
 import dev.voqal.provider.TtsProvider
 import dev.voqal.services.*
-import dev.voqal.status.VoqalStatus.ERROR
 import dev.voqal.utils.Iso639Language
 import dev.voqal.utils.SharedAudioCapture
 import io.ktor.client.*
@@ -147,16 +146,23 @@ class DeepgramClient(
             pingThread = Thread(pingLoop(), "DeepgramClient-Ping").apply { start() }
         } catch (e: WebSocketException) {
             if (!testMode && e.toString().contains("expected status code 101 but was 401")) {
-                log.warn("Deepgram connection failed: Invalid token")
-                project.service<VoqalStatusService>().update(ERROR, "Invalid Deepgram token")
+                log.warnChat("Invalid Deepgram token")
             } else if (!testMode) {
-                log.warn("Deepgram connection failed: ${e.message}", e)
-                project.service<VoqalStatusService>().update(ERROR, "Failed to connect to Deepgram")
+                val warnMessage = if (e.message != null) {
+                    "Deepgram connection failed: ${e.message}"
+                } else {
+                    "Failed to connect to Deepgram"
+                }
+                log.warnChat(warnMessage)
             }
             return false
         } catch (e: Exception) {
-            log.warn("Deepgram connection failed: ${e.message}", e)
-            project.service<VoqalStatusService>().update(ERROR, "Failed to connect to Deepgram")
+            val warnMessage = if (e.message != null) {
+                "Deepgram connection failed: ${e.message}"
+            } else {
+                "Failed to connect to Deepgram"
+            }
+            log.warnChat(warnMessage)
             return false
         }
         return true

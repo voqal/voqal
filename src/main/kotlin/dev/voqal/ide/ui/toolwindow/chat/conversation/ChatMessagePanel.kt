@@ -17,7 +17,8 @@ import javax.swing.SwingConstants
 
 open class ChatMessagePanel(
     val isUser: Boolean = false,
-    val isDebug: Boolean = false
+    val isDebug: Boolean = false,
+    val isError: Boolean = false
 ) : JPanel(BorderLayout()) {
     private val header: Header
     private val body: Body
@@ -55,7 +56,10 @@ open class ChatMessagePanel(
             add(iconLabel, BorderLayout.LINE_START)
 
             iconsWrapper = JPanel(FlowLayout(FlowLayout.RIGHT, 0, 0))
-            if (this@ChatMessagePanel.isDebug) {
+            if (this@ChatMessagePanel.isError) {
+                iconsWrapper.background = VoqalIcons.DARK_RED
+                background = VoqalIcons.DARK_RED
+            } else if (this@ChatMessagePanel.isDebug) {
                 iconsWrapper.background = background.darker()
                 background = background.darker()
             } else if (this@ChatMessagePanel.isUser) {
@@ -101,12 +105,16 @@ open class ChatMessagePanel(
 
         private val iconLabel: JBLabel
             get() = JBLabel(
-                if (this@ChatMessagePanel.isDebug) {
+                if (this@ChatMessagePanel.isError) {
+                    "Error"
+                } else if (this@ChatMessagePanel.isDebug) {
                     "Debug"
                 } else if (this@ChatMessagePanel.isUser) {
                     getDisplayName()
                 } else "Voqal",
-                if (this@ChatMessagePanel.isDebug) {
+                if (this@ChatMessagePanel.isError) {
+                    VoqalIcons.Error
+                } else if (this@ChatMessagePanel.isDebug) {
                     VoqalIcons.Debug
                 } else if (this@ChatMessagePanel.isUser) {
                     VoqalIcons.User
@@ -131,7 +139,9 @@ open class ChatMessagePanel(
 
         init {
             border = JBUI.Borders.empty(4, 8, 8, 8)
-            if (this@ChatMessagePanel.isDebug) {
+            if (this@ChatMessagePanel.isError) {
+                background = VoqalIcons.DARK_RED
+            } else if (this@ChatMessagePanel.isDebug) {
                 background = background.darker()
             } else if (this@ChatMessagePanel.isUser) {
                 background = ColorUtil.brighter(background, 2)

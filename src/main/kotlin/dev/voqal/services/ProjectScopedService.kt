@@ -7,10 +7,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import dev.voqal.ide.logging.LoggerFactory
+import dev.voqal.ide.logging.LoggerFactory.VoqalLogger
 import dev.voqal.ide.ui.toolwindow.tab.VoqalLogsTab
 import dev.voqal.utils.SharedAudioCapture
 import kotlinx.coroutines.*
-import org.slf4j.Logger
 import kotlin.reflect.KClass
 
 @Service(Service.Level.PROJECT)
@@ -22,7 +22,7 @@ class ProjectScopedService(project: Project) : Disposable {
     internal val voqalLogsTab by lazy { VoqalLogsTab(project, messageBusConnection) }
 
     private val handler = CoroutineExceptionHandler { _, exception ->
-        log.error("Unhandled exception: ${exception.message}", exception)
+        log.errorChat("Unhandled exception: ${exception.message}", exception)
     }
     private val job = Job().apply {
         invokeOnCompletion { cause ->
@@ -31,7 +31,7 @@ class ProjectScopedService(project: Project) : Disposable {
             }
         }
     }
-    val scope = CoroutineScope(Dispatchers.Default + job + handler)
+    internal val scope = CoroutineScope(Dispatchers.Default + job + handler)
 
     override fun dispose() {
         audioCapture.cancel()
@@ -40,7 +40,7 @@ class ProjectScopedService(project: Project) : Disposable {
     }
 }
 
-fun Project.getVoqalLogger(clazz: KClass<*>): Logger {
+fun Project.getVoqalLogger(clazz: KClass<*>): VoqalLogger {
     return LoggerFactory.getLogger(this, clazz.java)
 }
 

@@ -122,8 +122,7 @@ class VoqalDirectiveService(private val project: Project) {
 
         val aiProvider = project.service<VoqalConfigService>().getAiProvider()
         if (!aiProvider.isLlmProvider()) {
-            log.warn("No language model provider found")
-            project.service<VoqalStatusService>().updateText("No language model provider found")
+            log.warnChat("No language model provider found")
             return
         }
 
@@ -310,32 +309,22 @@ class VoqalDirectiveService(private val project: Project) {
                 } catch (e: RateLimitException) {
                     execution.errors.add(e)
                     if (++attempt >= maxAttempts) {
-                        log.warn("Rate limit exceeded. Maximum retry attempts reached.")
-                        handleResponse("Rate limit exceeded. Please try again later.", isTextOnly = textOnly)
+                        log.warnChat("Rate limit exceeded. Maximum retry attempts reached.")
                         retry = false
                     } else {
                         val delayTime = (2.0.pow(attempt.toDouble()) * 1000).toLong()
-                        log.warn("Rate limit exceeded. Retrying in ${delayTime / 1000} seconds...")
-                        handleResponse(
-                            "Rate limit exceeded. Retrying in ${delayTime / 1000} seconds...",
-                            isTextOnly = textOnly
-                        )
+                        log.warnChat("Rate limit exceeded. Retrying in ${delayTime / 1000} seconds...")
                         delay(delayTime)
                         retry = true
                     }
                 } catch (e: OpenAITimeoutException) {
                     execution.errors.add(e)
                     if (++attempt >= maxAttempts) {
-                        log.warn("Request timeout. Maximum retry attempts reached.")
-                        handleResponse("Request timeout. Please try again later.", isTextOnly = textOnly)
+                        log.warnChat("Request timeout. Maximum retry attempts reached.")
                         retry = false
                     } else {
                         val delayTime = (2.0.pow(attempt.toDouble()) * 1000).toLong()
-                        log.warn("Request timeout. Retrying in ${delayTime / 1000} seconds...")
-                        handleResponse(
-                            "Request timeout. Retrying in ${delayTime / 1000} seconds...",
-                            isTextOnly = textOnly
-                        )
+                        log.warnChat("Request timeout. Retrying in ${delayTime / 1000} seconds...")
                         delay(delayTime)
                         retry = true
                     }
@@ -343,23 +332,17 @@ class VoqalDirectiveService(private val project: Project) {
                     execution.errors.add(e)
                     if (e.statusCode in setOf(503)) {
                         if (++attempt >= maxAttempts) {
-                            log.warn("LLM API error. Maximum retry attempts reached.")
-                            handleResponse("LLM API error. Please try again later.", isTextOnly = textOnly)
+                            log.warnChat("LLM API error. Maximum retry attempts reached.")
                             retry = false
                         } else {
                             val delayTime = (2.0.pow(attempt.toDouble()) * 1000).toLong()
-                            log.warn("LLM API error. Retrying in ${delayTime / 1000} seconds...")
-                            handleResponse(
-                                "LLM API error. Retrying in ${delayTime / 1000} seconds...",
-                                isTextOnly = textOnly
-                            )
+                            log.warnChat("LLM API error. Retrying in ${delayTime / 1000} seconds...")
                             delay(delayTime)
                             retry = true
                         }
                     } else {
                         val errorMessage = e.message ?: "An unknown error occurred"
-                        log.warn(errorMessage)
-                        handleResponse(errorMessage, isTextOnly = textOnly)
+                        log.warnChat(errorMessage)
                         retry = false
                     }
                 } catch (e: OpenAIException) {
@@ -367,8 +350,7 @@ class VoqalDirectiveService(private val project: Project) {
                     val errorMessage = if (e.cause is ConnectException) {
                         "Host connection unavailable"
                     } else e.message ?: "An unknown error occurred"
-                    log.warn(errorMessage)
-                    handleResponse(errorMessage, isTextOnly = textOnly)
+                    log.warnChat(errorMessage)
                     retry = false
                 } catch (e: ResponseParseError) {
                     execution.errors.add(e)
@@ -385,21 +367,18 @@ class VoqalDirectiveService(private val project: Project) {
                         retry = true
                     } else {
                         val errorMessage = e.message
-                        log.warn(errorMessage)
-                        handleResponse(errorMessage, isTextOnly = true)
+                        log.warnChat(errorMessage)
                         retry = false
                     }
                 } catch (e: UnresolvedAddressException) {
                     execution.errors.add(e)
                     val errorMessage = "Host connection unavailable"
-                    log.warn(errorMessage)
-                    handleResponse(errorMessage, isTextOnly = textOnly)
+                    log.warnChat(errorMessage)
                     retry = false
                 } catch (e: Exception) {
                     execution.errors.add(e)
                     val errorMessage = e.message ?: "An unknown error occurred"
-                    log.error(errorMessage, e)
-                    handleResponse(errorMessage, isTextOnly = textOnly)
+                    log.errorChat(errorMessage, e)
                     retry = false
                 }
             } while (retry)
@@ -458,9 +437,8 @@ class VoqalDirectiveService(private val project: Project) {
 
         val toolCalls = response.toolCalls
         if (toolCalls.isEmpty()) {
-            log.warn("No tool calls available: $response")
+            log.warnChat("No tool calls provided")
             finishDirective(response.directive)
-            handleResponse("No tool calls available: $response")
         } else {
             val executionStr = buildString {
                 append("Executing ")
@@ -485,8 +463,7 @@ class VoqalDirectiveService(private val project: Project) {
                 if (toolCall != null) {
                     toolService.handleFunctionCall(toolCall, response)
                 } else {
-                    log.warn("Missing function call. Message: $response")
-                    handleResponse("Missing function call. Message: $response")
+                    log.warnChat("Missing function call")
                     return@forEach
                 }
             }
