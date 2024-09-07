@@ -21,7 +21,7 @@ import dev.voqal.services.getVoqalLogger
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
 
-class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
+class CancelTool : VoqalTool() {
 
     companion object {
         const val NAME = "cancel"
@@ -36,6 +36,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
 
         val statusService = project.service<VoqalStatusService>()
         if (statusService.getStatus() == VoqalStatus.IDLE) {
+            val updateText = args.getBoolean("updateText", true)
             if (updateText) {
                 //todo: try unselect before saying cancel unavailable
                 project.service<VoqalStatusService>().updateText("Cancel unavailable")
@@ -72,7 +73,7 @@ class CancelTool(private val updateText: Boolean = true) : VoqalTool() {
             editor.markupModel.removeHighlighter(it)
         }
         editor?.putUserData(VOQAL_HIGHLIGHTERS, emptyList())
-        project.service<VoqalToolService>().blindExecute(UnselectTool(false))
+        project.service<VoqalToolService>().blindExecute(UnselectTool(), JsonObject().put("updateText", false))
 
         //reset status
         project.service<VoqalStatusService>().updateText("Cancelled")

@@ -6,6 +6,7 @@ import com.intellij.openapi.components.service
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
+import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.launch
 
 open class DisableVoqalAction : AnAction() {
@@ -17,7 +18,7 @@ open class DisableVoqalAction : AnAction() {
         configService.updateConfig(config.pluginSettings.copy(enabled = false))
 
         project.scope.launch {
-            project.service<VoqalToolService>().blindExecute(CancelTool(false))
+            project.service<VoqalToolService>().blindExecute(CancelTool(), JsonObject().put("updateText", false))
             project.service<VoqalDirectiveService>().reset()
             project.service<VoqalConfigService>().resetAiProvider()
             project.service<VoqalConfigService>().resetCachedConfig()

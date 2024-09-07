@@ -15,7 +15,7 @@ import dev.voqal.services.VoqalStatusService
 import dev.voqal.services.getVoqalLogger
 import io.vertx.core.json.JsonObject
 
-class UnselectTool(private val updateText: Boolean = true) : VoqalTool() {
+class UnselectTool : VoqalTool() {
 
     companion object {
         const val NAME = "unselect"
@@ -26,6 +26,7 @@ class UnselectTool(private val updateText: Boolean = true) : VoqalTool() {
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
         val project = directive.project
         val log = project.getVoqalLogger(this::class)
+        val updateText = args.getBoolean("updateText", true)
         val editor = directive.ide.editor
         if (editor != null) {
             val hasSelection = ReadAction.compute(ThrowableComputable { editor.selectionModel.hasSelection() })

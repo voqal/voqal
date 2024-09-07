@@ -46,7 +46,15 @@ class VoqalToolService(private val project: Project) {
 
     private val availableTools = javaClass.classLoader.scanForClasses("dev.voqal.assistant.tool").filter {
         VoqalTool::class.java.isAssignableFrom(it) && !Modifier.isAbstract(it.modifiers)
-    }.map { it.constructors[0].newInstance() as VoqalTool }.toSet()
+    }.map {
+        try {
+            it.constructors[0].newInstance() as VoqalTool
+        } catch (e: Throwable) {
+            val log = project.getVoqalLogger(this::class)
+            log.error("Failed to create tool: " + it.name)
+            throw e
+        }
+    }.toSet()
     private val availableToolsMap = availableTools.associateBy { it.name }
     fun getAvailableTools() = availableToolsMap
 
