@@ -12,6 +12,7 @@
 
 - Revert smart rename affected files on cancel
 - Inconsistent spacing in configuration UI
+- Invalid revision when cancelling edit mode without changes
 
 ## [2024.10.1] - 2024-09-05
 
