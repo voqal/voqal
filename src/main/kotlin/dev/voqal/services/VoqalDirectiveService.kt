@@ -71,7 +71,7 @@ class VoqalDirectiveService(private val project: Project) {
     private val log = project.getVoqalLogger(this::class)
     private val activeDirectives = mutableMapOf<VoqalDirective, DirectiveExecution>()
     private val executionHistory = mutableListOf<DirectiveExecution>()
-    private val listeners: MutableList<(VoqalDirectiveService, DirectiveExecution) -> Unit> = CopyOnWriteArrayList()
+    private val listeners = CopyOnWriteArrayList<(VoqalDirectiveService, DirectiveExecution) -> Unit>()
 
     init {
         project.scope.launch {

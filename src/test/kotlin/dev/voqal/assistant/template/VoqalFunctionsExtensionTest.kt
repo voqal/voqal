@@ -55,7 +55,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertEquals(8, markdown.lines().filter { it.trim().isNotBlank() }.count())
+        assertEquals(8, markdown.lines().count { it.trim().isNotBlank() })
         assertFalse(markdown.contains("{"))
         assertFalse(markdown.contains("}"))
 
@@ -99,7 +99,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertEquals(8, markdown.lines().filter { it.trim().isNotBlank() }.count())
+        assertEquals(8, markdown.lines().count { it.trim().isNotBlank() })
         assertFalse(markdown.contains("{"))
         assertFalse(markdown.contains("}"))
 
@@ -143,7 +143,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertEquals(7, markdown.lines().filter { it.trim().isNotBlank() }.count())
+        assertEquals(7, markdown.lines().count { it.trim().isNotBlank() })
 
         val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(testDocument)!!
         val funcText = psiFile.descendants().filter { it.toString().contains("MethodImpl:") }.first().text
@@ -187,7 +187,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertEquals(9, markdown.lines().filter { it.trim().isNotBlank() }.count())
+        assertEquals(9, markdown.lines().count { it.trim().isNotBlank() })
 
         val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(testDocument)!!
         psiFile.descendants().filter {
@@ -281,7 +281,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertTrue(markdown.lines().filter { it.trim().isNotBlank() }.count() <= 23)
+        assertTrue(markdown.lines().count { it.trim().isNotBlank() } <= 23)
 
         val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(testDocument)!!
         val findTest = "    protected"
@@ -327,8 +327,8 @@ class VoqalFunctionsExtensionTest : JBTest() {
         )
         val markdown = directive.toMarkdown()
         assertTrue(markdown.contains("class Open_statementContext"))
-        assertTrue(markdown.lines().filter { it.trim().isNotBlank() }.count() > 30)
-        assertTrue(markdown.lines().filter { it.trim().isNotBlank() }.count() < 400)
+        assertTrue(markdown.lines().count { it.trim().isNotBlank() } > 30)
+        assertTrue(markdown.lines().count { it.trim().isNotBlank() } < 400)
     }
 
     fun `test plsql parser2`() {
@@ -434,6 +434,6 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertEquals(3, markdown.lines().filter { it.trim().isNotBlank() }.count())
+        assertEquals(3, markdown.lines().count { it.trim().isNotBlank() })
     }
 }

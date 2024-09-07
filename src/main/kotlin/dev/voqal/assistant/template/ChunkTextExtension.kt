@@ -258,7 +258,7 @@ class ChunkTextExtension : AbstractExtension() {
             var cumulativeLineCount = document.getText(selectedBlock.textRange).lines().size
             selectedBlocks.add(selectedBlock)
 
-            var commonParent = getBlockParent(rootBlock, selectedBlock) ?: rootBlock
+            val commonParent = getBlockParent(rootBlock, selectedBlock) ?: rootBlock
             val rejectedBlocks = mutableListOf<Block>()
             // Auto-reject blocks before/after the start/end lines of the common parent
             val commonParentStartLine = document.getLineNumber(commonParent.textRange.startOffset)

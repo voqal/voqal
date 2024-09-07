@@ -51,7 +51,6 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.websocket.serialization.jvm)
-    implementation(libs.ktor.serialization.kotlinx.protobuf)
     implementation(libs.openai.core)
     implementation(libs.openai.client)
     implementation(libs.jlayer)

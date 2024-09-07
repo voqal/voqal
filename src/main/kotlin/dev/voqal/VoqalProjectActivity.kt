@@ -121,13 +121,13 @@ class VoqalProjectActivity : ProjectActivity {
                     voqalCarets.remove(editor)
                 }
             }
-        }, project)
+        }, project.service<ProjectScopedService>())
         IdeEventQueue.getInstance().addDispatcher({ event ->
             if (event is KeyEvent) {
                 voqalCarets.forEach { (_, voqalCaret) -> voqalCaret.repaint() }
             }
             false
-        }, project)
+        }, project.service<ProjectScopedService>())
 
         //pre-initialize AI provider
         if (!ApplicationManager.getApplication().isUnitTestMode) {

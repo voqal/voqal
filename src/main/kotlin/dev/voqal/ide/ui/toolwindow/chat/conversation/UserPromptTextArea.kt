@@ -36,7 +36,7 @@ class UserPromptTextArea(
         textArea.lineWrap = true
         textArea.wrapStyleWord = true
         textArea.emptyText.setText("Type your message here")
-        textArea.border = JBUI.Borders.empty(4, 4)
+        textArea.border = JBUI.Borders.empty(4)
         addShiftEnterInputMap(textArea, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
                 handleSubmit()
@@ -86,7 +86,7 @@ class UserPromptTextArea(
     }
 
     private fun handleSubmit() {
-        if (submitEnabled && !textArea.text.isEmpty()) {
+        if (submitEnabled && textArea.text.isNotEmpty()) {
             onSubmit.accept(text.trim { it <= ' ' })
             textArea.text = ""
         }

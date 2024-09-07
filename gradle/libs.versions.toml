@@ -4,7 +4,6 @@ annotations = "24.1.0"
 ktor = "2.3.12"
 vertx = "4.5.10"
 openai-client = "3.8.2"
-protobuf = "2.3.12"
 jlayer = "1.0.1"
 okio = "3.9.0"
 jackson-databind = "2.17.2"
@@ -38,7 +37,6 @@ ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref="ktor" }
 ktor-serialization-kotlinx = { module = "io.ktor:ktor-serialization-kotlinx", version.ref="ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor" }
 ktor-websocket-serialization-jvm = { module = "io.ktor:ktor-websocket-serialization-jvm", version.ref="ktor" }
-ktor-serialization-kotlinx-protobuf = { module = "io.ktor:ktor-serialization-kotlinx-protobuf", version.ref="protobuf" }
 
 openai-core = { module = "com.aallam.openai:openai-core", version.ref="openai-client" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref="openai-client" }

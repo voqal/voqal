@@ -23,19 +23,15 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 
 public class LanguageModelsPanel {
+
   private static final String EMPTY_PANEL = "empty.panel";
 
   private final JBList<LanguageModelSettings> myLanguageModelsList;
-  @SuppressWarnings("UnusedDeclaration")
-  private JPanel myToolbarPanel;
-
   private final List<LanguageModelSettings> myLanguageModels = new ArrayList<>();
   private final List<LanguageModelSettingsPanel> myEditors = new ArrayList<>();
   private final Project myProject;
@@ -50,9 +46,9 @@ public class LanguageModelsPanel {
     myLanguageModelsList = new JBList<>(new CollectionListModel<>());
     myLanguageModelsList.getEmptyText().setText("No language models configured");
 
-    myServersLabel.setLabelFor(myLanguageModelsList);
+    myLanguageModelsLabel.setLabelFor(myLanguageModelsList);
 
-    myServersPanel.setMinimumSize(new Dimension(-1, 100));
+    myLanguageModelsPanel.setMinimumSize(new Dimension(-1, 100));
 
     final List<AnAction> createActions = new ArrayList<>();
     for (final LanguageModelSettings.LMProvider provider : LanguageModelSettings.LMProvider.getEntries()) {
@@ -89,67 +85,58 @@ public class LanguageModelsPanel {
         }
     });
 
-    toolbarDecorator.setAddAction(new AnActionButtonRunnable() {
-        @Override
-        public void run(AnActionButton anActionButton) {
-            DefaultActionGroup group = new DefaultActionGroup();
-            for (AnAction aMyAdditional : createActions) {
-                group.add(aMyAdditional);
-            }
-            Set<LanguageModelSettings> languageModelsSettings = new HashSet<>();
-            myLanguageModels.forEach(languageModelsSettings::remove);
-            if (!languageModelsSettings.isEmpty()) {
-                group.add(Separator.getInstance());
-                for (final LanguageModelSettings settings : languageModelsSettings) {
-                    group.add(new AddLanguageModelAction(settings) {
-                        @Override
-                        protected LanguageModelSettings getSettings() {
-                            return settings;
-                        }
-                    });
-                }
-            }
-
-            JBPopupFactory.getInstance()
-                    .createActionGroupPopup("Add Language Model", group, DataManager.getInstance().getDataContext(anActionButton.getContextComponent()),
-                            JBPopupFactory.ActionSelectionAid.SPEEDSEARCH, true).show(
-                            anActionButton.getPreferredPopupPoint());
+    toolbarDecorator.setAddAction(anActionButton -> {
+        DefaultActionGroup group = new DefaultActionGroup();
+        for (AnAction aMyAdditional : createActions) {
+            group.add(aMyAdditional);
         }
-    });
-
-    toolbarDecorator.setRemoveAction(new AnActionButtonRunnable() {
-        @Override
-        public void run(AnActionButton anActionButton) {
-            LanguageModelSettings settings = getSelectedSettings();
-            if (settings != null) {
-                CollectionListModel<LanguageModelSettings> model = getListModel();
-                model.remove(settings);
-                myLanguageModels.remove(settings);
-                myEditors.removeIf(e -> e.getConfig().equals(settings));
-
-                if (model.getSize() > 0) {
-                    myLanguageModelsList.setSelectedValue(model.getElementAt(0), true);
-                } else {
-                    myRepositoryEditor.removeAll();
-                    myRepositoryEditor.repaint();
-                }
+        Set<LanguageModelSettings> languageModelsSettings = new HashSet<>();
+        myLanguageModels.forEach(languageModelsSettings::remove);
+        if (!languageModelsSettings.isEmpty()) {
+            group.add(Separator.getInstance());
+            for (final LanguageModelSettings settings : languageModelsSettings) {
+                group.add(new AddLanguageModelAction(settings) {
+                    @Override
+                    protected LanguageModelSettings getSettings() {
+                        return settings;
+                    }
+                });
             }
         }
+
+        JBPopupFactory.getInstance()
+                .createActionGroupPopup("Add Language Model", group, DataManager.getInstance().getDataContext(anActionButton.getContextComponent()),
+                        JBPopupFactory.ActionSelectionAid.SPEEDSEARCH, true).show(
+                        anActionButton.getPreferredPopupPoint());
     });
 
-    myServersPanel.add(toolbarDecorator.createPanel(), BorderLayout.CENTER);
-
-    myLanguageModelsList.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(@NotNull ListSelectionEvent e) {
+    toolbarDecorator.setRemoveAction(anActionButton -> {
         LanguageModelSettings settings = getSelectedSettings();
         if (settings != null) {
-          String name = myRepoNames.get(settings);
-          assert name != null;
-          ((CardLayout)myRepositoryEditor.getLayout()).show(myRepositoryEditor, name);
-          mySplitter.doLayout();
-          mySplitter.repaint();
+            CollectionListModel<LanguageModelSettings> model = getListModel();
+            model.remove(settings);
+            myLanguageModels.remove(settings);
+            myEditors.removeIf(e -> e.getConfig().equals(settings));
+
+            if (model.getSize() > 0) {
+                myLanguageModelsList.setSelectedValue(model.getElementAt(0), true);
+            } else {
+                myRepositoryEditor.removeAll();
+                myRepositoryEditor.repaint();
+            }
         }
+    });
+
+    myLanguageModelsPanel.add(toolbarDecorator.createPanel(), BorderLayout.CENTER);
+
+    myLanguageModelsList.getSelectionModel().addListSelectionListener(e -> {
+      LanguageModelSettings settings = getSelectedSettings();
+      if (settings != null) {
+        String name = myRepoNames.get(settings);
+        assert name != null;
+        ((CardLayout)myRepositoryEditor.getLayout()).show(myRepositoryEditor, name);
+        mySplitter.doLayout();
+        mySplitter.repaint();
       }
     });
 
@@ -174,9 +161,8 @@ public class LanguageModelsPanel {
     LanguageModelSettingsPanel editor = new LanguageModelSettingsPanel(myProject, settings);
     myEditors.add(editor);
     editor.applyConfig(settings);
-    JComponent component = editor;
     String name = myRepoNames.get(settings);
-    myRepositoryEditor.add(component, name);
+    myRepositoryEditor.add(editor, name);
     myRepositoryEditor.doLayout();
   }
 
@@ -277,8 +263,8 @@ public class LanguageModelsPanel {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         // Generated using JFormDesigner Evaluation license - unknown
         myPanel = new JPanel();
-        myServersLabel = new JBLabel();
-        myServersPanel = new JPanel();
+        myLanguageModelsLabel = new JBLabel();
+        myLanguageModelsPanel = new JPanel();
         myRepositoryEditor = new JPanel();
         myEmptyPanel = new JPanel();
         var bLabel1 = new JBLabel();
@@ -288,19 +274,19 @@ public class LanguageModelsPanel {
         {
             myPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
 
-            //---- myServersLabel ----
-            myServersLabel.setText("Configured language models:");
-            myPanel.add(myServersLabel, new GridConstraints(0, 0, 1, 1,
+            //---- myLanguageModelsLabel ----
+            myLanguageModelsLabel.setText("Configured language models:");
+            myPanel.add(myLanguageModelsLabel, new GridConstraints(0, 0, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_FIXED,
                 GridConstraints.SIZEPOLICY_FIXED,
                 null, null, null));
 
-            //======== myServersPanel ========
+            //======== myLanguageModelsPanel ========
             {
-                myServersPanel.setLayout(new BorderLayout());
+                myLanguageModelsPanel.setLayout(new BorderLayout());
             }
-            myPanel.add(myServersPanel, new GridConstraints(1, 0, 1, 1,
+            myPanel.add(myLanguageModelsPanel, new GridConstraints(1, 0, 1, 1,
                 GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -329,7 +315,7 @@ public class LanguageModelsPanel {
                 null, null, null));
 
             //---- mySplitter ----
-            mySplitter.setFirstComponent(myServersPanel);
+            mySplitter.setFirstComponent(myLanguageModelsPanel);
             mySplitter.setOrientation(true);
             mySplitter.setSecondComponent(myRepositoryEditor);
             myPanel.add(mySplitter, new GridConstraints(2, 0, 1, 1,
@@ -344,8 +330,8 @@ public class LanguageModelsPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     // Generated using JFormDesigner Evaluation license - unknown
     private JPanel myPanel;
-    private JBLabel myServersLabel;
-    private JPanel myServersPanel;
+    private JBLabel myLanguageModelsLabel;
+    private JPanel myLanguageModelsPanel;
     private JPanel myRepositoryEditor;
     private JPanel myEmptyPanel;
     private Splitter mySplitter;

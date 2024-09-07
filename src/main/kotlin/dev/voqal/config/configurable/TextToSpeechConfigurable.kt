@@ -20,9 +20,9 @@ class TextToSpeechConfigurable(val project: Project) : Configurable {
     ) == true
 
     override fun apply() {
-        val updateSettings = form!!.getConfig()
+        val updatedSettings = form!!.getConfig()
         val configService = project.service<VoqalConfigService>()
-        configService.updateConfig(updateSettings)
+        configService.updateConfig(updatedSettings)
 
         project.scope.launch {
             //todo: can do onConfigChange instead of resetAiProvider/getAiProvider

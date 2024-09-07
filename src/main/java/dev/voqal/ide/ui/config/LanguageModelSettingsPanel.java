@@ -17,7 +17,6 @@ import dev.voqal.provider.clients.ollama.OllamaClient;
 import dev.voqal.provider.clients.openai.OpenAiClient;
 import dev.voqal.provider.clients.togetherai.TogetherAiClient;
 import dev.voqal.provider.clients.vertexai.VertexAiClient;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;

@@ -9,7 +9,7 @@ new FormModel {
 		} ) {
 			name: "myPanel"
 			add( new FormComponent( "com.intellij.ui.components.JBLabel" ) {
-				name: "myServersLabel"
+				name: "myLanguageModelsLabel"
 				"text": "Configured language models:"
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 				"anchor": 8
@@ -17,7 +17,7 @@ new FormModel {
 				"vSizePolicy": 0
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
-				name: "myServersPanel"
+				name: "myLanguageModelsPanel"
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 				"row": 1
 				"anchor": 1
@@ -49,7 +49,7 @@ new FormModel {
 			} )
 			add( new FormComponent( "com.intellij.openapi.ui.Splitter" ) {
 				name: "mySplitter"
-				"firstComponent": new FormReference( "myServersPanel" )
+				"firstComponent": new FormReference( "myLanguageModelsPanel" )
 				"orientation": true
 				"secondComponent": new FormReference( "myRepositoryEditor" )
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {

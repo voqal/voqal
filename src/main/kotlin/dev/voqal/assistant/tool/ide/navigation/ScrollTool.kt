@@ -14,6 +14,7 @@ import dev.voqal.assistant.focus.DetectedIntent
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.ide.navigation.ScrollTool.ScrollDirection.*
+import dev.voqal.services.ProjectScopedService
 import dev.voqal.services.VoqalStatusService
 import dev.voqal.services.getVoqalLogger
 import dev.voqal.services.invokeLater
@@ -78,7 +79,7 @@ class ScrollTool : VoqalTool() {
         val frameRate = 10
         val totalFrames = animationDuration / frameRate
         val deltaPerFrame = (newScrollPosition - currentScrollPosition).toFloat() / totalFrames
-        val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, editor.project)
+        val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, editor.project!!.service<ProjectScopedService>())
         for (i in 1..totalFrames) {
             alarm.addRequest({
                 editor.project!!.invokeLater {

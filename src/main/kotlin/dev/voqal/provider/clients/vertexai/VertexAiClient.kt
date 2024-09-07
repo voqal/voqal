@@ -21,6 +21,8 @@ import dev.voqal.provider.LlmProvider
 import dev.voqal.provider.StmProvider
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.getVoqalLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 
@@ -87,8 +89,10 @@ class VertexAiClient(
             speechDirectory.mkdirs()
             val speechFile = File(speechDirectory, "developer-$speechId.wav")
             val audio1Bytes = ByteArray(speechFile.length().toInt())
-            FileInputStream(speechFile).use { audio1FileInputStream ->
-                audio1FileInputStream.read(audio1Bytes)
+            withContext(Dispatchers.IO) {
+                FileInputStream(speechFile).use { audio1FileInputStream ->
+                    audio1FileInputStream.read(audio1Bytes)
+                }
             }
             val audio1 = PartMaker.fromMimeTypeAndData("audio/wav", audio1Bytes)
             log.debug("Attached ${audio1Bytes.size} bytes of audio to the request")
