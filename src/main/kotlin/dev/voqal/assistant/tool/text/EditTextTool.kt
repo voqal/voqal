@@ -15,6 +15,7 @@ import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.RangeMarker
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -28,7 +29,6 @@ import com.intellij.openapi.util.*
 import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.psi.*
 import com.intellij.refactoring.rename.RenameProcessor
-import com.intellij.refactoring.suggested.range
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.processing.TextSearcher
 import dev.voqal.assistant.tool.VoqalTool
@@ -754,6 +754,17 @@ class EditTextTool : VoqalTool() {
     private fun isValidIdentifier(language: Language, text: String): Boolean {
         return text.matches(Regex("[a-zA-Z_][a-zA-Z0-9_]*")) //todo: per lang regex
     }
+
+    private val RangeMarker.range: TextRange?
+        get() {
+            if (!isValid) {
+                return null
+            } else {
+                val start = startOffset
+                val end = endOffset
+                return if ((if (0 <= start) start <= end else false)) TextRange(start, end) else null
+            }
+        }
 
     private data class Diff(
         val fragments: List<DiffFragmentImpl>,
