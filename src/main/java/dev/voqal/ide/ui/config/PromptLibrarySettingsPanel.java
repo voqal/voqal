@@ -685,7 +685,6 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                 null, null, null));
 
             //---- languageModelComboBox ----
-            languageModelComboBox.setEditable(true);
             panel1.add(languageModelComboBox, new GridConstraints(3, 1, 1, 1,
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
