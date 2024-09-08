@@ -45,9 +45,9 @@ class LocalMemorySlice(
         }
 
         var lmSettings = directive.getLanguageModelSettings()
-        if (promptSettings.modelName.isNotBlank()) {
+        if (promptSettings.languageModel.isNotBlank()) {
             val settings = config.languageModelsSettings.models.firstOrNull {
-                it.name == promptSettings.modelName
+                it.name == promptSettings.languageModel
             }
             if (settings != null) {
                 lmSettings = settings

@@ -52,7 +52,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getPromptFile(),
                             prompt.getPromptText(),
                             prompt.getPromptUrl(),
-                            prompt.getModelName(),
+                            prompt.getLanguageModel(),
                             prompt.getShowPartialResults(),
                             prompt.getDecomposeDirectives(),
                             prompt.getCodeSmellCorrection(),
@@ -81,7 +81,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 promptFileTextField.getText(),
                                 "",
                                 "",
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -105,7 +105,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 "",
                                 "",
                                 urlTextField.getText(),
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -150,7 +150,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getPromptFile(),
                             prompt.getPromptText(),
                             prompt.getPromptUrl(),
-                            prompt.getModelName(),
+                            prompt.getLanguageModel(),
                             prompt.getShowPartialResults(),
                             decompCheckBox.isSelected(),
                             prompt.getCodeSmellCorrection(),
@@ -171,7 +171,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getPromptFile(),
                             prompt.getPromptText(),
                             prompt.getPromptUrl(),
-                            prompt.getModelName(),
+                            prompt.getLanguageModel(),
                             prompt.getShowPartialResults(),
                             prompt.getDecomposeDirectives(),
                             prompt.getCodeSmellCorrection(),
@@ -192,7 +192,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getPromptFile(),
                             prompt.getPromptText(),
                             prompt.getPromptUrl(),
-                            prompt.getModelName(),
+                            prompt.getLanguageModel(),
                             prompt.getShowPartialResults(),
                             prompt.getDecomposeDirectives(),
                             codeSmellCheckBox.isSelected(),
@@ -215,7 +215,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getPromptFile(),
                                 prompt.getPromptText(),
                                 prompt.getPromptUrl(),
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -238,7 +238,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getPromptFile(),
                                 prompt.getPromptText(),
                                 prompt.getPromptUrl(),
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -261,7 +261,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getPromptFile(),
                                 prompt.getPromptText(),
                                 prompt.getPromptUrl(),
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -284,7 +284,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getPromptFile(),
                             prompt.getPromptText(),
                             prompt.getPromptUrl(),
-                            prompt.getModelName(),
+                            prompt.getLanguageModel(),
                             prompt.getShowPartialResults(),
                             prompt.getDecomposeDirectives(),
                             prompt.getCodeSmellCorrection(),
@@ -378,8 +378,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         if (languageModelNames.length > 0) {
             languageModelComboBox.setSelectedIndex(0);
         }
-        if (!prompt.getModelName().isEmpty() && Set.of(languageModelNames).contains(prompt.getModelName())) {
-            languageModelComboBox.setSelectedItem(prompt.getModelName());
+        if (!prompt.getLanguageModel().isEmpty() && Set.of(languageModelNames).contains(prompt.getLanguageModel())) {
+            languageModelComboBox.setSelectedItem(prompt.getLanguageModel());
         }
 
         //reset other fields
@@ -390,7 +390,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             "",
                             "",
                             "",
-                            p.getModelName(),
+                            p.getLanguageModel(),
                             p.getShowPartialResults(),
                             p.getDecomposeDirectives(),
                             p.getCodeSmellCorrection(),
@@ -408,7 +408,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             "",
                             p.getPromptText(),
                             "",
-                            p.getModelName(),
+                            p.getLanguageModel(),
                             p.getShowPartialResults(),
                             p.getDecomposeDirectives(),
                             p.getCodeSmellCorrection(),
@@ -426,7 +426,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getPromptFile(),
                             "",
                             "",
-                            p.getModelName(),
+                            p.getLanguageModel(),
                             p.getShowPartialResults(),
                             p.getDecomposeDirectives(),
                             p.getCodeSmellCorrection(),
@@ -444,7 +444,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             "",
                             "",
                             p.getPromptUrl(),
-                            p.getModelName(),
+                            p.getLanguageModel(),
                             p.getShowPartialResults(),
                             p.getDecomposeDirectives(),
                             p.getCodeSmellCorrection(),
@@ -514,7 +514,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getPromptFile(),
                                 markdownPanel.getDocument().getText(),
                                 prompt.getPromptUrl(),
-                                prompt.getModelName(),
+                                prompt.getLanguageModel(),
                                 prompt.getShowPartialResults(),
                                 prompt.getDecomposeDirectives(),
                                 prompt.getCodeSmellCorrection(),
@@ -591,8 +591,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         if (languageModelNames.length > 0) {
             languageModelComboBox.setSelectedIndex(0);
         }
-        if (!prompt.getModelName().isEmpty() && Set.of(languageModelNames).contains(prompt.getModelName())) {
-            languageModelComboBox.setSelectedItem(prompt.getModelName());
+        if (!prompt.getLanguageModel().isEmpty() && Set.of(languageModelNames).contains(prompt.getLanguageModel())) {
+            languageModelComboBox.setSelectedItem(prompt.getLanguageModel());
         }
     }
 

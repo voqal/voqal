@@ -9,13 +9,13 @@ data class PromptSettings(
     val promptFile: String = "",
     val promptText: String = "",
     val promptUrl: String = "",
-    val modelName: String = "",
+    val languageModel: String = "",
     val showPartialResults: Boolean = false,
     val decomposeDirectives: Boolean = false,
     val codeSmellCorrection: Boolean = false,
     val vectorStoreId: String = "",
     val assistantId: String = "",
-    val assistantThreadId : String = "",
+    val assistantThreadId: String = "",
     val editFormat: EditFormat = EditFormat.FULL_TEXT,
     val streamCompletions: Boolean = false
 ) : ConfigurableSettings {
@@ -29,7 +29,7 @@ data class PromptSettings(
         promptFile = json.getString("promptFile", ""),
         promptText = json.getString("promptText", ""),
         promptUrl = json.getString("promptUrl", ""),
-        modelName = json.getString("modelName", ""),
+        languageModel = json.getString("languageModel", json.getString("modelName", "")),
         showPartialResults = json.getBoolean("showPartialResults", false),
         decomposeDirectives = json.getBoolean("decomposeDirectives", false),
         codeSmellCorrection = json.getBoolean("codeSmellCorrection", false),
@@ -47,7 +47,7 @@ data class PromptSettings(
             put("promptFile", promptFile)
             put("promptText", promptText)
             put("promptUrl", promptUrl)
-            put("modelName", modelName)
+            put("languageModel", languageModel)
             put("showPartialResults", showPartialResults)
             put("decomposeDirectives", decomposeDirectives)
             put("codeSmellCorrection", codeSmellCorrection)
@@ -68,7 +68,7 @@ data class PromptSettings(
             promptFile = if (promptFile.isEmpty()) "" else "***",
             promptText = if (promptText.isEmpty()) "" else "***",
             promptUrl = if (promptUrl.isEmpty()) "" else "***",
-            modelName = if (modelName.isEmpty()) "" else "***"
+            languageModel = if (languageModel.isEmpty()) "" else "***"
         )
     }
 

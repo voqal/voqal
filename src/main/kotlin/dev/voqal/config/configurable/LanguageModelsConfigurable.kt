@@ -31,7 +31,7 @@ class LanguageModelsConfigurable(val project: Project) : Configurable {
             val languageModelName = updatedSettings.models.first().name
             val promptLibrarySettings = configService.getConfig().promptLibrarySettings
             configService.updateConfig(promptLibrarySettings.copy(prompts = promptLibrarySettings.prompts.map {
-                it.copy(modelName = languageModelName)
+                it.copy(languageModel = languageModelName)
             }))
         }
 

@@ -647,7 +647,7 @@ class VoqalConfigService(private val project: Project) {
     fun getLanguageModelSettings(promptSettings: PromptSettings): LanguageModelSettings {
         val config = getConfig()
         return config.languageModelsSettings.models.firstOrNull {
-            it.name == promptSettings.modelName
+            it.name == promptSettings.languageModel
         } ?: LanguageModelSettings()
     }
 

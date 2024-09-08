@@ -106,14 +106,14 @@ class AiProvidersClient(private val project: Project) : AiProvider {
     override fun isStmProvider(): Boolean {
         val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
         return stmProviders
-            .filter { promptSettings.modelName == it.name }
+            .filter { it.name == promptSettings.languageModel }
             .any { it.isStmProvider() }
     }
 
     override fun asStmProvider(): StmProvider {
         val promptSettings = project.service<VoqalConfigService>().getCurrentPromptSettings()
         return stmProviders
-            .filter { promptSettings.modelName == it.name }
+            .filter { it.name == promptSettings.languageModel }
             .first { it.isStmProvider() }.asStmProvider()
     }
 
