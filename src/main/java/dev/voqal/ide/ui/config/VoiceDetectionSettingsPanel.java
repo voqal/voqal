@@ -15,6 +15,7 @@ import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider;
 import dev.voqal.ide.logging.LoggerFactory;
 import dev.voqal.provider.VadProvider;
 import dev.voqal.provider.clients.picovoice.PicovoiceCobraClient;
+import dev.voqal.provider.clients.picovoice.error.PicovoiceError;
 import dev.voqal.provider.clients.voqal.VoqalVadClient;
 import dev.voqal.utils.SharedAudioCapture;
 import io.github.givimad.libfvadjni.VoiceActivityDetector;
@@ -64,6 +65,10 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
             }
 
             try {
+                if (vadProvider != null) {
+                    Disposer.dispose(vadProvider);
+                    vadProvider = null;
+                }
                 updateVadProvider();
             } catch (IOException ex) {
                 log.error("Error setting provider", ex);
@@ -195,20 +200,6 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 } catch (InterruptedException ignored) {
                 }
             }
-
-            //reset
-            var sb = new StringBuilder();
-            sb.append("<html>");
-            sb.append("<font color='#ff6464'>Voice Detected: N</font>");
-            sb.append(" - ");
-            sb.append("<font color='#ff6464'>Speech Detected: N</font>");
-            sb.append("</html>");
-            try {
-                SwingUtilities.invokeAndWait(() -> label4.setText(sb.toString()));
-            } catch (InterruptedException ignore) {
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         });
         readThread.setDaemon(true);
         readThread.start();
@@ -224,6 +215,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
     private void updateVadProvider() throws IOException {
         var log = LoggerFactory.getLogger(project, VoiceDetectionSettingsPanel.class);
         if (setupMode) return;
+
         log.debug("Updating VAD provider");
         var provider = VoiceDetectionProvider.lenientValueOf(providerComboBox.getSelectedItem().toString());
         if (provider == VoiceDetectionProvider.Voqal) {
@@ -248,9 +240,9 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 vadClient.setAmnestyPeriodMillis(speechSilenceTime * 2L);
             } else if (vad != null) {
                 //create new
-                if (vadProvider != null) {
-                    Disposer.dispose(vadProvider);
-                    vadProvider = null;
+                if (readThread != null) {
+                    readThread.interrupt();
+                    readThread = null;
                 }
 
                 var sb = new StringBuilder();
@@ -260,7 +252,6 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 sb.append("<font color='#ff6464'>Speech Detected: N</font>");
                 sb.append("</html>");
                 label4.setText(sb.toString());
-                restartReadThread();
 
                 log.debug("Creating Voqal provider");
                 var voiceSilenceTime = ((Number) voiceSilenceSpinner.getValue()).intValue();
@@ -275,6 +266,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                         speechSilenceTime * 2L,
                         true
                 );
+                restartReadThread();
             }
         } else if (provider == VoiceDetectionProvider.Picovoice) {
             label3.setText("Probability (%):");
@@ -296,21 +288,18 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 );
             } else {
                 //create new
-                if (vadProvider != null) {
-                    Disposer.dispose(vadProvider);
-                    vadProvider = null;
+                if (readThread != null) {
+                    readThread.interrupt();
+                    readThread = null;
+                }
+                if (this.providerPasswordField.getPassword().length == 0) {
+                    SwingUtilities.invokeLater(() -> {
+                        label4.setText("<html><font color='#ff6464'>Error: Missing AccessKey</font></html>");
+                    });
+                    return;
                 }
 
                 try {
-                    var sb = new StringBuilder();
-                    sb.append("<html>");
-                    sb.append("<font color='#ff6464'>Voice Detected: N</font>");
-                    sb.append(" - ");
-                    sb.append("<font color='#ff6464'>Speech Detected: N</font>");
-                    sb.append("</html>");
-                    label4.setText(sb.toString());
-                    restartReadThread();
-
                     log.debug("Creating Picovoice provider");
                     var sensitivity = ((Number) sensitivitySpinner.getValue()).intValue();
                     var voiceSilenceTime = ((Number) voiceSilenceSpinner.getValue()).intValue();
@@ -326,13 +315,16 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                             speechSilenceTime * 2L,
                             true
                     );
-                } catch (IllegalStateException e) {
+                    restartReadThread();
+                } catch (PicovoiceError e) {
                     log.warn("Error creating Picovoice provider. Message: " + e.getMessage());
-                    if (e.getMessage().contains("Failed to parse AccessKey")) {
-                        label4.setText("<html><font color='#ff6464'>Error: Invalid AccessKey</font></html>");
-                    } else {
-                        label4.setText("<html><font color='#ff6464'>Error: " + e.getMessage() + "</font></html>");
-                    }
+                    SwingUtilities.invokeLater(() -> {
+                        if (e.getMessage().contains("Failed to parse AccessKey")) {
+                            label4.setText("<html><font color='#ff6464'>Error: Invalid AccessKey</font></html>");
+                        } else {
+                            label4.setText("<html><font color='#ff6464'>Error: " + e.getMessage() + "</font></html>");
+                        }
+                    });
                 }
             }
         }
@@ -449,7 +441,10 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         var log = LoggerFactory.getLogger(project, VoiceDetectionSettingsPanel.class);
         log.debug("Disposing VoiceDetectionSettingsPanel");
         audioCapture.removeListener(this);
-        readThread.interrupt();
+        if (readThread != null) {
+            readThread.interrupt();
+            readThread = null;
+        }
         if (vadProvider != null) {
             Disposer.dispose(vadProvider);
             vadProvider = null;

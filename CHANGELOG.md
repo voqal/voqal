@@ -17,6 +17,7 @@
 - Set prompt library defaults on first language model added
 - Unable to cancel changes with active editor closed
 - Listener already registered warning when using Voqal VAD
+- Invalid argument error when choosing Picovoice VAD
 
 ## [2024.10.1] - 2024-09-05
 
