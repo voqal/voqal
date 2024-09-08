@@ -5,6 +5,7 @@ import com.aallam.openai.api.core.Parameters
 import com.intellij.history.Label
 import com.intellij.history.LocalHistoryAction
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -47,19 +48,19 @@ class CancelTool : VoqalTool() {
         val memoryService = project.service<VoqalMemoryService>()
         val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
         val affectedFiles = memoryService.getUserData("affectedFiles")
+        val editor = memoryService.getUserData("voqal.edit.editor") as Editor?
         val action = memoryService.getUserData("voqal.edit.action") as LocalHistoryAction?
         val label = memoryService.getUserData("voqal.edit") as Label?
         val memory = memoryService.getCurrentMemory()
         memoryService.resetMemory()
 
         //do anything considered cancelling
-        val editor = directive.ide.editor
         if (statusService.getStatus() == VoqalStatus.SEARCHING) {
             //nop
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
             log.info("Reverting changes to: ${memory.id}")
             action?.finish()
-            label?.revert(project, editor!!.virtualFile)
+            editor?.virtualFile?.let { label?.revert(project, it) }
             (affectedFiles as? List<*>)?.let { it.forEach { f -> label?.revert(project, (f as PsiFile).virtualFile) } }
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")

@@ -85,6 +85,7 @@ class VoqalMemoryService(private val project: Project) : Disposable {
             "voqal.edit.action",
             LocalHistory.getInstance().startAction("voqal.edit.action.$memoryId")
         )
+        putUserData("voqal.edit.editor", editor)
     }
 
     fun putUserData(key: String, data: Any) {
