@@ -22,8 +22,18 @@ class LanguageModelsConfigurable(val project: Project) : Configurable {
     override fun apply() {
         val updatedSettings = form!!.getConfig()
         val configService = project.service<VoqalConfigService>()
+        val oldConfig = configService.getConfig()
         configService.updateConfig(updatedSettings)
         form!!.reset(updatedSettings)
+
+        //set prompt library defaults on first language model added
+        if (oldConfig.languageModelsSettings.models.isEmpty() && updatedSettings.models.isNotEmpty()) {
+            val languageModelName = updatedSettings.models.first().name
+            val promptLibrarySettings = configService.getConfig().promptLibrarySettings
+            configService.updateConfig(promptLibrarySettings.copy(prompts = promptLibrarySettings.prompts.map {
+                it.copy(modelName = languageModelName)
+            }))
+        }
 
         project.scope.launch {
             //todo: can do onConfigChange instead of resetAiProvider/getAiProvider
