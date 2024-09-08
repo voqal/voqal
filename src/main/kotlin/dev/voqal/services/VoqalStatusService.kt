@@ -31,7 +31,7 @@ class VoqalStatusService(private val project: Project) {
     init {
         val config = project.service<VoqalConfigService>().getConfig()
         if (config.pluginSettings.enabled) {
-            log.info("Setting initial status to idle")
+            log.debug("Setting initial status to idle")
             update(IDLE)
         }
     }

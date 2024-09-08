@@ -158,15 +158,32 @@ class VoqalToolService(private val project: Project) {
         }
         if (action != null) {
             log.info("Invoking tool: ${functionCall.name}")
-            project.service<VoqalStatusService>().updateText(
-                "Invoking tool: ${functionCall.name} (Directive: ${response.directive.assistant.directiveMode})",
-                response
-            )
+            if (response.directive.assistant.directiveMode) {
+                project.service<VoqalStatusService>().updateText(
+                    "Invoking tool: ${functionCall.name} (Directive: true)",
+                    response
+                )
+            } else {
+                project.service<VoqalStatusService>().updateText(
+                    "Invoking tool: ${functionCall.name}",
+                    response
+                )
+            }
+
             invokeAction(functionCall, action, response)
-            project.service<VoqalStatusService>().updateText(
-                "Finished invoking tool: ${functionCall.name} (Directive: ${response.directive.assistant.directiveMode})",
-                response
-            )
+
+            log.info("Finished invoking tool: ${functionCall.name}")
+            if (response.directive.assistant.directiveMode) {
+                project.service<VoqalStatusService>().updateText(
+                    "Finished invoking tool: ${functionCall.name} (Directive: true)",
+                    response
+                )
+            } else {
+                project.service<VoqalStatusService>().updateText(
+                    "Finished invoking tool: ${functionCall.name}",
+                    response
+                )
+            }
         } else {
             val intent = getIntentAction(functionCall.name)
             if (intent != null) {

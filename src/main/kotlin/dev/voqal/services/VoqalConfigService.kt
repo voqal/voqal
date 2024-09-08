@@ -186,8 +186,8 @@ class VoqalConfigService(private val project: Project) {
 
     fun resetAiProvider() {
         synchronized(syncLock) {
-            log.info("Disposing AI provider")
             aiProvider?.let {
+                log.info("Disposing AI provider")
                 Disposer.dispose(it)
                 log.info("AI provider disposed")
             }
