@@ -37,6 +37,7 @@ abstract class VadProvider(project: Project) : AiProvider, SharedAudioCapture.Au
     private var begunTalkingTimeMillis = 0L
 
     override fun isVadProvider() = true
+    override fun isTestListener() = testMode
     override fun isLiveDataListener() = true
 
     fun handleVoiceNotDetected() {

@@ -72,10 +72,6 @@ class PicovoiceCobraClient(
         project.audioCapture.registerListener(this)
     }
 
-    override fun isTestListener(): Boolean {
-        return testMode
-    }
-
     override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
         val pcm = convertBytesToShorts(data)
         val isVoicedRef = FloatByReference()
