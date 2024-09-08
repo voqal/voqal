@@ -61,6 +61,9 @@ class ToggleEditModeTool : VoqalTool() {
                 "Unable to toggle edit mode. Language model ${lmSettings.name} requires speech-to-text provider"
             )
             return
+        } else if (!aiProvider.isLlmProvider()) {
+            log.warnChat("No language model provider found")
+            return
         }
 
         val editor = directive.ide.editor
