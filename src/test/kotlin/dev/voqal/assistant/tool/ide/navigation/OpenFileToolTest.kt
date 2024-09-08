@@ -16,8 +16,10 @@ import dev.voqal.assistant.context.IdeContext
 import dev.voqal.config.settings.PromptSettings
 import dev.voqal.services.VoqalSearchService
 import dev.voqal.services.VoqalToolService
+import dev.voqal.services.scope
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.VertxTestContext
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
@@ -214,5 +216,39 @@ class OpenFileToolTest : JBTest() {
             argumentsOrNull = JsonObject().put("directive", "open Main,").toString()
         )
         assertTrue(tool.canShortcut(project, call2))
+    }
+
+    fun `test open file camel case`() {
+        val f1 = myFixture.addFileToProject("GoodbyeWorld.java", "")
+        myFixture.addFileToProject("HelloWorld.java", "")
+
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalToolService>().blindExecute(
+                OpenFileTool(), JsonObject().put("directive", "open goodbye world")
+            )
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+
+        assertEquals(1, FileEditorManager.getInstance(project).openFiles.size)
+        assertEquals(f1.name, FileEditorManager.getInstance(project).openFiles.first().name)
+    }
+
+    fun `test open file path`() {
+        val f1 = myFixture.addFileToProject("GoodbyeWorld.java", "")
+        myFixture.addFileToProject("HelloWorld.java", "")
+
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalToolService>().blindExecute(
+                OpenFileTool(), JsonObject().put("directive", "open src/goodbyeworld")
+            )
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+
+        assertEquals(1, FileEditorManager.getInstance(project).openFiles.size)
+        assertEquals(f1.name, FileEditorManager.getInstance(project).openFiles.first().name)
     }
 }

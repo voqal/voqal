@@ -35,13 +35,47 @@ class CloseFileToolTest : JBTest() {
         myFixture.openFileInEditor(f1.virtualFile)
         myFixture.openFileInEditor(f2.virtualFile)
 
-        assertEquals(FileEditorManager.getInstance(project).openFiles.size, 2)
+        assertEquals(2, FileEditorManager.getInstance(project).openFiles.size)
 
         project.service<VoqalToolService>().blindExecute(
             CloseFileTool(), JsonObject().put("directive", "close MAIN")
         )
 
-        assertEquals(FileEditorManager.getInstance(project).openFiles.size, 1)
-        assertEquals(FileEditorManager.getInstance(project).openFiles.first().name, f2.name)
+        assertEquals(1, FileEditorManager.getInstance(project).openFiles.size)
+        assertEquals(f2.name, FileEditorManager.getInstance(project).openFiles.first().name)
+    }
+
+    fun `test close file non active camel case`(): Unit = runBlocking {
+        val f1 = myFixture.addFileToProject("GoodbyeWorld.java", "")
+        val f2 = myFixture.addFileToProject("HelloWorld.java", "")
+
+        myFixture.openFileInEditor(f1.virtualFile)
+        myFixture.openFileInEditor(f2.virtualFile)
+
+        assertEquals(2, FileEditorManager.getInstance(project).openFiles.size)
+
+        project.service<VoqalToolService>().blindExecute(
+            CloseFileTool(), JsonObject().put("directive", "close goodbye world")
+        )
+
+        assertEquals(1, FileEditorManager.getInstance(project).openFiles.size)
+        assertEquals(f2.name, FileEditorManager.getInstance(project).openFiles.first().name)
+    }
+
+    fun `test close file non active path`(): Unit = runBlocking {
+        val f1 = myFixture.addFileToProject("GoodbyeWorld.java", "")
+        val f2 = myFixture.addFileToProject("HelloWorld.java", "")
+
+        myFixture.openFileInEditor(f1.virtualFile)
+        myFixture.openFileInEditor(f2.virtualFile)
+
+        assertEquals(2, FileEditorManager.getInstance(project).openFiles.size)
+
+        project.service<VoqalToolService>().blindExecute(
+            CloseFileTool(), JsonObject().put("directive", "close src/goodbyeworld")
+        )
+
+        assertEquals(1, FileEditorManager.getInstance(project).openFiles.size)
+        assertEquals(f2.name, FileEditorManager.getInstance(project).openFiles.first().name)
     }
 }

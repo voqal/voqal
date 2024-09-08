@@ -142,7 +142,7 @@ class VoqalSearchService(private val project: Project) {
 
     fun findExactMatches(name: String): List<Pair<VirtualFile, String>> {
         val name = name.lowercase()
-        //consider style diffs (i.e camelCase, snake_case, etc)
+        //consider style diffs (i.e CamelCase, snake_case, etc)
         val nameSet = mutableSetOf<String>()
         nameSet.add(name) //original
         nameSet.add(name.replace(" ", "_"))
@@ -172,29 +172,11 @@ class VoqalSearchService(private val project: Project) {
 
     fun findFiles(searchFiles: Collection<VirtualFile>, name: String, exact: Boolean = false): List<VirtualFile> {
         //check for exact match
-        val exactMatch = searchFiles.filter { it.name.equals(name, ignoreCase = true) }
-        if (exactMatch.isNotEmpty()) {
-            if (exactMatch.size == 1 || !exact) {
-                return exactMatch
+        val matchFiles = searchFiles.filter { isNameMatch(name, it) }
+        if (matchFiles.isNotEmpty()) {
+            if (matchFiles.size == 1 || !exact) {
+                return matchFiles
             }
-        }
-
-        //check for exact match from root
-        val exactMatchFromRoot = searchFiles.filter { it.path.endsWith(name, ignoreCase = true) }
-        if (exactMatchFromRoot.isNotEmpty()) {
-            return exactMatchFromRoot
-        }
-
-        //check for exact match from root (removing extension)
-        val exactMatchFromRootNoExt = searchFiles.filter {
-            if (it.extension != null) {
-                it.path.substringBeforeLast("." + it.extension!!).endsWith(name, ignoreCase = true) ||
-                        it.path.substringBeforeLast("." + it.extension!!)
-                            .endsWith(name.replace(".", "/"), ignoreCase = true)
-            } else false
-        }
-        if (exactMatchFromRootNoExt.isNotEmpty()) {
-            return exactMatchFromRootNoExt
         }
 
         if (exact) {
@@ -206,6 +188,35 @@ class VoqalSearchService(private val project: Project) {
             }
             return filesByDistance
         }
+    }
+
+    private fun isNameMatch(name: String, file: VirtualFile): Boolean {
+        //consider style diffs (i.e CamelCase, snake_case, etc)
+        val nameSet = mutableSetOf<String>()
+        nameSet.add(name) //original
+        nameSet.add(name.replace(" ", "_"))
+        nameSet.add(name.replace(" ", ""))
+
+        //check for exact match
+        val exactMatch = nameSet.any {
+            file.name.equals(it, ignoreCase = true) || file.nameWithoutExtension.equals(it, ignoreCase = true)
+        }
+        if (exactMatch) {
+            return true
+        }
+
+        //check for exact match from root
+        val exactMatchFromRoot = nameSet.any {
+            file.path.endsWith(it, ignoreCase = true) ||
+                    (file.extension?.let { ext ->
+                        file.path.substringBeforeLast(".$ext").endsWith(it, ignoreCase = true)
+                    } == true)
+        }
+        if (exactMatchFromRoot) {
+            return true
+        }
+
+        return false
     }
 
     fun getFlattenedPackages(): List<String> {
