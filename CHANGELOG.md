@@ -7,6 +7,7 @@
 ### Changed
 
 - Display error messages in chat tool window
+- Replace logs tab UI JTextPane with OpenAPI Editor
 
 ### Fixed
 

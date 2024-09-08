@@ -1,60 +1,79 @@
 package dev.voqal.ide.ui.toolwindow.tab
 
+import com.intellij.ide.ui.UISettingsListener
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.ui.DarculaColors
 import com.intellij.ui.OnePixelSplitter
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.messages.MessageBusConnection
-import dev.voqal.services.getVoqalLogger
-import dev.voqal.services.invokeLater
+import dev.voqal.ide.ui.VoqalUI
+import dev.voqal.services.ProjectScopedService
 import java.awt.BorderLayout
+import java.awt.Color
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.swing.*
-import javax.swing.text.html.HTMLDocument
-import javax.swing.text.html.HTMLEditorKit
+import javax.swing.JButton
+import javax.swing.JComboBox
+import javax.swing.JPanel
+import javax.swing.border.EmptyBorder
 
-class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBusConnection) {
+class VoqalLogsTab(private val project: Project, private val messageBusConnection: MessageBusConnection) {
 
-    val splitter: OnePixelSplitter
+    companion object {
+        private val LOG_LEVEL = Key.create<String>("VOQAL_LOG_LEVEL")
+    }
 
-    private val log = project.getVoqalLogger(this::class)
-    private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS")
-    private val emptyLogHtml = buildString {
-        append("<html><body ")
-        append("id='body' ")
-        append("style='font-family: monospace; font-size: smaller;'>")
-        append("</body></html>")
-    }
-    private val logArea = JTextPane().apply {
-        isEditable = false
-        editorKit = HTMLEditorKit()
-        contentType = "text/html"
-        text = emptyLogHtml
-        background = EditorColorsManager.getInstance().globalScheme.defaultBackground
-    }
-    private val scrollPane = JBScrollPane(logArea)
-    private val panel = JPanel(BorderLayout()).apply {
-        scrollPane.border = null
-        add(scrollPane, BorderLayout.CENTER)
-    }
     var logLevel = "INFO"
+    val splitter = OnePixelSplitter(true, .98f)
+
+    private val timeFormat = SimpleDateFormat("HH:mm:ss.SSS")
+    private lateinit var logEditor: Editor
 
     init {
+        ApplicationManager.getApplication().invokeLater {
+            initUi()
+        }
+    }
+
+    private fun initUi() {
+        logEditor = VoqalUI.createPreviewComponent(project, "", false, project.service<ProjectScopedService>())
+        logEditor.settings.isLineNumbersShown = false
+        logEditor.settings.isRightMarginShown = false
+        messageBusConnection.subscribe(UISettingsListener.TOPIC, UISettingsListener {
+            //make font 30% smaller
+            logEditor.colorsScheme.editorFontSize =
+                (EditorColorsManager.getInstance().globalScheme.editorFontSize * 0.7 * it.ideScale).toInt()
+        })
         messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
-            if (it != null) {
-                SwingUtilities.invokeLater { updateUi(it) }
+            //update log level colors on theme switch
+            ApplicationManager.getApplication().invokeLater {
+                logEditor.markupModel.allHighlighters.forEach {
+                    it.getTextAttributes(null)?.foregroundColor = getTextColor(it.getUserData(LOG_LEVEL)!!)
+                }
             }
         })
-        splitter = OnePixelSplitter(true, .98f)
+
+        splitter.setResizeEnabled(false)
         splitter.dividerWidth = 2
 
-        splitter.firstComponent = panel
+        //todo: seems odd but gets rid of gutter (also need left line border)
+        val scrollPane = (logEditor as EditorImpl).scrollPane
+        scrollPane.setRowHeaderView(null)
+        logEditor.contentComponent.border = EmptyBorder(0, 6, 0, 0)
+
+        splitter.firstComponent = logEditor.component
         splitter.secondComponent = JPanel().apply {
             val levelComboBox = JComboBox(arrayOf("TRACE", "DEBUG", "INFO", "WARN", "ERROR")).apply {
                 selectedItem = logLevel
@@ -66,29 +85,13 @@ class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBu
 
             val clearButton = JButton("Clear").apply {
                 addActionListener {
-                    logArea.text = emptyLogHtml
+                    WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+                        logEditor.markupModel.removeAllHighlighters()
+                        logEditor.document.setText("")
+                    })
                 }
             }
             add(clearButton, BorderLayout.WEST)
-        }
-    }
-
-    private fun updateUi(scheme: EditorColorsScheme) {
-        logArea.background = scheme.defaultBackground
-        logArea.text = emptyLogHtml
-    }
-
-    private fun getColorFromScheme(scheme: EditorColorsScheme, key: TextAttributesKey): String {
-        val attributes = scheme.getAttributes(key)
-        return if (attributes != null) {
-            String.format(
-                "#%02x%02x%02x",
-                attributes.foregroundColor.red,
-                attributes.foregroundColor.green,
-                attributes.foregroundColor.blue
-            )
-        } else {
-            "#000000"
         }
     }
 
@@ -100,56 +103,37 @@ class VoqalLogsTab(private val project: Project, messageBusConnection: MessageBu
         if (logLevel == "DEBUG" && level !in listOf("ERROR", "WARN", "INFO", "DEBUG")) return
         if (logLevel == "TRACE" && level !in listOf("ERROR", "WARN", "INFO", "DEBUG", "TRACE")) return
 
-        val shortTime = timeFormat.format(Date(millis))
-        val logDiv = getLogAsHtml(Log(shortTime, level, message))
-        project.invokeLater {
-            val isScrolledToEnd = scrollPane.verticalScrollBar.value + scrollPane.verticalScrollBar.height ==
-                    scrollPane.verticalScrollBar.maximum || !scrollPane.verticalScrollBar.isVisible
-            val doc = logArea.document as HTMLDocument
-            val elem = doc.getElement("body")
-            try {
-                doc.insertBeforeEnd(elem, logDiv)
-            } catch (ex: Exception) {
-                log.warn("Error adding log to VoqalLogsTab", ex)
-            }
+        ApplicationManager.getApplication().invokeLater {
+            WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+                val textColor = getTextColor(level)
+                val shortTime = timeFormat.format(Date(millis))
+                insertText("$shortTime [$level] $message\n", textColor, level)
 
-            if (isScrolledToEnd) {
-                scrollPane.validate()
-                scrollPane.verticalScrollBar.value = scrollPane.verticalScrollBar.maximum
-            }
+                //todo: stick scroll instead of force scroll
+                logEditor.scrollingModel.scrollVertically(Integer.MAX_VALUE)
+            })
         }
     }
 
-    private fun getLogAsHtml(
-        logEntry: Log,
-        scheme: EditorColorsScheme = EditorColorsManager.getInstance().globalScheme
-    ): String {
-        val levelColor = when (logEntry.level) {
-            "ERROR" -> String.format(
-                "#%02x%02x%02x",
-                DarculaColors.RED.red,
-                DarculaColors.RED.green,
-                DarculaColors.RED.blue
-            )
-
-            "WARN" -> String.format(
-                "#%02x%02x%02x",
-                DarculaColors.BLUE.red,
-                DarculaColors.BLUE.green,
-                DarculaColors.BLUE.blue
-            )
-
-            else -> getColorFromScheme(scheme, HighlighterColors.TEXT)
+    private fun insertText(logDiv: String, color: Color, level: String) {
+        val len = logEditor.document.textLength
+        logEditor.document.insertString(len, logDiv)
+        logEditor.markupModel.addRangeHighlighter(
+            len, len + logDiv.length,
+            HighlighterLayer.LAST,
+            TextAttributes().apply { foregroundColor = color },
+            HighlighterTargetArea.EXACT_RANGE
+        ).apply {
+            putUserData(LOG_LEVEL, level)
         }
-
-        return """
-                    <div>
-                        <span style="color: gray;">${logEntry.time}</span>
-                        <span style="color: $levelColor;">[${logEntry.level}]</span>
-                        <span style="color: $levelColor;">${logEntry.message}</span>
-                    </div>
-                """.trimIndent()
     }
 
-    private data class Log(val time: String, val level: String, val message: String)
+    private fun getTextColor(level: String): Color {
+        val textColor = when (level) {
+            "ERROR" -> DarculaColors.RED
+            "WARN" -> DarculaColors.BLUE
+            else -> EditorColorsManager.getInstance().globalScheme.getAttributes(HighlighterColors.TEXT)!!.foregroundColor
+        }
+        return textColor
+    }
 }
