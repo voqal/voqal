@@ -22,11 +22,12 @@ import java.io.File
 abstract class JBTest : BasePlatformTestCase() {
 
     companion object {
+        val lmProvider = LMProvider.lenientValueOf(System.getenv("VQL_MODEL_PROVIDER") ?: "openai")
         val TEST_CONFIG = VoqalConfig(
             languageModelsSettings = LanguageModelsSettings(
                 models = listOf(
                     LanguageModelSettings(
-                        provider = LMProvider.lenientValueOf(System.getenv("VQL_MODEL_PROVIDER") ?: "openai"),
+                        provider = lmProvider,
                         providerKey = System.getenv("VQL_MODEL_KEY") ?: "YOUR_OPENAI_KEY",
                         modelName = System.getenv("VQL_MODEL_NAME") ?: "gpt-4o-mini",
                         seed = 1234567890,
@@ -41,8 +42,8 @@ abstract class JBTest : BasePlatformTestCase() {
             ),
             promptLibrarySettings = PromptLibrarySettings(
                 listOf(
-                    PromptSettings(promptName = "Edit Mode"),
-                    PromptSettings(promptName = "Idle Mode")
+                    PromptSettings(promptName = "Edit Mode", languageModel = lmProvider.displayName),
+                    PromptSettings(promptName = "Idle Mode", languageModel = lmProvider.displayName)
                 )
             )
         )

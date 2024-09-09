@@ -48,6 +48,7 @@ class VoqalLogsTab(private val project: Project) {
     }
 
     private fun initUi() {
+        if (System.getProperty("VQL_TEST_MODE") == "true") return
         logEditor = VoqalUI.createPreviewComponent(project, "", false, project.service<ProjectScopedService>())
         logEditor.settings.isLineNumbersShown = false
         logEditor.settings.isRightMarginShown = false
@@ -97,6 +98,7 @@ class VoqalLogsTab(private val project: Project) {
     }
 
     fun addLog(millis: Long, level: String, message: String?) {
+        if (System.getProperty("VQL_TEST_MODE") == "true") return
         if (message == null) return
         if (logLevel == "ERROR" && level != "ERROR") return
         if (logLevel == "WARN" && level !in listOf("ERROR", "WARN")) return

@@ -194,6 +194,7 @@ class VoqalSearchService(private val project: Project) {
         //consider style diffs (i.e CamelCase, snake_case, etc)
         val nameSet = mutableSetOf<String>()
         nameSet.add(name) //original
+        nameSet.add(name.replace(".", "/"))
         nameSet.add(name.replace(" ", "_"))
         nameSet.add(name.replace(" ", ""))
 
