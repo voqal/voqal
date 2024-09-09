@@ -6,6 +6,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.util.messages.MessageBusConnection
 import dev.voqal.ide.logging.LoggerFactory
 import dev.voqal.ide.logging.LoggerFactory.VoqalLogger
 import dev.voqal.ide.ui.toolwindow.tab.VoqalLogsTab
@@ -17,9 +18,9 @@ import kotlin.reflect.KClass
 class ProjectScopedService(project: Project) : Disposable {
 
     private val log = project.getVoqalLogger(this::class)
-    private val messageBusConnection = project.messageBus.connect()
+    internal val messageBusConnection = project.messageBus.connect()
     internal val audioCapture by lazy { SharedAudioCapture(project) }
-    internal val voqalLogsTab by lazy { VoqalLogsTab(project, messageBusConnection) }
+    internal val voqalLogsTab by lazy { VoqalLogsTab(project) }
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         log.errorChat("Unhandled exception: ${exception.message}", exception)
@@ -44,6 +45,8 @@ fun Project.getVoqalLogger(clazz: KClass<*>): VoqalLogger {
     return LoggerFactory.getLogger(this, clazz.java)
 }
 
+val Project.messageBusConnection: MessageBusConnection
+    get() = service<ProjectScopedService>().messageBusConnection
 val Project.scope: CoroutineScope
     get() = service<ProjectScopedService>().scope
 val Project.logsTab: VoqalLogsTab

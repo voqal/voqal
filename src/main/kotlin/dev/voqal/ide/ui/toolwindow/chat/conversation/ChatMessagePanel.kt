@@ -3,11 +3,16 @@ package dev.voqal.ide.ui.toolwindow.chat.conversation
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.colors.EditorColorsListener
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.project.Project
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import dev.voqal.ide.VoqalIcons
+import dev.voqal.services.messageBusConnection
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.Box
@@ -16,10 +21,15 @@ import javax.swing.JPanel
 import javax.swing.SwingConstants
 
 open class ChatMessagePanel(
+    project: Project,
     val isUser: Boolean = false,
     val isDebug: Boolean = false,
     val isError: Boolean = false
 ) : JPanel(BorderLayout()) {
+
+    val content: JComponent?
+        get() = body.content
+
     private val header: Header
     private val body: Body
 
@@ -28,6 +38,25 @@ open class ChatMessagePanel(
         body = Body()
         add(header, BorderLayout.NORTH)
         add(body, BorderLayout.CENTER)
+
+        updateUiColors()
+        project.messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
+            ApplicationManager.getApplication().invokeLater {
+                updateUiColors()
+            }
+        })
+    }
+
+    private fun updateUiColors() {
+        val defaultBackground = EditorColorsManager.getInstance().globalScheme.defaultBackground
+
+        if (isError) {
+            background = VoqalIcons.DARK_RED
+        } else if (isDebug) {
+            background = defaultBackground.darker()
+        } else if (!isUser) {
+            background = ColorUtil.brighter(defaultBackground, 2)
+        }
     }
 
     fun withViewPrompt(onPromptCopy: Runnable): ChatMessagePanel {
@@ -45,30 +74,16 @@ open class ChatMessagePanel(
         return this
     }
 
-    val content: JComponent?
-        get() = body.content
-
-    inner class Header : JPanel(BorderLayout()) {
+    private inner class Header : JPanel(BorderLayout()) {
         private val iconsWrapper: JPanel
 
         init {
+            isOpaque = false
             border = JBUI.Borders.empty(12, 8, 4, 8)
             add(iconLabel, BorderLayout.LINE_START)
 
             iconsWrapper = JPanel(FlowLayout(FlowLayout.RIGHT, 0, 0))
-            if (this@ChatMessagePanel.isError) {
-                iconsWrapper.background = VoqalIcons.DARK_RED
-                background = VoqalIcons.DARK_RED
-            } else if (this@ChatMessagePanel.isDebug) {
-                iconsWrapper.background = background.darker()
-                background = background.darker()
-            } else if (this@ChatMessagePanel.isUser) {
-                iconsWrapper.background = ColorUtil.brighter(background, 2)
-                background = ColorUtil.brighter(background, 2)
-            } else {
-                iconsWrapper.background = background
-                background = background
-            }
+            iconsWrapper.isOpaque = false
             add(iconsWrapper, BorderLayout.LINE_END)
         }
 
@@ -133,19 +148,13 @@ open class ChatMessagePanel(
         }
     }
 
-    inner class Body : JPanel(BorderLayout()) {
+    private inner class Body : JPanel(BorderLayout()) {
         var content: JComponent? = null
             private set
 
         init {
+            isOpaque = false
             border = JBUI.Borders.empty(4, 8, 8, 8)
-            if (this@ChatMessagePanel.isError) {
-                background = VoqalIcons.DARK_RED
-            } else if (this@ChatMessagePanel.isDebug) {
-                background = background.darker()
-            } else if (this@ChatMessagePanel.isUser) {
-                background = ColorUtil.brighter(background, 2)
-            }
         }
 
         fun addContent(content: JComponent) {

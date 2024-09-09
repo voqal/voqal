@@ -17,9 +17,9 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.ui.DarculaColors
 import com.intellij.ui.OnePixelSplitter
-import com.intellij.util.messages.MessageBusConnection
 import dev.voqal.ide.ui.VoqalUI
 import dev.voqal.services.ProjectScopedService
+import dev.voqal.services.messageBusConnection
 import java.awt.BorderLayout
 import java.awt.Color
 import java.text.SimpleDateFormat
@@ -29,7 +29,7 @@ import javax.swing.JComboBox
 import javax.swing.JPanel
 import javax.swing.border.EmptyBorder
 
-class VoqalLogsTab(private val project: Project, private val messageBusConnection: MessageBusConnection) {
+class VoqalLogsTab(private val project: Project) {
 
     companion object {
         private val LOG_LEVEL = Key.create<String>("VOQAL_LOG_LEVEL")
@@ -51,12 +51,13 @@ class VoqalLogsTab(private val project: Project, private val messageBusConnectio
         logEditor = VoqalUI.createPreviewComponent(project, "", false, project.service<ProjectScopedService>())
         logEditor.settings.isLineNumbersShown = false
         logEditor.settings.isRightMarginShown = false
-        messageBusConnection.subscribe(UISettingsListener.TOPIC, UISettingsListener {
+
+        project.messageBusConnection.subscribe(UISettingsListener.TOPIC, UISettingsListener {
             //make font 30% smaller
             logEditor.colorsScheme.editorFontSize =
                 (EditorColorsManager.getInstance().globalScheme.editorFontSize * 0.7 * it.ideScale).toInt()
         })
-        messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
+        project.messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
             //update log level colors on theme switch
             ApplicationManager.getApplication().invokeLater {
                 logEditor.markupModel.allHighlighters.forEach {

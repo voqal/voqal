@@ -63,7 +63,7 @@ object VoqalUI {
         return textPane
     }
 
-    fun createScrollPaneWithSmartScroller(scrollablePanel: ScrollablePanel?): JScrollPane {
+    fun createScrollPaneWithSmartScroller(scrollablePanel: ScrollablePanel): JScrollPane {
         val scrollPane = ScrollPaneFactory.createScrollPane(scrollablePanel, true)
         scrollPane.horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         SmartScroller(scrollPane)

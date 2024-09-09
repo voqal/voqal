@@ -5,11 +5,9 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.util.registry.Registry
-import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
-import com.intellij.util.ui.UIUtil
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
 import java.awt.*
@@ -32,7 +30,6 @@ class UserPromptTextArea(
 
     init {
         textArea.isOpaque = false
-        textArea.background = BACKGROUND_COLOR
         textArea.lineWrap = true
         textArea.wrapStyleWord = true
         textArea.emptyText.setText("Type your message here")
@@ -97,7 +94,7 @@ class UserPromptTextArea(
         add(textArea, BorderLayout.CENTER)
 
         stopButton = IconActionButton(
-            object : AnAction("Stop", "Stop current inference", AllIcons.Actions.Suspend) {
+            object : AnAction("Cancel", "Cancel message", AllIcons.Actions.Suspend) {
                 override fun actionPerformed(e: AnActionEvent) {
                 }
             })
@@ -125,11 +122,5 @@ class UserPromptTextArea(
         } else {
             textArea.font = UIManager.getFont("TextField.font")
         }
-    }
-
-    companion object {
-        private val BACKGROUND_COLOR = JBColor.namedColor(
-            "Editor.SearchField.background", UIUtil.getTextFieldBackground()
-        )
     }
 }
