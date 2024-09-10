@@ -63,7 +63,7 @@ class VoqalContextServiceTest : JBTest() {
             ide = IdeContext(
                 project,
                 editor,
-                projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
+                projectFileTree = project.service<VoqalContextService>().getProjectStructureAsMarkdownTree()
             ),
             developer = DeveloperContext(
                 transcription = "",
