@@ -87,7 +87,7 @@ class QuickEditAction : AnAction() {
 
         val editorWidthWatcher = EditorTextWidthWatcher(project, editor)
         val wrapperPanel = JPanel()
-        wrapperPanel.border = EmptyBorder(0, 0, 2, 0)
+        wrapperPanel.border = EmptyBorder(2, 0, 2, 0)
         wrapperPanel.layout = BorderLayout()
 
         var earlyExit = false
