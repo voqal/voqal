@@ -17,6 +17,7 @@ import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import java.nio.channels.UnresolvedAddressException
 
 class HeliconeClient(
     project: Project,
@@ -46,8 +47,10 @@ class HeliconeClient(
             }
         } catch (_: CancellationException) {
             log.warn("Observability data send canceled")
+        } catch (e: UnresolvedAddressException) {
+            log.warnChat("Helicone connection unavailable")
         } catch (e: Exception) {
-            log.warn("Error while sending data to Helicone", e)
+            log.warnChat("Error while sending data to Helicone", e)
         }
     }
 
