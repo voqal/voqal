@@ -106,7 +106,7 @@ class UserPromptTextArea(
         add(textArea, BorderLayout.CENTER)
 
         stopButton = IconActionButton(
-            object : AnAction("Cancel", "Cancel message", AllIcons.Actions.Suspend) {
+            object : AnAction("Cancel Directive", "Cancel directive", AllIcons.Actions.Suspend) {
                 override fun actionPerformed(e: AnActionEvent) {
                 }
             })
@@ -116,7 +116,7 @@ class UserPromptTextArea(
         val iconsPanel = JPanel(flowLayout)
         iconsPanel.add(
             IconActionButton(
-                object : AnAction("Send Directive", "Send directive", VoqalIcons.send) {
+                object : AnAction("Execute Directive", "Execute directive", AllIcons.Actions.Execute) {
                     override fun actionPerformed(e: AnActionEvent) {
                         handleSubmit()
                     }
