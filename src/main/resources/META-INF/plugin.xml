@@ -48,9 +48,9 @@
     </extensions>
 
     <actions>
-        <action id="voqal.ToggleEditMode"
-                class="dev.voqal.ide.actions.mode.ToggleEditModeAction"
-                text="Toggle Edit Mode" description="Edit Mode">
+        <action id="voqal.QuickEdit"
+                class="dev.voqal.ide.actions.QuickEditAction"
+                text="Quick Edit" description="Quick Edit">
             <keyboard-shortcut first-keystroke="alt c" keymap="$default"/>
         </action>
         <action id="voqal.enableVoqal"

@@ -617,6 +617,8 @@ class VoqalConfigService(private val project: Project) {
                     log.warnChat("Missing wake provider key")
                 }
             }
+
+            VoiceDetectionSettings.VoiceDetectionProvider.None -> Unit //nop
         }
     }
 

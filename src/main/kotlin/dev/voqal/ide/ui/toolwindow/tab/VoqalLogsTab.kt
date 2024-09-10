@@ -1,7 +1,6 @@
 package dev.voqal.ide.ui.toolwindow.tab
 
 import com.intellij.ide.ui.UISettingsListener
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
@@ -19,6 +18,7 @@ import com.intellij.ui.DarculaColors
 import com.intellij.ui.OnePixelSplitter
 import dev.voqal.ide.ui.VoqalUI
 import dev.voqal.services.ProjectScopedService
+import dev.voqal.services.invokeLater
 import dev.voqal.services.messageBusConnection
 import java.awt.BorderLayout
 import java.awt.Color
@@ -42,7 +42,7 @@ class VoqalLogsTab(private val project: Project) {
     private lateinit var logEditor: Editor
 
     init {
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             initUi()
         }
     }
@@ -60,7 +60,7 @@ class VoqalLogsTab(private val project: Project) {
         })
         project.messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
             //update log level colors on theme switch
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 logEditor.markupModel.allHighlighters.forEach {
                     it.getTextAttributes(null)?.foregroundColor = getTextColor(it.getUserData(LOG_LEVEL)!!)
                 }
@@ -106,7 +106,7 @@ class VoqalLogsTab(private val project: Project) {
         if (logLevel == "DEBUG" && level !in listOf("ERROR", "WARN", "INFO", "DEBUG")) return
         if (logLevel == "TRACE" && level !in listOf("ERROR", "WARN", "INFO", "DEBUG", "TRACE")) return
 
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 val textColor = getTextColor(level)
                 val shortTime = timeFormat.format(Date(millis))

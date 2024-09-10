@@ -6,6 +6,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.psi.PsiElement
 import com.intellij.util.messages.MessageBusConnection
 import dev.voqal.ide.logging.LoggerFactory
 import dev.voqal.ide.logging.LoggerFactory.VoqalLogger
@@ -58,4 +59,65 @@ fun Project.invokeLater(action: () -> Unit) {
     ApplicationManager.getApplication().invokeLater({
         action()
     }, disposed)
+}
+
+fun PsiElement.isFunction(): Boolean {
+    val psiElement = this
+    return psiElement::class.java.simpleName.startsWith("KtNamedFunction")
+            || psiElement::class.java.simpleName.startsWith("PsiMethodImpl")
+            || psiElement::class.java.simpleName.startsWith("PyFunction")
+            || psiElement::class.java.simpleName.startsWith("GoFunctionDeclaration")
+            || psiElement::class.java.simpleName.startsWith("GoMethodDeclaration")
+            || psiElement::class.java.simpleName.startsWith("JSFunctionImpl")
+}
+
+fun PsiElement.isCodeBlock(): Boolean {
+    val psiElement = this
+    return psiElement::class.java.simpleName.startsWith("KtBlockExpression")
+            || psiElement::class.java.simpleName.startsWith("PsiCodeBlockImpl")
+            || psiElement::class.java.simpleName.startsWith("PyStatementList")
+            || psiElement::class.java.simpleName.startsWith("GoBlockImpl")
+            || psiElement::class.java.simpleName.startsWith("JSBlockStatementImpl")
+}
+
+fun PsiElement.isField(): Boolean {
+    val psiElement = this
+    return psiElement::class.java.simpleName.startsWith("KtProperty")
+            || psiElement::class.java.simpleName.startsWith("PsiFieldImpl")
+}
+
+fun PsiElement.isClass(): Boolean {
+    val psiElement = this
+    return psiElement::class.java.simpleName.startsWith("KtClass")
+            || psiElement::class.java.simpleName.startsWith("PsiClass")
+            || psiElement::class.java.simpleName.startsWith("PyClass")
+            || psiElement::class.java.simpleName.startsWith("GoTypeSpecImpl")
+            || psiElement::class.java.simpleName.startsWith("ES6ClassImpl")
+}
+
+fun PsiElement.isFile(): Boolean {
+    val psiElement = this
+    return psiElement::class.java.simpleName.startsWith("KtFile")
+            || psiElement::class.java.simpleName.startsWith("PsiJavaFile")
+            || psiElement::class.java.simpleName.startsWith("PyFile")
+            || psiElement::class.java.simpleName.startsWith("GoFile")
+            || psiElement::class.java.simpleName.startsWith("JSFileImpl")
+}
+
+fun PsiElement.isIdentifier(): Boolean {
+    val psiElement = this
+    return psiElement.toString().contains("PsiIdentifier")
+            || psiElement.toString().contains("IDENTIFIER")
+}
+
+fun PsiElement.isJvm(): Boolean {
+    return this.language.id.lowercase() == "java" || this.language.id.lowercase() == "kotlin"
+}
+
+fun PsiElement.isPython(): Boolean {
+    return this.language.id.lowercase() == "python"
+}
+
+fun PsiElement.isGo(): Boolean {
+    return this.language.id.lowercase() == "go"
 }

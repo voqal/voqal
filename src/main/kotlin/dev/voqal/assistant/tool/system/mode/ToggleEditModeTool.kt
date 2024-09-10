@@ -51,11 +51,11 @@ class ToggleEditModeTool : VoqalTool() {
         val promptSettings = configService.getPromptSettings("Edit Mode")
         val aiProvider = configService.getAiProvider()
         val lmSettings = configService.getLanguageModelSettings(promptSettings)
-        if (!aiProvider.isStmProvider() && !aiProvider.isSttProvider() && !directive.developer.chatMessage) {
-            log.warn("No transcription AI provider available")
-            project.service<VoqalStatusService>().updateText("No transcription AI provider available")
+        val chatMessage = args.getBoolean("chatMessage") ?: directive.developer.chatMessage
+        if (!aiProvider.isStmProvider() && !aiProvider.isSttProvider() && !chatMessage) {
+            log.warnChat("No transcription AI provider available")
             return
-        } else if (!aiProvider.isSttProvider() && !lmSettings.audioModality && !directive.developer.chatMessage) {
+        } else if (!aiProvider.isSttProvider() && !lmSettings.audioModality && !chatMessage) {
             log.warn("Unable to toggle edit mode. Language model ${lmSettings.name} requires speech-to-text provider")
             project.service<VoqalStatusService>().updateText(
                 "Unable to toggle edit mode. Language model ${lmSettings.name} requires speech-to-text provider"
@@ -91,7 +91,7 @@ class ToggleEditModeTool : VoqalTool() {
                     transcription = SpokenTranscript(prompt, directive.assistant.speechId),
                     textOnly = directive.developer.textOnly,
                     usingAudioModality = directive.assistant.usingAudioModality,
-                    chatMessage = directive.developer.chatMessage,
+                    chatMessage = chatMessage,
                     "edit mode"
                 )
                 project.service<VoqalDirectiveService>().executeDirective(editDirective)

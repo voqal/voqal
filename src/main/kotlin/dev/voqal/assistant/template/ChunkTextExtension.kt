@@ -6,7 +6,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
@@ -17,6 +16,7 @@ import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.util.ui.JBUI
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.services.VoqalDirectiveService
@@ -64,9 +64,9 @@ class ChunkTextExtension : AbstractExtension() {
             }
 
             val log = directive.project.getVoqalLogger(this::class)
-            var visibleText: String? = null
-            var editRange = directive.project.service<VoqalMemoryService>()
-                .getUserData("visibleRange") as? ProperTextRange
+            val visibleText: String?
+            val memoryService = directive.project.service<VoqalMemoryService>()
+            var editRange = memoryService.getUserData("visibleRange") as? ProperTextRange
             if (editRange == null) {
                 var initialVisibleRange: ProperTextRange? = null
                 ApplicationManager.getApplication().invokeAndWait {
@@ -134,30 +134,27 @@ class ChunkTextExtension : AbstractExtension() {
                         editRange = initialVisibleRange!!
                     }
 
-                    directive.project.service<VoqalMemoryService>()
-                        .putUserData("visibleRange", editRange)
+                    memoryService.putUserData("visibleRange", editRange)
                 }
 
                 //paint visible range
                 if (editRange.length != editor.document.textLength) {
-                    val existingHighlighter = directive.project.service<VoqalMemoryService>()
+                    val existingHighlighter = memoryService
                         .getUserData("visibleRangeHighlighter") as? RangeHighlighter
                     if (existingHighlighter == null) {
                         val textAttributes = TextAttributes()
-                        textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                            .globalScheme.defaultBackground.brighter()
+                        textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
                         val highlighter = editor.markupModel.addRangeHighlighter(
                             editRange.startOffset, editRange.endOffset,
                             HighlighterLayer.SELECTION,
                             textAttributes,
                             HighlighterTargetArea.EXACT_RANGE
                         )
-                        directive.project.service<VoqalMemoryService>()
-                            .putUserData("visibleRangeHighlighter", highlighter)
+                        memoryService.putUserData("visibleRangeHighlighter", highlighter)
                         log.debug("Highlighted visible range: $editRange")
                     }
                 }
-            } else {
+            } else if (memoryService.getUserData("voqal.edit.inlay") == null) {
                 //if full code visible but current document is less than edit range, reset edit range
                 val existingHighlighter = directive.project.service<VoqalMemoryService>()
                     .getUserData("visibleRangeHighlighter") as? RangeHighlighter
@@ -225,7 +222,7 @@ class ChunkTextExtension : AbstractExtension() {
                         val startOffset = block.textRange.startOffset + 2
                         val endOffset = block.textRange.endOffset - 2
                         if (startOffset < endOffset) {
-                            blocks.add(SynthBlock(block, startOffset, endOffset))
+                            blocks.add(SynthBlock(startOffset, endOffset))
                         }
                     }
                 }
@@ -376,7 +373,7 @@ class ChunkTextExtension : AbstractExtension() {
             return null
         }
 
-        private class SynthBlock(val parent: Block, val startOffset: Int, val endOffset: Int) : Block {
+        private class SynthBlock(val startOffset: Int, val endOffset: Int) : Block {
             override fun getTextRange(): TextRange = TextRange(startOffset, endOffset)
             override fun getSubBlocks(): List<Block?> = emptyList()
             override fun getWrap(): Wrap? = null

@@ -4,8 +4,10 @@ import com.aallam.openai.api.chat.Tool
 import com.aallam.openai.api.core.Parameters
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.ThrowableComputable
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.focus.DetectedIntent
@@ -15,6 +17,7 @@ import dev.voqal.assistant.tool.text.EditTextTool.Companion.VOQAL_HIGHLIGHTERS
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.VoqalStatusService
 import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.invokeLater
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
 
@@ -42,7 +45,14 @@ class LooksGoodTool : VoqalTool() {
             log.info("Looks good while editing")
             val memoryService = project.service<VoqalMemoryService>()
             val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+            val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
             memoryService.resetMemory()
+
+            inlay?.let {
+                project.invokeLater {
+                    Disposer.dispose(it)
+                }
+            }
 
             //ensure highlighters removed
             if (visibleRangeHighlighter is RangeHighlighter) {

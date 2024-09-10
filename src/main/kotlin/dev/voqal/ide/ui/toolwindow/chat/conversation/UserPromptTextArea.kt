@@ -5,13 +5,16 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.util.registry.Registry
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
+import com.intellij.util.ui.UIUtil
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
 import java.awt.*
 import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.util.function.Consumer
@@ -23,17 +26,30 @@ class UserPromptTextArea(
     private val onSubmit: Consumer<String>,
 ) : JPanel(BorderLayout()) {
 
-    private val textArea = JBTextArea()
-    private val textAreaRadius = 16
+    val textArea = JBTextArea()
+    private val textAreaRadius = 4
     private var stopButton: IconActionButton? = null
     private var submitEnabled = true
+    var allowEmptyText = false
 
     init {
         textArea.isOpaque = false
         textArea.lineWrap = true
         textArea.wrapStyleWord = true
-        textArea.emptyText.setText("Type your message here")
-        textArea.border = JBUI.Borders.empty(4)
+        textArea.emptyText.setText("").appendText(
+            true,
+            0,
+            VoqalIcons.microphone,
+            "Speak or type here",
+            SimpleTextAttributes.REGULAR_ATTRIBUTES,
+            object : ActionListener {
+                override fun actionPerformed(e: ActionEvent?) {
+                    println("here")
+                }
+            })
+
+        textArea.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true)
+
         addShiftEnterInputMap(textArea, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
                 handleSubmit()
@@ -48,7 +64,6 @@ class UserPromptTextArea(
                 super@UserPromptTextArea.paintBorder(super@UserPromptTextArea.getGraphics())
             }
         })
-        updateFont()
         init()
     }
 
@@ -72,9 +87,6 @@ class UserPromptTextArea(
         val g2 = g.create() as Graphics2D
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2.color = CurrentTheme.ActionButton.focusedBorder()
-        if (textArea.isFocusOwner) {
-            g2.stroke = BasicStroke(1.5f)
-        }
         g2.drawRoundRect(0, 0, width - 1, height - 1, textAreaRadius, textAreaRadius)
     }
 
@@ -83,7 +95,7 @@ class UserPromptTextArea(
     }
 
     private fun handleSubmit() {
-        if (submitEnabled && textArea.text.isNotEmpty()) {
+        if (submitEnabled && (textArea.text.isNotEmpty() || allowEmptyText)) {
             onSubmit.accept(text.trim { it <= ' ' })
             textArea.text = ""
         }
@@ -100,12 +112,11 @@ class UserPromptTextArea(
             })
         stopButton!!.isEnabled = false
 
-        val flowLayout = FlowLayout(FlowLayout.RIGHT)
-        flowLayout.hgap = 8
+        val flowLayout = FlowLayout(FlowLayout.RIGHT, 6, 0)
         val iconsPanel = JPanel(flowLayout)
         iconsPanel.add(
             IconActionButton(
-                object : AnAction("Send Message", "Send message", VoqalIcons.send) {
+                object : AnAction("Send Directive", "Send directive", VoqalIcons.send) {
                     override fun actionPerformed(e: AnActionEvent) {
                         handleSubmit()
                     }

@@ -264,7 +264,9 @@ class EditTextTool : VoqalTool() {
 
             //may contain modification instead of addition on last change, if so can't append remaining original text
             if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
-                streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
+                if (previousIndicatorLine > 0) {
+                    streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
+                }
                 return null
             }
 
@@ -428,7 +430,7 @@ class EditTextTool : VoqalTool() {
             var element = ReadAction.compute(ThrowableComputable {
                 PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.findElementAt(diffStartOffset)
             })
-            val isIdentifier = element?.let { project.service<VoqalSearchService>().isIdentifier(it) } ?: false
+            val isIdentifier = element?.isIdentifier() ?: false
             val parent = if (isIdentifier) ReadAction.compute(ThrowableComputable { element?.parent }) else null
             if (isIdentifier && parent is PsiNamedElement) {
                 //can be smart renamed, use rename processor

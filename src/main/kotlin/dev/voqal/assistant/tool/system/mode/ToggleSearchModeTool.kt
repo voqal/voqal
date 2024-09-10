@@ -53,8 +53,7 @@ class ToggleSearchModeTool : VoqalTool() {
         val aiProvider = configService.getAiProvider()
         val lmSettings = configService.getLanguageModelSettings(promptSettings)
         if (!aiProvider.isStmProvider() && !aiProvider.isSttProvider() && !directive.developer.chatMessage) {
-            log.warn("No transcription AI provider available")
-            project.service<VoqalStatusService>().updateText("No transcription AI provider available")
+            log.warnChat("No transcription AI provider available")
             return
         } else if (!aiProvider.isSttProvider() && !lmSettings.audioModality && !directive.developer.chatMessage) {
             log.warn("Unable to toggle search mode. Language model ${lmSettings.name} requires speech-to-text provider")

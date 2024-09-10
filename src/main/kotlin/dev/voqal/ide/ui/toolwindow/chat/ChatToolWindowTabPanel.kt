@@ -3,7 +3,6 @@ package dev.voqal.ide.ui.toolwindow.chat
 import com.intellij.ide.scratch.ScratchRootType
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -56,7 +55,7 @@ class ChatToolWindowTabPanel(
         userPromptTextArea.requestFocusInWindow()
         userPromptTextArea.requestFocus()
 
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             addWelcomeMessage()
         }
     }

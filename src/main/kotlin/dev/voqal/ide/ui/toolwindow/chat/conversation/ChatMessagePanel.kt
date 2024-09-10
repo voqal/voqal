@@ -3,7 +3,6 @@ package dev.voqal.ide.ui.toolwindow.chat.conversation
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.project.Project
@@ -12,6 +11,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
 import dev.voqal.ide.VoqalIcons
+import dev.voqal.services.invokeLater
 import dev.voqal.services.messageBusConnection
 import java.awt.BorderLayout
 import java.awt.FlowLayout
@@ -41,7 +41,7 @@ open class ChatMessagePanel(
 
         updateUiColors()
         project.messageBusConnection.subscribe(EditorColorsManager.TOPIC, EditorColorsListener {
-            ApplicationManager.getApplication().invokeLater {
+            project.invokeLater {
                 updateUiColors()
             }
         })
