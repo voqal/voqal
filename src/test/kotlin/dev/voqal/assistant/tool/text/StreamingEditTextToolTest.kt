@@ -2,7 +2,9 @@ package dev.voqal.assistant.tool.text
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
@@ -13,8 +15,6 @@ import dev.voqal.services.scope
 import dev.voqal.status.VoqalStatus
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 import java.io.File
 
 class StreamingEditTextToolTest : JBTest() {
@@ -192,17 +192,17 @@ class StreamingEditTextToolTest : JBTest() {
 
         val testDocument = LightVirtualFile("TextAdventureGame.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
-        val testRange = ProperTextRange(14, 91)
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(14, 91)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)

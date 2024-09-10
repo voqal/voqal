@@ -4,7 +4,9 @@ import com.intellij.lang.Language
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.testFramework.LightVirtualFile
@@ -20,8 +22,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 import java.io.File
 
 class EditTextToolTest : JBTest() {
@@ -72,7 +72,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(0, 7093)
         val responseCode = """
             // Generated from PLSQLParser/PLSQL.g4 by ANTLR 4.2
             package large;
@@ -183,13 +182,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(0, 7093)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -218,7 +218,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(17, 62)
         val responseCode = """
             def add(self, x, y):
                 return x + y #test
@@ -227,13 +226,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(17, 62)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -262,7 +262,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(17, 53)
         val responseCode = """
             def add(self, x, y):
             	return x + y #test
@@ -271,13 +270,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(17, 53)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -306,7 +306,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(163898, 170177)
         val responseCode = """
             /**
              *
@@ -533,13 +532,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(163898, 170177)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -603,7 +603,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(0, codeText.length)
         val responseCode = """
             enum class TileType {
                 GRASS, WATER, MOUNTAIN, ROAD, LAVA
@@ -634,13 +633,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(0, codeText.length)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -678,7 +678,6 @@ class EditTextToolTest : JBTest() {
         val document = virtualFile.getDocument()
         val editor = EditorFactory.getInstance().createEditor(document)
 
-        val testRange = ProperTextRange(0, codeText.length)
         val responseCode = """
             public class Main {
             }
@@ -687,13 +686,14 @@ class EditTextToolTest : JBTest() {
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(0, codeText.length)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
