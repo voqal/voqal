@@ -48,7 +48,7 @@ class CancelTool : VoqalTool() {
         val memoryService = project.service<VoqalMemoryService>()
         val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
         val affectedFiles = memoryService.getUserData("affectedFiles")
-        val editor = memoryService.getUserData("voqal.edit.editor") as Editor?
+        val editor = (memoryService.getUserData("voqal.edit.editor") as Editor?) ?: directive.ide.editor
         val action = memoryService.getUserData("voqal.edit.action") as LocalHistoryAction?
         val label = memoryService.getUserData("voqal.edit") as Label?
         val memory = memoryService.getCurrentMemory()
