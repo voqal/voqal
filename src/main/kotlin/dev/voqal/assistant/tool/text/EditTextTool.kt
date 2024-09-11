@@ -31,6 +31,7 @@ import com.intellij.psi.*
 import com.intellij.refactoring.rename.RenameProcessor
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.processing.TextSearcher
+import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.assistant.tool.system.LooksGoodTool
@@ -207,12 +208,30 @@ class EditTextTool : VoqalTool() {
             }
         }
 
-        //finally, do text replacement on current editor
+        //do text change(s) in current editor
         val editHighlighters = if (replacementText.lines().filter { it.isNotBlank() }.all { diffRegex.matches(it) }) {
             doDiffTextEdit(replacementText, editor, project)
         } else {
             doFullTextEdit(editor, replacementText, project)
         }
+
+        //finally, ensure visible range highlighter is up-to-date
+        val memoryService = project.service<VoqalMemoryService>()
+        val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter") as RangeHighlighter?
+        val visibleRange = visibleRangeHighlighter?.range
+        if (visibleRange != null) {
+            val newStartOffset = editHighlighters.minOfOrNull { it.startOffset } ?: visibleRange.startOffset
+            val newEndOffset = editHighlighters.maxOfOrNull { it.endOffset } ?: visibleRange.endOffset
+            if (newStartOffset < visibleRange.startOffset || newEndOffset > visibleRange.endOffset) {
+                val updatedRange = ProperTextRange(
+                    Math.min(newStartOffset, visibleRange.startOffset),
+                    Math.max(newEndOffset, visibleRange.endOffset)
+                )
+                editor.markupModel.removeHighlighter(visibleRangeHighlighter)
+                ChunkTextExtension.setVisibleRangeHighlighter(project, editor, updatedRange)
+            }
+        }
+
         return streamIndicators + editHighlighters.sortedBy { it.startOffset }
     }
 
@@ -228,6 +247,9 @@ class EditTextTool : VoqalTool() {
 
         //when streaming, the last line may or may not be complete, drop to be safe
         var fullTextWithEdits = responseCode.lines().dropLast(1).joinToString("\n")
+        if (fullTextWithEdits.isEmpty()) {
+            return null
+        }
 
         //determine diff between original text and text streamed so far
         var origText = editor.document.text

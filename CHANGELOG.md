@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Smart chunking in chunk text extension erroneously disabled
+- Invalid text modification when stream completion contains single line
+- Invalid text modification when stream completion adds text above visible range
+
+## [2024.10.2] - 2024-09-09
+
 ### Changed
 
 - Display error messages in chat tool window
@@ -519,7 +527,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.1...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.2...HEAD
+[2024.10.2]: https://github.com/voqal/voqal/compare/v2024.10.1...v2024.10.2
 [2024.10.1]: https://github.com/voqal/voqal/compare/v2024.10.0...v2024.10.1
 [2024.10.0]: https://github.com/voqal/voqal/compare/v2024.9.1...v2024.10.0
 [2024.9.1]: https://github.com/voqal/voqal/compare/v2024.9.0...v2024.9.1

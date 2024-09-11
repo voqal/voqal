@@ -2,7 +2,9 @@ package dev.voqal.assistant.tool.text
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
@@ -13,8 +15,6 @@ import dev.voqal.services.scope
 import dev.voqal.status.VoqalStatus
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 import java.io.File
 
 class StreamingEditTextToolTest : JBTest() {
@@ -184,7 +184,31 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
-    fun `test streaming edit visible range`() {
+    fun `test streaming ignore single line completion`() {
+        val responseCode = File("src/test/resources/edit-stream/single-line-completion.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.verify {
+                assertEquals(0, voqalHighlighters.size)
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+    }
+
+    fun `test streaming edit visible range add below`() {
         val responseCode = File("src/test/resources/edit-stream/add-import-scanner.txt").readText()
             .replace("\r\n", "\n")
         val originalText = File("src/test/resources/edit-stream/TextAdventureGame.java").readText()
@@ -192,17 +216,17 @@ class StreamingEditTextToolTest : JBTest() {
 
         val testDocument = LightVirtualFile("TextAdventureGame.java", originalText).getDocument()
         val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
-        val testRange = ProperTextRange(14, 91)
         val testContext = VertxTestContext()
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(14, 91)
             project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
-            val rangeHighlighter = mock<RangeHighlighter> {
-                on { isValid } doReturn true
-                on { startOffset } doReturn testRange.startOffset
-                on { endOffset } doReturn testRange.endOffset
-            }
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", rangeHighlighter)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
 
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
@@ -222,6 +246,71 @@ class StreamingEditTextToolTest : JBTest() {
         assertEquals(
             testEditor.document.text,
             originalText.replace("import java.util.List;", "import java.util.List;\nimport java.util.Scanner;")
+        )
+    }
+
+    fun `test streaming edit visible range add above`() {
+        val responseCode = File("src/test/resources/edit-stream/add-javadocs.txt").readText()
+            .replace("\r\n", "\n")
+        val responseCode2 = File("src/test/resources/edit-stream/add-javadocs-2.txt").readText()
+            .replace("\r\n", "\n")
+        val responseCode3 = File("src/test/resources/edit-stream/add-javadocs-3.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = ProperTextRange(417, 836)
+            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+
+            val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters1.size)
+
+                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            val voqalHighlighters2 = EditTextTool().doDocumentEdits(project, responseCode2, testEditor, true)
+            testContext.verify {
+                assertEquals(2, voqalHighlighters2.size)
+
+                val editHighlighters = voqalHighlighters2.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(1, editHighlighters.size)
+                assertTrue(editHighlighters[0].let { it.startOffset == 417 && it.endOffset == 526 })
+            }
+            val voqalHighlighters3 = EditTextTool().doDocumentEdits(project, responseCode3, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters3.size)
+
+                val editHighlighters = voqalHighlighters3.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            testEditor.document.text,
+            originalText.replace(
+                "  public TodoItemController(Boolean isTest) {", "  /**\n" +
+                        "   * Constructor.\n" +
+                        "   * @param isTest True if the controller is being used in a test environment.\n" +
+                        "   */\n" +
+                        "  public TodoItemController(Boolean isTest) {"
+            )
         )
     }
 

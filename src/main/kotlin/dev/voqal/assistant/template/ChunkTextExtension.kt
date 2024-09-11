@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.ThrowableComputable
@@ -28,20 +29,29 @@ import io.pebbletemplates.pebble.template.EvaluationContext
 import io.pebbletemplates.pebble.template.PebbleTemplate
 import io.vertx.core.json.JsonObject
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.VisibleForTesting
 
 class ChunkTextExtension : AbstractExtension() {
+
+    companion object {
+        fun setVisibleRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
+            val textAttributes = TextAttributes()
+            textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
+            val highlighter = editor.markupModel.addRangeHighlighter(
+                editRange.startOffset, editRange.endOffset,
+                HighlighterLayer.SELECTION,
+                textAttributes,
+                HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", highlighter)
+            project.getVoqalLogger(this::class).debug("Highlighted visible range: $editRange")
+        }
+    }
 
     override fun getFunctions() = mapOf(
         "chunkText" to ChunkTextFunction()
     )
 
     class ChunkTextFunction : Function {
-
-        companion object {
-            @VisibleForTesting
-            var VISIBLE_RANGE_FALLBACK = true
-        }
 
         override fun getArgumentNames(): List<String> {
             return listOf("viewingCode", "limit", "limitType")
@@ -122,14 +132,10 @@ class ChunkTextExtension : AbstractExtension() {
                     })
                     val smartEditRange = smartChunk(editor, psiFile, limit, editRange, initialVisibleRange!!)
 
-                    var visibleRangePass = smartEditRange.contains(initialVisibleRange!!)
-                    if (!VISIBLE_RANGE_FALLBACK) {
-                        visibleRangePass = true
-                    }
-                    if (smartEditRange != editRange && visibleRangePass) {
+                    if (smartEditRange != editRange) {
                         editRange = smartEditRange
                         log.debug("Smart code chunked code from $originalEditRange to $editRange")
-                    } else if (VISIBLE_RANGE_FALLBACK && smartEditRange != editRange) {
+                    } else if (smartEditRange != editRange) {
                         log.debug("Smart code chunking failed, falling back to initial visible range")
                         editRange = initialVisibleRange!!
                     }
@@ -142,16 +148,7 @@ class ChunkTextExtension : AbstractExtension() {
                     val existingHighlighter = memoryService
                         .getUserData("visibleRangeHighlighter") as? RangeHighlighter
                     if (existingHighlighter == null) {
-                        val textAttributes = TextAttributes()
-                        textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
-                        val highlighter = editor.markupModel.addRangeHighlighter(
-                            editRange.startOffset, editRange.endOffset,
-                            HighlighterLayer.SELECTION,
-                            textAttributes,
-                            HighlighterTargetArea.EXACT_RANGE
-                        )
-                        memoryService.putUserData("visibleRangeHighlighter", highlighter)
-                        log.debug("Highlighted visible range: $editRange")
+                        setVisibleRangeHighlighter(directive.project, editor, editRange)
                     }
                 }
             } else if (memoryService.getUserData("voqal.edit.inlay") == null) {
