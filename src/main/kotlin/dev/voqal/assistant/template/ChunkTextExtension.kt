@@ -23,6 +23,7 @@ import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.services.VoqalDirectiveService
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.range
 import io.pebbletemplates.pebble.extension.AbstractExtension
 import io.pebbletemplates.pebble.extension.Function
 import io.pebbletemplates.pebble.template.EvaluationContext
@@ -33,7 +34,7 @@ import kotlinx.serialization.json.Json
 class ChunkTextExtension : AbstractExtension() {
 
     companion object {
-        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
+        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange) {
             val textAttributes = TextAttributes()
             textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
             val highlighter = editor.markupModel.addRangeHighlighter(
@@ -76,14 +77,14 @@ class ChunkTextExtension : AbstractExtension() {
             val log = directive.project.getVoqalLogger(this::class)
             val visibleText: String?
             val memoryService = directive.project.service<VoqalMemoryService>()
-            var editRange = memoryService.getUserData("visibleRange") as? ProperTextRange
+            var editRange = (memoryService.getUserData("editRangeHighlighter") as? RangeHighlighter)?.range
             if (editRange == null) {
-                var initialVisibleRange: ProperTextRange? = null
+                var visibleRange: TextRange? = null
                 ApplicationManager.getApplication().invokeAndWait {
-                    initialVisibleRange = editor.calculateVisibleRange()
+                    visibleRange = editor.calculateVisibleRange()
                 }
-                editRange = initialVisibleRange!!
-                log.debug("Initial visible range: $editRange")
+                editRange = visibleRange!!
+                log.debug("Initial edit range: $editRange")
 
                 val limit = args["limit"]?.toString()?.toInt() ?: 0
                 val limitType = args["limitType"]
@@ -130,17 +131,15 @@ class ChunkTextExtension : AbstractExtension() {
                     val psiFile = ReadAction.compute(ThrowableComputable {
                         PsiManager.getInstance(directive.project).findFile(file)!!
                     })
-                    val smartEditRange = smartChunk(editor, psiFile, limit, editRange, initialVisibleRange!!)
+                    val smartEditRange = smartChunk(editor, psiFile, limit, editRange, visibleRange!!)
 
                     if (smartEditRange != editRange) {
                         editRange = smartEditRange
                         log.debug("Smart code chunked code from $originalEditRange to $editRange")
                     } else if (smartEditRange != editRange) {
                         log.debug("Smart code chunking failed, falling back to initial visible range")
-                        editRange = initialVisibleRange!!
+                        editRange = visibleRange!!
                     }
-
-                    memoryService.putUserData("visibleRange", editRange)
                 }
 
                 //paint edit range
@@ -156,9 +155,7 @@ class ChunkTextExtension : AbstractExtension() {
                 val existingHighlighter = directive.project.service<VoqalMemoryService>()
                     .getUserData("editRangeHighlighter") as? RangeHighlighter
                 if (existingHighlighter == null && editRange.length > editor.document.text.length) {
-                    editRange = ProperTextRange(0, editor.document.textLength)
-                    directive.project.service<VoqalMemoryService>()
-                        .putUserData("visibleRange", editRange)
+                    editRange = TextRange(0, editor.document.textLength)
                     log.debug("Reset edit range to full code: $editRange")
                 } //todo: this doesn't handle cases where the code is too long to fit in the editor
                 //todo: this may not be needed since the visibleText is only sent on initial message to LLM

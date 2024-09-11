@@ -4,8 +4,10 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.RangeMarker
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.util.messages.MessageBusConnection
 import dev.voqal.ide.logging.LoggerFactory
@@ -121,3 +123,14 @@ fun PsiElement.isPython(): Boolean {
 fun PsiElement.isGo(): Boolean {
     return this.language.id.lowercase() == "go"
 }
+
+val RangeMarker.range: TextRange?
+    get() {
+        if (!isValid) {
+            return null
+        } else {
+            val start = startOffset
+            val end = endOffset
+            return if ((if (0 <= start) start <= end else false)) TextRange(start, end) else null
+        }
+    }

@@ -103,17 +103,19 @@ class QuickEditAction : AnAction() {
                     earlyExit = true
                     toolService.blindExecute(LooksGoodTool())
                 } else {
-                    //make sure quick edit range is up-to-date
-                    val prevEditRange = memoryService.getUserData("visibleRange") as ProperTextRange?
-                    if (prevEditRange != null) {
-                        val startBlockPosition = prevEditRange.startOffset
-                        val newEditRange = getQuickEditRange(project, editor, psiFile, startBlockPosition)
-                        if (newEditRange == null) {
-                            log.warn("todo")
-                        } else if (prevEditRange != newEditRange) {
-                            memoryService.putUserData("visibleRange", newEditRange)
-                        }
-                    }
+//                    //todo: i think edit text handles now
+//                    //make sure quick edit range is up-to-date
+//                    val prevEditRange = (memoryService.getUserData("editRangeHighlighter") as? RangeHighlighter)?.range
+//                    if (prevEditRange != null) {
+//                        val startBlockPosition = prevEditRange.startOffset
+//                        val newEditRange = getQuickEditRange(project, editor, psiFile, startBlockPosition)
+//                        if (newEditRange == null) {
+//                            log.warn("todo")
+//                        } else if (prevEditRange != newEditRange) {
+//                            TODO()
+//                            //memoryService.putUserData("editRange", newEditRange)
+//                        }
+//                    }
 
                     log.debug("Sending message: $message")
                     project.service<VoqalDirectiveService>().handleTranscription(
@@ -160,7 +162,6 @@ class QuickEditAction : AnAction() {
         )
         memoryService.putUserData("editRangeHighlighter", quickEditRangeHighlighter)
         log.debug("Highlighted edit range: $editRange")
-        memoryService.putUserData("visibleRange", editRange)
 
         project.invokeLater {
             EditorEmbeddedComponentManager.getInstance().addComponent(

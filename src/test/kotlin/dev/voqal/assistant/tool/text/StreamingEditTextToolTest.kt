@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.util.ProperTextRange
+import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
@@ -99,10 +99,7 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {
-                assertEquals(1, voqalHighlighters.size)
-
-                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
-                assertEquals(0, editHighlighters.size)
+                assertEquals(0, voqalHighlighters.size)
             }
             testContext.completeNow()
         }
@@ -220,8 +217,7 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
-            val testRange = ProperTextRange(14, 91)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
+            val testRange = TextRange(14, 91)
             val testHighlighter = testEditor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
@@ -265,8 +261,7 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
-            val testRange = ProperTextRange(417, 836)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
+            val testRange = TextRange(417, 836)
             val testHighlighter = testEditor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
@@ -275,10 +270,7 @@ class StreamingEditTextToolTest : JBTest() {
 
             val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {
-                assertEquals(1, voqalHighlighters1.size)
-
-                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
-                assertEquals(0, editHighlighters.size)
+                assertEquals(0, voqalHighlighters1.size)
             }
             val voqalHighlighters2 = EditTextTool().doDocumentEdits(project, responseCode2, testEditor, true)
             testContext.verify {

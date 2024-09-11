@@ -48,7 +48,6 @@ class DiffEditTest : JBTest() {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
             val testRange = ProperTextRange(0, codeText.length)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
             val testHighlighter = editor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
@@ -93,7 +92,6 @@ class DiffEditTest : JBTest() {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
             val testRange = ProperTextRange(0, codeText.length)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
             val testHighlighter = editor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
@@ -148,7 +146,6 @@ class DiffEditTest : JBTest() {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
             val testRange = ProperTextRange(0, codeText.length)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
             val testHighlighter = editor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
@@ -222,7 +219,6 @@ class DiffEditTest : JBTest() {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
             val testRange = ProperTextRange(0, codeText.length)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
             val testHighlighter = editor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
