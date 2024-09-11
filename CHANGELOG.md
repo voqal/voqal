@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.10.3] - 2024-09-11
+
 ### Fixed
 
 - Smart chunking in chunk text extension erroneously disabled
@@ -527,7 +529,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.2...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.10.3...HEAD
+[2024.10.3]: https://github.com/voqal/voqal/compare/v2024.10.2...v2024.10.3
 [2024.10.2]: https://github.com/voqal/voqal/compare/v2024.10.1...v2024.10.2
 [2024.10.1]: https://github.com/voqal/voqal/compare/v2024.10.0...v2024.10.1
 [2024.10.0]: https://github.com/voqal/voqal/compare/v2024.9.1...v2024.10.0
