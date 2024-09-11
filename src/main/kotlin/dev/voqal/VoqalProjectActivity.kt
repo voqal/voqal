@@ -26,7 +26,7 @@ class VoqalProjectActivity : ProjectActivity {
         val configService = project.service<VoqalConfigService>()
         var pluginEnabled = configService.getConfig().pluginSettings.enabled
         var pauseOnFocusLost = configService.getConfig().pluginSettings.pauseOnFocusLost
-        configService.onConfigChange(project.service<ProjectScopedService>()) {
+        configService.onConfigChange {
             pluginEnabled = it.pluginSettings.enabled
             if (pauseOnFocusLost != it.pluginSettings.pauseOnFocusLost) {
                 pauseOnFocusLost = it.pluginSettings.pauseOnFocusLost

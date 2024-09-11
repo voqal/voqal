@@ -65,7 +65,10 @@ class VoqalConfigService(private val project: Project) {
     private val configListeners = mutableListOf<(VoqalConfig) -> Unit>()
     private val syncLock = Any()
 
-    fun onConfigChange(disposable: Disposable, listener: (VoqalConfig) -> Unit) {
+    fun onConfigChange(
+        disposable: Disposable = project.service<ProjectScopedService>(),
+        listener: (VoqalConfig) -> Unit
+    ) {
         configListeners.add(listener)
 
         Disposer.register(disposable) {

@@ -4,6 +4,7 @@ import com.aallam.openai.api.exception.OpenAIException
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.focus.SpokenTranscript
+import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
@@ -89,6 +90,20 @@ class SharedAudioCapture(private val project: Project) {
                 cancel()
             }
         }
+
+        var vadProvider = configService.getConfig().voiceDetectionSettings.provider
+        configService.onConfigChange {
+            val newVadProvider = it.voiceDetectionSettings.provider
+            if (vadProvider == VoiceDetectionProvider.None && newVadProvider != VoiceDetectionProvider.None) {
+                log.info("Voice detection enabled")
+                vadProvider = newVadProvider
+                restart()
+            } else if (vadProvider != VoiceDetectionProvider.None && newVadProvider == VoiceDetectionProvider.None) {
+                log.info("Voice detection disabled")
+                vadProvider = newVadProvider
+                restart()
+            }
+        }
     }
 
     fun setMicrophone(project: Project, microphoneName: String) {
@@ -143,6 +158,11 @@ class SharedAudioCapture(private val project: Project) {
 
     private fun captureAudio() {
         try {
+            val configService = project.service<VoqalConfigService>()
+            if (configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.None) {
+                log.warn("No voice detection provider available")
+                return
+            }
             val availableMicrophones = getAvailableMicrophones()
             if (availableMicrophones.isEmpty()) {
                 log.warn("No microphone available")
@@ -185,7 +205,6 @@ class SharedAudioCapture(private val project: Project) {
             val framesBeforeVoiceDetected = CircularListFIFO<Frame>(preSpeechBufferSize)
             val capturedVoice = LinkedList<Frame>()
             val audioDetection = AudioDetection()
-            val configService = project.service<VoqalConfigService>()
 
             val processJob = CoroutineScope(Dispatchers.Default).launch {
                 while (active) {
