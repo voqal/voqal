@@ -322,7 +322,7 @@ class EditTextTool : VoqalTool() {
                 }
             }
 
-            if (textRange.endOffset < origText.length) {
+            if (textRange.endOffset <= origText.length) {
                 fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
             } else {
                 //edit is adding text past visible range, need to re-add final line dropped above

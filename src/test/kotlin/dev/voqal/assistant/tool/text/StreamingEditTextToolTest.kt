@@ -306,6 +306,56 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
+    fun `test streaming edit visible range exact`() {
+        val responseCode = File("src/test/resources/edit-stream/smaller-1.txt").readText()
+            .replace("\r\n", "\n")
+        val responseCode2 = File("src/test/resources/edit-stream/smaller-2.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/smaller.ts").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("smaller.ts", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = TextRange(0, 827)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
+
+            val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters1.size)
+
+                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            val voqalHighlighters2 = EditTextTool().doDocumentEdits(project, responseCode2, testEditor, true)
+            testContext.verify {
+                assertEquals(3, voqalHighlighters2.size)
+
+                val editHighlighters = voqalHighlighters2.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(2, editHighlighters.size)
+                assertTrue(editHighlighters[0].let { it.startOffset == 770 && it.endOffset == 771 })
+                assertTrue(editHighlighters[1].let { it.startOffset == 777 && it.endOffset == 778 })
+            }
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            testEditor.document.text,
+            originalText.replace("1 - sa", "(1 - sa)")
+        )
+    }
+
     fun `test streaming edit groq bad spacing`() {
         val responseCode = File("src/test/resources/edit-stream/groq-bad-spacing.txt").readText()
             .replace("\r\n", "\n")
