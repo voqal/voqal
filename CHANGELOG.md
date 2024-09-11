@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- Conversational quick edit inlay
+- `None` voice detection provider
+
+### Fixed
+
+- Incorrect text modification when stream editing exact edit range
+- Compute icons coloring in light theme
+
+### Removed
+
+- Voqal mode caret
+
 ## [2024.10.3] - 2024-09-11
 
 ### Fixed
