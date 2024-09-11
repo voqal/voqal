@@ -23,6 +23,7 @@ import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.services.VoqalDirectiveService
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.range
 import io.pebbletemplates.pebble.extension.AbstractExtension
 import io.pebbletemplates.pebble.extension.Function
 import io.pebbletemplates.pebble.template.EvaluationContext
@@ -33,17 +34,16 @@ import kotlinx.serialization.json.Json
 class ChunkTextExtension : AbstractExtension() {
 
     companion object {
-        fun setVisibleRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
-            val textAttributes = TextAttributes()
-            textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
-            val highlighter = editor.markupModel.addRangeHighlighter(
+        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange) {
+            val textAttributes = TextAttributes().apply {
+                backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
+            }
+            val editRangeHighlighter = editor.markupModel.addRangeHighlighter(
                 editRange.startOffset, editRange.endOffset,
-                HighlighterLayer.SELECTION,
-                textAttributes,
-                HighlighterTargetArea.EXACT_RANGE
+                HighlighterLayer.SELECTION, textAttributes, HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", highlighter)
-            project.getVoqalLogger(this::class).debug("Highlighted visible range: $editRange")
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", editRangeHighlighter)
+            project.getVoqalLogger(this::class).debug("Highlighted edit range: $editRange")
         }
     }
 
@@ -74,16 +74,16 @@ class ChunkTextExtension : AbstractExtension() {
             }
 
             val log = directive.project.getVoqalLogger(this::class)
-            var visibleText: String? = null
-            var editRange = directive.project.service<VoqalMemoryService>()
-                .getUserData("visibleRange") as? ProperTextRange
+            val visibleText: String?
+            val memoryService = directive.project.service<VoqalMemoryService>()
+            var editRange = (memoryService.getUserData("editRangeHighlighter") as? RangeHighlighter)?.range
             if (editRange == null) {
-                var initialVisibleRange: ProperTextRange? = null
+                var visibleRange: TextRange? = null
                 ApplicationManager.getApplication().invokeAndWait {
-                    initialVisibleRange = editor.calculateVisibleRange()
+                    visibleRange = editor.calculateVisibleRange()
                 }
-                editRange = initialVisibleRange!!
-                log.debug("Initial visible range: $editRange")
+                editRange = visibleRange!!
+                log.debug("Initial edit range: $editRange")
 
                 val limit = args["limit"]?.toString()?.toInt() ?: 0
                 val limitType = args["limitType"]
@@ -130,36 +130,31 @@ class ChunkTextExtension : AbstractExtension() {
                     val psiFile = ReadAction.compute(ThrowableComputable {
                         PsiManager.getInstance(directive.project).findFile(file)!!
                     })
-                    val smartEditRange = smartChunk(editor, psiFile, limit, editRange, initialVisibleRange!!)
+                    val smartEditRange = smartChunk(editor, psiFile, limit, editRange, visibleRange!!)
 
                     if (smartEditRange != editRange) {
                         editRange = smartEditRange
                         log.debug("Smart code chunked code from $originalEditRange to $editRange")
                     } else if (smartEditRange != editRange) {
                         log.debug("Smart code chunking failed, falling back to initial visible range")
-                        editRange = initialVisibleRange!!
+                        editRange = visibleRange!!
                     }
-
-                    directive.project.service<VoqalMemoryService>()
-                        .putUserData("visibleRange", editRange)
                 }
 
-                //paint visible range
+                //paint edit range
                 if (editRange.length != editor.document.textLength) {
-                    val existingHighlighter = directive.project.service<VoqalMemoryService>()
-                        .getUserData("visibleRangeHighlighter") as? RangeHighlighter
+                    val existingHighlighter = memoryService
+                        .getUserData("editRangeHighlighter") as? RangeHighlighter
                     if (existingHighlighter == null) {
-                        setVisibleRangeHighlighter(directive.project, editor, editRange)
+                        setEditRangeHighlighter(directive.project, editor, editRange)
                     }
                 }
-            } else {
+            } else if (memoryService.getUserData("voqal.edit.inlay") == null) {
                 //if full code visible but current document is less than edit range, reset edit range
                 val existingHighlighter = directive.project.service<VoqalMemoryService>()
-                    .getUserData("visibleRangeHighlighter") as? RangeHighlighter
+                    .getUserData("editRangeHighlighter") as? RangeHighlighter
                 if (existingHighlighter == null && editRange.length > editor.document.text.length) {
-                    editRange = ProperTextRange(0, editor.document.textLength)
-                    directive.project.service<VoqalMemoryService>()
-                        .putUserData("visibleRange", editRange)
+                    editRange = TextRange(0, editor.document.textLength)
                     log.debug("Reset edit range to full code: $editRange")
                 } //todo: this doesn't handle cases where the code is too long to fit in the editor
                 //todo: this may not be needed since the visibleText is only sent on initial message to LLM
@@ -220,7 +215,7 @@ class ChunkTextExtension : AbstractExtension() {
                         val startOffset = block.textRange.startOffset + 2
                         val endOffset = block.textRange.endOffset - 2
                         if (startOffset < endOffset) {
-                            blocks.add(SynthBlock(block, startOffset, endOffset))
+                            blocks.add(SynthBlock(startOffset, endOffset))
                         }
                     }
                 }
@@ -371,7 +366,7 @@ class ChunkTextExtension : AbstractExtension() {
             return null
         }
 
-        private class SynthBlock(val parent: Block, val startOffset: Int, val endOffset: Int) : Block {
+        private class SynthBlock(val startOffset: Int, val endOffset: Int) : Block {
             override fun getTextRange(): TextRange = TextRange(startOffset, endOffset)
             override fun getSubBlocks(): List<Block?> = emptyList()
             override fun getWrap(): Wrap? = null

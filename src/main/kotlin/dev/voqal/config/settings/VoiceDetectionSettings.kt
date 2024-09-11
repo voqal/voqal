@@ -4,7 +4,7 @@ import dev.voqal.config.ConfigurableSettings
 import io.vertx.core.json.JsonObject
 
 data class VoiceDetectionSettings(
-    val provider: VoiceDetectionProvider = VoiceDetectionProvider.Voqal,
+    val provider: VoiceDetectionProvider = VoiceDetectionProvider.None,
     val providerKey: String = "",
     val sensitivity: Int = 3,
     val sustainDuration: Long = 200,
@@ -17,7 +17,7 @@ data class VoiceDetectionSettings(
      */
     constructor(json: JsonObject) : this(
         provider = VoiceDetectionProvider.lenientValueOf(
-            json.getString("provider") ?: VoiceDetectionProvider.Voqal.name
+            json.getString("provider") ?: VoiceDetectionProvider.None.name
         ),
         providerKey = json.getString("providerKey", ""),
         sensitivity = json.getInteger("sensitivity") ?: 3,
@@ -46,8 +46,9 @@ data class VoiceDetectionSettings(
     }
 
     enum class VoiceDetectionProvider(val displayName: String) {
-        Voqal("Voqal"),
-        Picovoice("Picovoice");
+        None("None"),
+        Picovoice("Picovoice"),
+        Voqal("Voqal");
 
         fun isKeyRequired(): Boolean {
             return this in setOf(Picovoice)

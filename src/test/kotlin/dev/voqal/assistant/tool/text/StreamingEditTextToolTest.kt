@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.util.ProperTextRange
+import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
@@ -99,10 +99,7 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {
-                assertEquals(1, voqalHighlighters.size)
-
-                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
-                assertEquals(0, editHighlighters.size)
+                assertEquals(0, voqalHighlighters.size)
             }
             testContext.completeNow()
         }
@@ -220,13 +217,12 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
-            val testRange = ProperTextRange(14, 91)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
+            val testRange = TextRange(14, 91)
             val testHighlighter = testEditor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
@@ -265,20 +261,16 @@ class StreamingEditTextToolTest : JBTest() {
         project.scope.launch {
             project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
 
-            val testRange = ProperTextRange(417, 836)
-            project.service<VoqalMemoryService>().putUserData("visibleRange", testRange)
+            val testRange = TextRange(417, 836)
             val testHighlighter = testEditor.markupModel.addRangeHighlighter(
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {
-                assertEquals(1, voqalHighlighters1.size)
-
-                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
-                assertEquals(0, editHighlighters.size)
+                assertEquals(0, voqalHighlighters1.size)
             }
             val voqalHighlighters2 = EditTextTool().doDocumentEdits(project, responseCode2, testEditor, true)
             testContext.verify {
@@ -311,6 +303,56 @@ class StreamingEditTextToolTest : JBTest() {
                         "   */\n" +
                         "  public TodoItemController(Boolean isTest) {"
             )
+        )
+    }
+
+    fun `test streaming edit visible range exact`() {
+        val responseCode = File("src/test/resources/edit-stream/smaller-1.txt").readText()
+            .replace("\r\n", "\n")
+        val responseCode2 = File("src/test/resources/edit-stream/smaller-2.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/smaller.ts").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("smaller.ts", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = TextRange(0, 827)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
+
+            val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters1.size)
+
+                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            val voqalHighlighters2 = EditTextTool().doDocumentEdits(project, responseCode2, testEditor, true)
+            testContext.verify {
+                assertEquals(3, voqalHighlighters2.size)
+
+                val editHighlighters = voqalHighlighters2.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(2, editHighlighters.size)
+                assertTrue(editHighlighters[0].let { it.startOffset == 770 && it.endOffset == 771 })
+                assertTrue(editHighlighters[1].let { it.startOffset == 777 && it.endOffset == 778 })
+            }
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            testEditor.document.text,
+            originalText.replace("1 - sa", "(1 - sa)")
         )
     }
 

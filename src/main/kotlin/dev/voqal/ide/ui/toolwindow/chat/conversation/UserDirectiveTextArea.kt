@@ -5,9 +5,11 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.util.registry.Registry
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
+import com.intellij.util.ui.UIUtil
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
 import java.awt.*
@@ -19,21 +21,31 @@ import javax.swing.AbstractAction
 import javax.swing.JPanel
 import javax.swing.UIManager
 
-class UserPromptTextArea(
+class UserDirectiveTextArea(
     private val onSubmit: Consumer<String>,
 ) : JPanel(BorderLayout()) {
 
-    private val textArea = JBTextArea()
-    private val textAreaRadius = 16
+    val textArea = JBTextArea()
+    private val textAreaRadius = 4
     private var stopButton: IconActionButton? = null
     private var submitEnabled = true
+    var allowEmptyText = false
 
     init {
         textArea.isOpaque = false
         textArea.lineWrap = true
         textArea.wrapStyleWord = true
-        textArea.emptyText.setText("Type your message here")
-        textArea.border = JBUI.Borders.empty(4)
+        textArea.emptyText.setText("").appendText(
+            true,
+            0,
+            VoqalIcons.logoOffset,
+            "Speak or type directive",
+            SimpleTextAttributes.REGULAR_ATTRIBUTES,
+            null
+        )
+
+        textArea.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true)
+
         addShiftEnterInputMap(textArea, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
                 handleSubmit()
@@ -41,14 +53,13 @@ class UserPromptTextArea(
         })
         textArea.addFocusListener(object : FocusListener {
             override fun focusGained(e: FocusEvent) {
-                super@UserPromptTextArea.paintBorder(super@UserPromptTextArea.getGraphics())
+                super@UserDirectiveTextArea.paintBorder(super@UserDirectiveTextArea.getGraphics())
             }
 
             override fun focusLost(e: FocusEvent) {
-                super@UserPromptTextArea.paintBorder(super@UserPromptTextArea.getGraphics())
+                super@UserDirectiveTextArea.paintBorder(super@UserDirectiveTextArea.getGraphics())
             }
         })
-        updateFont()
         init()
     }
 
@@ -72,9 +83,6 @@ class UserPromptTextArea(
         val g2 = g.create() as Graphics2D
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2.color = CurrentTheme.ActionButton.focusedBorder()
-        if (textArea.isFocusOwner) {
-            g2.stroke = BasicStroke(1.5f)
-        }
         g2.drawRoundRect(0, 0, width - 1, height - 1, textAreaRadius, textAreaRadius)
     }
 
@@ -83,7 +91,7 @@ class UserPromptTextArea(
     }
 
     private fun handleSubmit() {
-        if (submitEnabled && textArea.text.isNotEmpty()) {
+        if (submitEnabled && (textArea.text.isNotEmpty() || allowEmptyText)) {
             onSubmit.accept(text.trim { it <= ' ' })
             textArea.text = ""
         }
@@ -94,18 +102,17 @@ class UserPromptTextArea(
         add(textArea, BorderLayout.CENTER)
 
         stopButton = IconActionButton(
-            object : AnAction("Cancel", "Cancel message", AllIcons.Actions.Suspend) {
+            object : AnAction("Cancel Directive", "Cancel directive", AllIcons.Actions.Suspend) {
                 override fun actionPerformed(e: AnActionEvent) {
                 }
             })
         stopButton!!.isEnabled = false
 
-        val flowLayout = FlowLayout(FlowLayout.RIGHT)
-        flowLayout.hgap = 8
+        val flowLayout = FlowLayout(FlowLayout.RIGHT, 6, 0)
         val iconsPanel = JPanel(flowLayout)
         iconsPanel.add(
             IconActionButton(
-                object : AnAction("Send Message", "Send message", VoqalIcons.send) {
+                object : AnAction("Execute Directive", "Execute directive", AllIcons.Actions.Execute) {
                     override fun actionPerformed(e: AnActionEvent) {
                         handleSubmit()
                     }

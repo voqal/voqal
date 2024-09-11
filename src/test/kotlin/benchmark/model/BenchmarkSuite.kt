@@ -4,7 +4,6 @@ import benchmark.model.context.ProjectFileContext
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
@@ -16,7 +15,10 @@ import com.intellij.psi.util.descendantsOfType
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
-import dev.voqal.services.VoqalSearchService
+import dev.voqal.services.isClass
+import dev.voqal.services.isCodeBlock
+import dev.voqal.services.isField
+import dev.voqal.services.isFunction
 import java.io.File
 
 interface BenchmarkSuite {
@@ -105,33 +107,29 @@ interface BenchmarkSuite {
     }
 
     fun PsiElement.getCodeBlock(): PsiElement {
-        val searchService = project.service<VoqalSearchService>()
         return descendants()
-            .filter { searchService.isCodeBlock(it) }
+            .filter { it.isCodeBlock() }
             .first()
     }
 
     fun PsiFile.getFunctions(): List<PsiNamedElement> {
-        val searchService = project.service<VoqalSearchService>()
         return descendants()
             .filter { it is PsiNamedElement }
-            .filter { searchService.isFunction(it) }
+            .filter { it.isFunction() }
             .map { it as PsiNamedElement }.toList()
     }
 
     fun PsiFile.getFields(): List<PsiNamedElement> {
-        val searchService = project.service<VoqalSearchService>()
         return descendants()
             .filter { it is PsiNamedElement }
-            .filter { searchService.isField(it) }
+            .filter { it.isField() }
             .map { it as PsiNamedElement }.toList()
     }
 
     fun PsiFile.getClasses(): List<PsiNamedElement> {
-        val searchService = project.service<VoqalSearchService>()
         return descendants()
             .filter { it is PsiNamedElement }
-            .filter { searchService.isClass(it) }
+            .filter { it.isClass() }
             .map { it as PsiNamedElement }.toList()
     }
 

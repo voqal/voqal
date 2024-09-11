@@ -3,7 +3,6 @@ package dev.voqal.ide.ui.toolwindow.chat
 import com.intellij.ide.scratch.ScratchRootType
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -19,7 +18,7 @@ import dev.voqal.ide.ui.VoqalUI.createScrollPaneWithSmartScroller
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatMessagePanel
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatMessageResponseBody
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatToolWindowScrollablePanel
-import dev.voqal.ide.ui.toolwindow.chat.conversation.UserPromptTextArea
+import dev.voqal.ide.ui.toolwindow.chat.conversation.UserDirectiveTextArea
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
 import io.vertx.core.json.Json
@@ -47,16 +46,16 @@ class ChatToolWindowTabPanel(
 
     private val log = project.getVoqalLogger(this::class)
     private val rootPanel: JPanel
-    private val userPromptTextArea: UserPromptTextArea
+    private val userDirectiveTextArea: UserDirectiveTextArea
     private val toolWindowScrollablePanel = ChatToolWindowScrollablePanel()
 
     init {
-        userPromptTextArea = UserPromptTextArea { text: String -> handleSubmit(text) }
+        userDirectiveTextArea = UserDirectiveTextArea { text: String -> handleSubmit(text) }
         rootPanel = createRootPanel()
-        userPromptTextArea.requestFocusInWindow()
-        userPromptTextArea.requestFocus()
+        userDirectiveTextArea.requestFocusInWindow()
+        userDirectiveTextArea.requestFocus()
 
-        ApplicationManager.getApplication().invokeLater {
+        project.invokeLater {
             addWelcomeMessage()
         }
     }
@@ -245,7 +244,7 @@ class ChatToolWindowTabPanel(
             JBUI.Borders.empty(8)
         )
         panel.addToTop(createUserPromptTextAreaHeader())
-        panel.addToBottom(userPromptTextArea)
+        panel.addToBottom(userDirectiveTextArea)
         return panel
     }
 
@@ -278,8 +277,8 @@ class ChatToolWindowTabPanel(
             append("<html>")
             append("<p style=\"margin-top: 4px; margin-bottom: 4px;\">")
             append("Hello, my name is Voqal. I am your vocal programming assistant. ")
-            append("To get started, you will need to set up my AI providers. ")
-            append("You can configure my AI providers at: Settings >> Tools >> Voqal. ")
+            append("To get started, you will need to set up my AI provider. ")
+            append("You can configure my AI provider at: Settings >> Tools >> Voqal. ")
             append("Please note that I will be unable to respond until you have properly configured me.<br><br>")
             append("If you need help, please go to <a href=\"https://docs.voqal.dev\">docs.voqal.dev</a> for more information.")
             append("</p>")

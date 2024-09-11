@@ -22,6 +22,7 @@ import dev.voqal.status.VoqalStatus
 class VoqalMemoryService(private val project: Project) : Disposable {
 
     private val log = project.getVoqalLogger(this::class)
+
     //todo: memory system per mode?
     private var memorySystem: MemorySystem
     private var memory: MemorySlice? = null
@@ -96,6 +97,11 @@ class VoqalMemoryService(private val project: Project) : Disposable {
     fun getUserData(key: String): Any? {
         val memoryId = getCurrentMemory().id
         return userData[memoryId]?.get(key)
+    }
+
+    fun removeUserData(key: String): Any? {
+        val memoryId = getCurrentMemory().id
+        return userData[memoryId]?.remove(key)
     }
 
     fun putLongTermUserData(key: String, data: Any?) {

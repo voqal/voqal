@@ -191,7 +191,7 @@ class VoqalBenchmarking : JBTest() {
                 ide = IdeContext(
                     project = project,
                     editor = editor,
-                    projectFileTree = project.service<VoqalSearchService>().getProjectStructureAsMarkdownTree()
+                    projectFileTree = project.service<VoqalContextService>().getProjectStructureAsMarkdownTree()
                 ),
                 developer = DeveloperContext(
                     transcription = transcription.text,

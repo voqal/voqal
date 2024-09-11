@@ -10,9 +10,7 @@ import com.aallam.openai.api.vectorstore.VectorStoreRequest
 import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAI
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
-import com.intellij.ide.structureView.StructureViewTreeElement
 import com.intellij.lang.Language
-import com.intellij.lang.LanguageStructureViewBuilder
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
@@ -29,17 +27,13 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.readText
 import com.intellij.psi.PsiDirectory
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.impl.file.PsiDirectoryFactory
 import com.intellij.util.containers.CollectionFactory
-import com.knuddels.jtokkit.api.Encoding
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getSupportedFileExtensions
 import dev.voqal.config.settings.LanguageModelSettings
 import io.vertx.core.Promise
@@ -78,7 +72,7 @@ class VoqalSearchService(private val project: Project) {
                 val psiFile = ReadAction.compute(ThrowableComputable {
                     PsiManager.getInstance(project).findFile(fileOrDir)
                 }) ?: return true
-                if (isFile(psiFile)) {
+                if (psiFile.isFile()) {
                     filesToUpload.add(fileOrDir)
                 }
                 return true
@@ -272,65 +266,6 @@ class VoqalSearchService(private val project: Project) {
         return promise.future().toCompletionStage().await()
     }
 
-    /**
-     * Returns markdown representation of the tree.
-     * ```
-     * ├── src
-     * │   ├── main
-     * │   │   ├── kotlin
-     * ```
-     */
-    fun getProjectStructureAsMarkdownTree(encoding: Encoding? = null, tokenLimit: Int = -1): String {
-        val sb = StringBuilder()
-        val projectDir = getProjectRoot()
-        sb.append(recursiveMarkdownTree(projectDir.children.toList()))
-
-        //remove from bottom and top (till under tokenLimit then add ... to top and bottom to indicate cropped)
-        val tokens = encoding?.countTokens(sb.toString()) ?: -1
-        if (tokens > tokenLimit) {
-            val lines = sb.toString().lines().toMutableList()
-            //take from bottom and top equally till under tokenLimit
-            while (encoding!!.countTokens(sb.toString()) > tokenLimit && lines.size > 2) {
-                lines.removeAt(0)
-                lines.removeAt(lines.size - 1)
-            }
-            return (listOf("...") + lines + listOf("...")).joinToString("\n")
-        }
-        return sb.toString()
-    }
-
-    private fun recursiveMarkdownTree(children: Collection<VirtualFile>, level: Int = 0): String {
-        val ignoreNames = setOf(
-            ".git", ".idea", ".gitignore", "build", "out", "target", "node_modules",
-            "__pycache__", "venv", ".gradle", "obj"
-        )
-        val ignoreExtensions = setOf("class")
-
-        val sb = StringBuilder()
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        for (child in children.sortedBy { it.name }) {
-            val isInContent = ReadAction.compute(ThrowableComputable {
-                projectFileIndex.isInContent(child)
-            })
-            if (!isInContent || child.name in ignoreNames || child.extension in ignoreExtensions) {
-                continue
-            } else if (child.name == "obj" && child.children.any { it.name == "Debug" || it.name == "Release" }) {
-                continue //.NET build dir
-            }
-
-            repeat(level) {
-                sb.append("│   ")
-            }
-            sb.append("├── ")
-            sb.append(child.name)
-            sb.append("\n")
-            if (child.isDirectory) {
-                sb.append(recursiveMarkdownTree(child.children.toList(), level + 1))
-            }
-        }
-        return sb.toString()
-    }
-
     fun getLanguageForSourceRoot(sourceRoot: VirtualFile): Language? {
         //try to extract language from path
         if (sourceRoot.path.contains("src/main/")) {
@@ -338,226 +273,5 @@ class VoqalSearchService(private val project: Project) {
             return Language.findLanguageByID(lang)
         }
         return null
-    }
-
-    fun getProjectCodeStructure(encoding: Encoding? = null, tokenLimit: Int = -1): String {
-        val sb = StringBuilder()
-        val projectDir = getProjectRoot()
-        sb.append(recursiveCodeStructure(projectDir.children.toList()))
-
-        //remove final "---" if present
-        if (sb.endsWith("---\n")) {
-            sb.delete(sb.length - 4, sb.length)
-            sb.append("\n")
-        }
-
-        //remove from bottom and top (till under tokenLimit then add ... to top and bottom to indicate cropped)
-        val tokens = encoding?.countTokens(sb.toString()) ?: -1
-        if (tokens > tokenLimit) {
-            val lines = sb.toString().lines().toMutableList()
-            //take from bottom and top equally till under tokenLimit
-            while (encoding!!.countTokens(sb.toString()) > tokenLimit && lines.size > 2) {
-                lines.removeAt(0)
-                lines.removeAt(lines.size - 1)
-            }
-            return (listOf("...") + lines + listOf("...")).joinToString("\n")
-        }
-        return sb.toString()
-    }
-
-    private fun recursiveCodeStructure(children: Collection<VirtualFile>, level: Int = 0): String {
-        val ignoreNames = setOf(
-            ".git", ".idea", ".gitignore", "build", "out", "target", "node_modules",
-            "__pycache__", "venv", ".gradle", "obj"
-        )
-        val ignoreExtensions = setOf("class")
-
-        val sb = StringBuilder()
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        for (child in children.sortedBy { it.name }) {
-            val isInContent = ReadAction.compute(ThrowableComputable {
-                projectFileIndex.isInContent(child)
-            })
-            if (!isInContent || child.name in ignoreNames || child.extension in ignoreExtensions) {
-                continue
-            } else if (child.name == "obj" && child.children.any { it.name == "Debug" || it.name == "Release" }) {
-                continue //.NET build dir
-            }
-
-            if (child.isDirectory) {
-                sb.append(recursiveCodeStructure(child.children.toList(), level + 1))
-            } else {
-//                val code = summarizeCode(child)
-//                if (code != null) {
-//                    sb.append(code)
-//                    sb.append("---\n")
-//                }
-
-                val fileText = ReadAction.compute(ThrowableComputable {
-                    child.readText()
-                })
-                sb.append(fileText).append("---\n")
-            }
-        }
-        return sb.toString()
-    }
-
-    /**
-     * Summarizes file by returning a string of structure signatures.
-     * Example:
-     * ```kotlin
-     * MyClass.kt
-     *   class MyClass
-     *     fun add(a: Int, b: Int): Int
-     *       ...
-     *     fun subtract(a: Int, b: Int): Int
-     *       ...
-     * ```
-     */
-    private fun summarizeCode(virtualFile: VirtualFile): String? {
-        val psiFile = ReadAction.compute(ThrowableComputable { PsiManager.getInstance(project).findFile(virtualFile) })
-        if (psiFile == null) {
-            log.warn("Failed to find PSI file for virtual file: $virtualFile")
-            return null
-        }
-
-        //ignore non-code files
-        if (!isFile(psiFile)) {
-            log.debug("Ignoring non-code file: $virtualFile")
-            return null
-        }
-
-        val structure = ReadAction.compute(ThrowableComputable {
-            LanguageStructureViewBuilder.INSTANCE.getStructureViewBuilder(psiFile)
-        })
-        if (structure == null) {
-            log.warn("Failed to get structure view builder for file: $virtualFile")
-            return null
-        }
-
-        val sb = StringBuilder()
-        val structureView = structure.createStructureView(null, project)
-        ReadAction.compute(ThrowableComputable {
-            recursiveSummarizeCode((structureView.treeModel).root, sb)
-        })
-        Disposer.dispose(structureView)
-        return sb.toString()
-    }
-
-    private fun recursiveSummarizeCode(element: StructureViewTreeElement, sb: StringBuilder, indent: String = "") {
-        val psiElement = element.value as PsiElement
-        if (isFile(psiElement)) {
-            sb.append((psiElement as PsiNamedElement).name).append("\n")
-        } else if (isClass(psiElement)) {
-            sb.append(indent)
-
-            val presentationIcon = element.presentation.getIcon(false)
-            if (presentationIcon.toString().contains("public.svg")) {
-                sb.append("public ")
-            } else if (presentationIcon.toString().contains("private.svg")) {
-                sb.append("private ")
-            }
-            //todo: isStatic
-
-            sb.append("class ").append(element.presentation.presentableText).append("\n")
-            //sb.append(indent).append(indent).append("...").append("\n")
-        } else if (isFunction(psiElement)) {
-            sb.append(indent)
-
-            val presentationIcon = element.presentation.getIcon(false)
-            if (presentationIcon.toString().contains("public.svg")) {
-                sb.append("public ")
-            } else if (presentationIcon.toString().contains("private.svg")) {
-                sb.append("private ")
-            } else if (presentationIcon.toString().contains("protected.svg")) {
-                sb.append("protected ")
-            } else if (presentationIcon.toString().contains("plocal.svg")) {
-                sb.append("package-private ")
-            }
-            //todo: isStatic
-
-            if (psiElement.isJvm()) {
-                sb.append("function ")
-            } else if (psiElement.isPython()) {
-                sb.append("def ")
-            } else if (psiElement.isGo()) {
-                sb.append("func ")
-            }
-            sb.append(element.presentation.presentableText).append("\n")
-                .append(indent).append(indent).append("...").append("\n")
-        } else {
-            sb.append(indent)
-
-            val presentationIcon = element.presentation.getIcon(false)
-            if (presentationIcon.toString().contains("public.svg")) {
-                sb.append("public ")
-            } else if (presentationIcon.toString().contains("private.svg")) {
-                sb.append("private ")
-            } else if (presentationIcon.toString().contains("protected.svg")) {
-                sb.append("protected ")
-            } else if (presentationIcon.toString().contains("plocal.svg")) {
-                sb.append("package-private ")
-            }
-            sb.append(element.presentation.presentableText).append("\n")
-        }
-
-        for (child in element.children) {
-            recursiveSummarizeCode(child as StructureViewTreeElement, sb, "$indent  ")
-        }
-    }
-
-    fun isFunction(psiElement: PsiElement): Boolean {
-        return psiElement::class.java.simpleName.startsWith("KtNamedFunction")
-                || psiElement::class.java.simpleName.startsWith("PsiMethodImpl")
-                || psiElement::class.java.simpleName.startsWith("PyFunction")
-                || psiElement::class.java.simpleName.startsWith("GoFunctionDeclaration")
-                || psiElement::class.java.simpleName.startsWith("GoMethodDeclaration")
-                || psiElement::class.java.simpleName.startsWith("JSFunctionImpl")
-    }
-
-    fun isCodeBlock(psiElement: PsiElement): Boolean {
-        return psiElement::class.java.simpleName.startsWith("KtBlockExpression")
-                || psiElement::class.java.simpleName.startsWith("PsiCodeBlockImpl")
-                || psiElement::class.java.simpleName.startsWith("PyStatementList")
-                || psiElement::class.java.simpleName.startsWith("GoBlockImpl")
-                || psiElement::class.java.simpleName.startsWith("JSBlockStatementImpl")
-    }
-
-    fun isField(psiElement: PsiElement): Boolean {
-        return psiElement::class.java.simpleName.startsWith("KtProperty")
-                || psiElement::class.java.simpleName.startsWith("PsiFieldImpl")
-    }
-
-    fun isClass(psiElement: PsiElement): Boolean {
-        return psiElement::class.java.simpleName.startsWith("KtClass")
-                || psiElement::class.java.simpleName.startsWith("PsiClass")
-                || psiElement::class.java.simpleName.startsWith("PyClass")
-                || psiElement::class.java.simpleName.startsWith("GoTypeSpecImpl")
-                || psiElement::class.java.simpleName.startsWith("ES6ClassImpl")
-    }
-
-    fun isFile(psiElement: PsiElement): Boolean {
-        return psiElement::class.java.simpleName.startsWith("KtFile")
-                || psiElement::class.java.simpleName.startsWith("PsiJavaFile")
-                || psiElement::class.java.simpleName.startsWith("PyFile")
-                || psiElement::class.java.simpleName.startsWith("GoFile")
-                || psiElement::class.java.simpleName.startsWith("JSFileImpl")
-    }
-
-    fun isIdentifier(psiElement: PsiElement): Boolean {
-        return psiElement.toString().contains("PsiIdentifier")
-                || psiElement.toString().contains("IDENTIFIER")
-    }
-
-    fun PsiElement.isJvm(): Boolean {
-        return this.language.id.lowercase() == "java" || this.language.id.lowercase() == "kotlin"
-    }
-
-    fun PsiElement.isPython(): Boolean {
-        return this.language.id.lowercase() == "python"
-    }
-
-    fun PsiElement.isGo(): Boolean {
-        return this.language.id.lowercase() == "go"
     }
 }

@@ -14,14 +14,15 @@ object VoqalIcons {
     val logoOffline = IconLoader.getIcon("/icons/logo-offline.svg", VoqalIcons::class.java)
     val logoError = IconLoader.getIcon("/icons/logo-error.svg", VoqalIcons::class.java)
 
-    val send = IconLoader.getIcon("/icons/send.svg", VoqalIcons::class.java)
-
     val Default: Icon = IconLoader.getIcon("/icons/voqal-avatar.svg", VoqalIcons::class.java)
     val Error: Icon = IconLoader.getIcon("/icons/voqal-avatar-error.svg", VoqalIcons::class.java)
     val Debug: Icon = IconLoader.getIcon("/icons/voqal-avatar-debug.svg", VoqalIcons::class.java)
     val User: Icon = IconLoader.getIcon("/icons/user.svg", VoqalIcons::class.java)
 
     val volume: Icon = IconLoader.getIcon("/icons/volume.svg", VoqalIcons::class.java)
+
+    //todo: figure out why offset is needed to properly align with text
+    val logoOffset: Icon = IconLoader.getIcon("/icons/logo-offset.svg", VoqalIcons::class.java)
 
     object Compute {
         val ollama: Icon = IconLoader.getIcon("/icons/compute/ollama.svg", VoqalIcons::class.java)
@@ -37,6 +38,5 @@ object VoqalIcons {
         val fireworks: Icon = IconLoader.getIcon("/icons/compute/fireworks.svg", VoqalIcons::class.java)
     }
 
-    val YELLOW = Color(0xF6CD6C)
     val DARK_RED = JBColor(JBColor.PINK, Color(0x5E3838))
 }

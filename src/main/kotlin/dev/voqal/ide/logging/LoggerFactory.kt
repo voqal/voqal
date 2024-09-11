@@ -49,8 +49,8 @@ class LoggerFactory {
             project.service<VoqalStatusService>().warnChat(input)
         }
 
-        fun warnChat(input: String) {
-            warn(input)
+        fun warnChat(input: String, e: Throwable? = null) {
+            warn(input, e)
             project.service<VoqalStatusService>().warnChat(input)
         }
 

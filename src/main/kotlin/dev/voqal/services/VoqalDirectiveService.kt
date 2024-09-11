@@ -193,7 +193,8 @@ class VoqalDirectiveService(private val project: Project) {
         promptName: String = "Idle Mode"
     ): VoqalDirective {
         ThreadingAssertions.assertBackgroundThread()
-        val selectedTextEditor = project.service<VoqalContextService>().getSelectedTextEditor()
+        val contextService = project.service<VoqalContextService>()
+        val selectedTextEditor = contextService.getSelectedTextEditor()
         val currentCode = ReadAction.compute(ThrowableComputable {
             selectedTextEditor?.document?.text
         })
@@ -204,7 +205,7 @@ class VoqalDirectiveService(private val project: Project) {
             }
         })
 
-        val openFiles = project.service<VoqalContextService>().getOpenFiles(selectedTextEditor)
+        val openFiles = contextService.getOpenFiles(selectedTextEditor)
         val configService = project.service<VoqalConfigService>()
         val promptSettings = configService.getPromptSettings(promptName)
         val languageModelSettings = configService.getLanguageModelSettings(promptSettings)
@@ -229,7 +230,7 @@ class VoqalDirectiveService(private val project: Project) {
 
         val searchService = project.service<VoqalSearchService>()
         val viewingCodeProblems = selectedTextEditor?.let { searchService.getActiveProblems(it) }
-        val projectFileStructure = searchService.getProjectStructureAsMarkdownTree()
+        val projectFileStructure = contextService.getProjectStructureAsMarkdownTree()
         val languageOfFile = selectedTextEditor?.let {
             val file = it.virtualFile ?: return@let null
             (FileTypeManager.getInstance().getFileTypeByFile(file) as? LanguageFileType)?.language
@@ -270,7 +271,7 @@ class VoqalDirectiveService(private val project: Project) {
                 chatMessage = chatMessage
             )
         )
-        return project.service<VoqalContextService>().cropAsNecessary(fullDirective)
+        return contextService.cropAsNecessary(fullDirective)
     }
 
     suspend fun executeDirective(directive: VoqalDirective) {

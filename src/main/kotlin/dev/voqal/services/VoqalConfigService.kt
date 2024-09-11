@@ -65,7 +65,10 @@ class VoqalConfigService(private val project: Project) {
     private val configListeners = mutableListOf<(VoqalConfig) -> Unit>()
     private val syncLock = Any()
 
-    fun onConfigChange(disposable: Disposable, listener: (VoqalConfig) -> Unit) {
+    fun onConfigChange(
+        disposable: Disposable = project.service<ProjectScopedService>(),
+        listener: (VoqalConfig) -> Unit
+    ) {
         configListeners.add(listener)
 
         Disposer.register(disposable) {
@@ -187,7 +190,7 @@ class VoqalConfigService(private val project: Project) {
     fun resetAiProvider() {
         synchronized(syncLock) {
             aiProvider?.let {
-                log.info("Disposing AI provider")
+                log.debug("Disposing AI provider")
                 Disposer.dispose(it)
                 log.info("AI provider disposed")
             }
@@ -213,9 +216,9 @@ class VoqalConfigService(private val project: Project) {
             setupTextToSpeechProvider(voqalConfig)
         }
         if (providersClient.hasNecessaryProviders()) {
-            log.info("AI providers successfully initialized")
+            log.info("AI provider successfully initialized")
         } else {
-            log.warn("No AI providers initialized")
+            log.warn("No AI provider initialized")
         }
         return providersClient
     }
@@ -617,6 +620,8 @@ class VoqalConfigService(private val project: Project) {
                     log.warnChat("Missing wake provider key")
                 }
             }
+
+            VoiceDetectionSettings.VoiceDetectionProvider.None -> Unit //nop
         }
     }
 

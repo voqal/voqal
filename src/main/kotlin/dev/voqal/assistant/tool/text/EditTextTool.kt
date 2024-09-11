@@ -15,7 +15,6 @@ import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.RangeMarker
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -35,6 +34,7 @@ import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.assistant.tool.system.LooksGoodTool
+import dev.voqal.ide.actions.ShowQuickEditAction
 import dev.voqal.services.*
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.Deferred
@@ -215,20 +215,24 @@ class EditTextTool : VoqalTool() {
             doFullTextEdit(editor, replacementText, project)
         }
 
-        //finally, ensure visible range highlighter is up-to-date
+        //finally, ensure edit range highlighter is up-to-date
         val memoryService = project.service<VoqalMemoryService>()
-        val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter") as RangeHighlighter?
-        val visibleRange = visibleRangeHighlighter?.range
-        if (visibleRange != null) {
-            val newStartOffset = editHighlighters.minOfOrNull { it.startOffset } ?: visibleRange.startOffset
-            val newEndOffset = editHighlighters.maxOfOrNull { it.endOffset } ?: visibleRange.endOffset
-            if (newStartOffset < visibleRange.startOffset || newEndOffset > visibleRange.endOffset) {
-                val updatedRange = ProperTextRange(
-                    Math.min(newStartOffset, visibleRange.startOffset),
-                    Math.max(newEndOffset, visibleRange.endOffset)
+        val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter") as RangeHighlighter?
+        val editRange = editRangeHighlighter?.range
+        if (editRange != null) {
+            val newStartOffset = editHighlighters.minOfOrNull { it.startOffset } ?: editRange.startOffset
+            val newEndOffset = editHighlighters.maxOfOrNull { it.endOffset } ?: editRange.endOffset
+            if (newStartOffset < editRange.startOffset || newEndOffset > editRange.endOffset) {
+                val updatedEditRange = TextRange(
+                    Math.min(newStartOffset, editRange.startOffset),
+                    Math.max(newEndOffset, editRange.endOffset)
                 )
-                editor.markupModel.removeHighlighter(visibleRangeHighlighter)
-                ChunkTextExtension.setVisibleRangeHighlighter(project, editor, updatedRange)
+                if (editRangeHighlighter.layer == ShowQuickEditAction.QUICK_EDIT_LAYER) {
+                    ShowQuickEditAction.setEditRangeHighlighter(project, editor, updatedEditRange)
+                } else {
+                    ChunkTextExtension.setEditRangeHighlighter(project, editor, updatedEditRange)
+                }
+                editor.markupModel.removeHighlighter(editRangeHighlighter)
             }
         }
 
@@ -254,11 +258,11 @@ class EditTextTool : VoqalTool() {
         //determine diff between original text and text streamed so far
         var origText = editor.document.text
         val highlighter = project.service<VoqalMemoryService>()
-            .getUserData("visibleRangeHighlighter") as RangeHighlighter?
-        val visibleRange = highlighter?.range
-        if (visibleRange != null) {
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
+        val editRange = highlighter?.range
+        if (editRange != null) {
             ApplicationManager.getApplication().invokeAndWait {
-                origText = visibleRange.substring(editor.document.text)
+                origText = editRange.substring(editor.document.text)
             }
         }
         val simpleDiffs = getSimpleDiffChanges(origText, fullTextWithEdits, project)
@@ -278,15 +282,17 @@ class EditTextTool : VoqalTool() {
             val previousIndicatorLine = previousStreamIndicator?.startOffset?.let {
                 editor.document.getLineNumber(it)
             } ?: 0
-            val visibleRangeLineOffset = visibleRange?.startOffset ?: 0
+            val editRangeLineOffset = editRange?.startOffset ?: 0
             val linesWithEdits = diffFragments.map {
-                editor.document.getLineNumber(it.startOffset1 + visibleRangeLineOffset)
+                editor.document.getLineNumber(it.startOffset1 + editRangeLineOffset)
             }
-            var indicatorLine = editor.document.getLineNumber(textRange.endOffset + visibleRangeLineOffset)
+            var indicatorLine = editor.document.getLineNumber(textRange.endOffset + editRangeLineOffset)
 
             //may contain modification instead of addition on last change, if so can't append remaining original text
-            if (!isAppendRemainingChange(origText, lastDiff, visibleRange)) {
-                streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
+            if (!isAppendRemainingChange(origText, lastDiff, editRange)) {
+                if (previousIndicatorLine > 0) {
+                    streamIndicators.add(createStreamIndicator(editor, previousIndicatorLine))
+                }
                 return null
             }
 
@@ -316,7 +322,7 @@ class EditTextTool : VoqalTool() {
                 }
             }
 
-            if (textRange.endOffset < origText.length) {
+            if (textRange.endOffset <= origText.length) {
                 fullTextWithEdits += origText.substring(textRange.endOffset + diffOffset)
             } else {
                 //edit is adding text past visible range, need to re-add final line dropped above
@@ -450,7 +456,7 @@ class EditTextTool : VoqalTool() {
             var element = ReadAction.compute(ThrowableComputable {
                 PsiDocumentManager.getInstance(project).getPsiFile(editor.document)?.findElementAt(diffStartOffset)
             })
-            val isIdentifier = element?.let { project.service<VoqalSearchService>().isIdentifier(it) } ?: false
+            val isIdentifier = element?.isIdentifier() ?: false
             val parent = if (isIdentifier) ReadAction.compute(ThrowableComputable { element?.parent }) else null
             if (isIdentifier && parent is PsiNamedElement) {
                 //can be smart renamed, use rename processor
@@ -549,13 +555,13 @@ class EditTextTool : VoqalTool() {
     ): Diff? {
         var oldText: String? = null
         val highlighter = project.service<VoqalMemoryService>()
-            .getUserData("visibleRangeHighlighter") as RangeHighlighter?
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
         if (highlighter == null) {
             return null
         }
-        val visibleRange = highlighter.range!!
+        val editRange = highlighter.range!!
         ApplicationManager.getApplication().invokeAndWait {
-            oldText = visibleRange.substring(editor.document.text)
+            oldText = editRange.substring(editor.document.text)
         }
 
         var newText = newText
@@ -651,8 +657,8 @@ class EditTextTool : VoqalTool() {
         //update start offsets to be relative to full document
         val fragments = textDiff.fragments.map {
             DiffFragmentImpl(
-                visibleRange.startOffset + it.startOffset1,
-                visibleRange.startOffset + it.endOffset1,
+                editRange.startOffset + it.startOffset1,
+                editRange.startOffset + it.endOffset1,
                 it.startOffset2,
                 it.endOffset2
             )
@@ -744,14 +750,14 @@ class EditTextTool : VoqalTool() {
     private fun isAppendRemainingChange(
         originalText: String,
         diffChange: SimpleDiffChange,
-        visibleRange: TextRange?
+        editRange: TextRange?
     ): Boolean {
-        if (visibleRange != null) {
-            val offsetVisibleRange = TextRange(0, visibleRange.endOffset - visibleRange.startOffset)
-            val appendAfterVisibleRange = diffChange.fragment.endOffset1 == originalText.length
-                    && diffChange.fragment.startOffset2 == offsetVisibleRange.endOffset
+        if (editRange != null) {
+            val offsetEditRange = TextRange(0, editRange.endOffset - editRange.startOffset)
+            val appendAfterEditRange = diffChange.fragment.endOffset1 == originalText.length
+                    && diffChange.fragment.startOffset2 == offsetEditRange.endOffset
                     && diffChange.fragment.endOffset2 > diffChange.fragment.startOffset2
-            if (appendAfterVisibleRange) {
+            if (appendAfterEditRange) {
                 return true
             }
         }
@@ -776,17 +782,6 @@ class EditTextTool : VoqalTool() {
     private fun isValidIdentifier(language: Language, text: String): Boolean {
         return text.matches(Regex("[a-zA-Z_][a-zA-Z0-9_]*")) //todo: per lang regex
     }
-
-    private val RangeMarker.range: TextRange?
-        get() {
-            if (!isValid) {
-                return null
-            } else {
-                val start = startOffset
-                val end = endOffset
-                return if ((if (0 <= start) start <= end else false)) TextRange(start, end) else null
-            }
-        }
 
     private data class Diff(
         val fragments: List<DiffFragmentImpl>,

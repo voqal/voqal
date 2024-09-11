@@ -6,8 +6,10 @@ import com.intellij.history.Label
 import com.intellij.history.LocalHistoryAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiFile
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.focus.DetectedIntent
@@ -15,10 +17,7 @@ import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.ide.UnselectTool
 import dev.voqal.assistant.tool.text.EditTextTool.Companion.VOQAL_HIGHLIGHTERS
-import dev.voqal.services.VoqalMemoryService
-import dev.voqal.services.VoqalStatusService
-import dev.voqal.services.VoqalToolService
-import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
 
@@ -46,8 +45,9 @@ class CancelTool : VoqalTool() {
         }
 
         val memoryService = project.service<VoqalMemoryService>()
-        val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+        val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter")
         val affectedFiles = memoryService.getUserData("affectedFiles")
+        val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
         val editor = (memoryService.getUserData("voqal.edit.editor") as Editor?) ?: directive.ide.editor
         val action = memoryService.getUserData("voqal.edit.action") as LocalHistoryAction?
         val label = memoryService.getUserData("voqal.edit") as Label?
@@ -58,17 +58,20 @@ class CancelTool : VoqalTool() {
         if (statusService.getStatus() == VoqalStatus.SEARCHING) {
             //nop
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
-            log.info("Reverting changes to: ${memory.id}")
+            inlay?.let { project.invokeLater { Disposer.dispose(it) } }
+
+            //todo: info diff size
             action?.finish()
             editor?.virtualFile?.let { label?.revert(project, it) }
             (affectedFiles as? List<*>)?.let { it.forEach { f -> label?.revert(project, (f as PsiFile).virtualFile) } }
+            log.debug("Reverted changes to: ${memory.id}")
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
         }
 
         //ensure highlighters removed
-        if (visibleRangeHighlighter is RangeHighlighter) {
-            editor?.markupModel?.removeHighlighter(visibleRangeHighlighter)
+        if (editRangeHighlighter is RangeHighlighter) {
+            editor?.markupModel?.removeHighlighter(editRangeHighlighter)
         }
         editor?.getUserData(VOQAL_HIGHLIGHTERS)?.forEach {
             editor.markupModel.removeHighlighter(it)
