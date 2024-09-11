@@ -7,6 +7,7 @@
 ### Fixed
 
 - Smart chunking in chunk text extension erroneously disabled
+- Invalid text modification when stream completion contains single line
 
 ## [2024.10.2] - 2024-09-09
 

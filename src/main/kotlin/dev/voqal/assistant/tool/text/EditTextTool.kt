@@ -228,6 +228,9 @@ class EditTextTool : VoqalTool() {
 
         //when streaming, the last line may or may not be complete, drop to be safe
         var fullTextWithEdits = responseCode.lines().dropLast(1).joinToString("\n")
+        if (fullTextWithEdits.isEmpty()) {
+            return null
+        }
 
         //determine diff between original text and text streamed so far
         var origText = editor.document.text

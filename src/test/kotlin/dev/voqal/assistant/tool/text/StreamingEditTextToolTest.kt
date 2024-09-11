@@ -184,6 +184,30 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
+    fun `test streaming ignore single line completion`() {
+        val responseCode = File("src/test/resources/edit-stream/single-line-completion.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/TodoItemController.java").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("TodoItemController.java", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.verify {
+                assertEquals(0, voqalHighlighters.size)
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+    }
+
     fun `test streaming edit visible range`() {
         val responseCode = File("src/test/resources/edit-stream/add-import-scanner.txt").readText()
             .replace("\r\n", "\n")
