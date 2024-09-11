@@ -39,8 +39,8 @@ class UserPromptTextArea(
         textArea.emptyText.setText("").appendText(
             true,
             0,
-            VoqalIcons.microphone,
-            "Speak or type here",
+            VoqalIcons.logoOffset,
+            "Speak or type directive",
             SimpleTextAttributes.REGULAR_ATTRIBUTES,
             object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {

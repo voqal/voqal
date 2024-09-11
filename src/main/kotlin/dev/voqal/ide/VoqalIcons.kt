@@ -20,7 +20,9 @@ object VoqalIcons {
     val User: Icon = IconLoader.getIcon("/icons/user.svg", VoqalIcons::class.java)
 
     val volume: Icon = IconLoader.getIcon("/icons/volume.svg", VoqalIcons::class.java)
-    val microphone: Icon = IconLoader.getIcon("/icons/microphone.svg", VoqalIcons::class.java)
+
+    //todo: figure out why offset is needed to properly align with text
+    val logoOffset: Icon = IconLoader.getIcon("/icons/logo-offset.svg", VoqalIcons::class.java)
 
     object Compute {
         val ollama: Icon = IconLoader.getIcon("/icons/compute/ollama.svg", VoqalIcons::class.java)
