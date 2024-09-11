@@ -2,7 +2,7 @@
     <id>dev.voqal</id>
     <name>Voqal Assistant</name>
     <vendor>voqal.dev</vendor>
-    <product-descriptor code="PVOQAL" release-date="20240913" release-version="202411"/>
+    <product-descriptor code="PVOQAL" release-date="20240911" release-version="202411"/>
 
     <depends>com.intellij.modules.platform</depends>
 
@@ -48,9 +48,9 @@
     </extensions>
 
     <actions>
-        <action id="voqal.QuickEdit"
-                class="dev.voqal.ide.actions.QuickEditAction"
-                text="Quick Edit" description="Quick Edit">
+        <action id="voqal.ShowQuickEdit"
+                class="dev.voqal.ide.actions.ShowQuickEditAction"
+                text="Show Quick Edit" description="Show Quick Edit">
             <keyboard-shortcut first-keystroke="alt c" keymap="$default"/>
         </action>
         <action id="voqal.enableVoqal"

@@ -13,10 +13,12 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.ProperTextRange
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -51,9 +53,24 @@ import kotlin.math.min
  * Displays [UserPromptTextArea] above the caret of the current [Editor] allowing for directive
  * input outside the Voqal Chat tool window.
  */
-class QuickEditAction : AnAction() {
+class ShowQuickEditAction : AnAction() {
 
     companion object {
+
+        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange): RangeHighlighter {
+            val textAttributes = TextAttributes().apply {
+                val borderColor = JBUI.CurrentTheme.ActionButton.focusedBorder()
+                Reflect.on(this).call("withAdditionalEffect", EffectType.ROUNDED_BOX, borderColor)
+            }
+            val quickEditRangeHighlighter = editor.markupModel.addRangeHighlighter(
+                editRange.startOffset, editRange.endOffset,
+                QUICK_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", quickEditRangeHighlighter)
+            project.getVoqalLogger(this::class).debug("Highlighted quick edit range: $editRange")
+            return quickEditRangeHighlighter
+        }
+
         internal const val QUICK_EDIT_LAYER = 6101
     }
 
@@ -103,20 +120,6 @@ class QuickEditAction : AnAction() {
                     earlyExit = true
                     toolService.blindExecute(LooksGoodTool())
                 } else {
-//                    //todo: i think edit text handles now
-//                    //make sure quick edit range is up-to-date
-//                    val prevEditRange = (memoryService.getUserData("editRangeHighlighter") as? RangeHighlighter)?.range
-//                    if (prevEditRange != null) {
-//                        val startBlockPosition = prevEditRange.startOffset
-//                        val newEditRange = getQuickEditRange(project, editor, psiFile, startBlockPosition)
-//                        if (newEditRange == null) {
-//                            log.warn("todo")
-//                        } else if (prevEditRange != newEditRange) {
-//                            TODO()
-//                            //memoryService.putUserData("editRange", newEditRange)
-//                        }
-//                    }
-
                     log.debug("Sending message: $message")
                     project.service<VoqalDirectiveService>().handleTranscription(
                         SpokenTranscript(message, null),
@@ -152,17 +155,7 @@ class QuickEditAction : AnAction() {
         }
 
         //show quick edit inlay and edit range
-        val textAttributes = TextAttributes().apply {
-            val borderColor = JBUI.CurrentTheme.ActionButton.focusedBorder()
-            Reflect.on(this).call("withAdditionalEffect", EffectType.ROUNDED_BOX, borderColor)
-        }
-        val quickEditRangeHighlighter = editor.markupModel.addRangeHighlighter(
-            editRange.startOffset, editRange.endOffset,
-            QUICK_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
-        )
-        memoryService.putUserData("editRangeHighlighter", quickEditRangeHighlighter)
-        log.debug("Highlighted edit range: $editRange")
-
+        val quickEditRangeHighlighter = setEditRangeHighlighter(project, editor, editRange)
         project.invokeLater {
             EditorEmbeddedComponentManager.getInstance().addComponent(
                 editor, wrappedComponent,

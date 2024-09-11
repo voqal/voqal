@@ -34,6 +34,7 @@ import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.assistant.tool.system.LooksGoodTool
+import dev.voqal.ide.actions.ShowQuickEditAction
 import dev.voqal.services.*
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.Deferred
@@ -222,12 +223,16 @@ class EditTextTool : VoqalTool() {
             val newStartOffset = editHighlighters.minOfOrNull { it.startOffset } ?: editRange.startOffset
             val newEndOffset = editHighlighters.maxOfOrNull { it.endOffset } ?: editRange.endOffset
             if (newStartOffset < editRange.startOffset || newEndOffset > editRange.endOffset) {
-                val updatedRange = ProperTextRange(
+                val updatedEditRange = TextRange(
                     Math.min(newStartOffset, editRange.startOffset),
                     Math.max(newEndOffset, editRange.endOffset)
                 )
+                if (editRangeHighlighter.layer == ShowQuickEditAction.QUICK_EDIT_LAYER) {
+                    ShowQuickEditAction.setEditRangeHighlighter(project, editor, updatedEditRange)
+                } else {
+                    ChunkTextExtension.setEditRangeHighlighter(project, editor, updatedEditRange)
+                }
                 editor.markupModel.removeHighlighter(editRangeHighlighter)
-                ChunkTextExtension.setEditRangeHighlighter(project, editor, updatedRange)
             }
         }
 

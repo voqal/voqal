@@ -35,16 +35,15 @@ class ChunkTextExtension : AbstractExtension() {
 
     companion object {
         fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange) {
-            val textAttributes = TextAttributes()
-            textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
-            val highlighter = editor.markupModel.addRangeHighlighter(
+            val textAttributes = TextAttributes().apply {
+                backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
+            }
+            val editRangeHighlighter = editor.markupModel.addRangeHighlighter(
                 editRange.startOffset, editRange.endOffset,
-                HighlighterLayer.SELECTION,
-                textAttributes,
-                HighlighterTargetArea.EXACT_RANGE
+                HighlighterLayer.SELECTION, textAttributes, HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", highlighter)
-            project.getVoqalLogger(this::class).debug("Highlighted visible range: $editRange")
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", editRangeHighlighter)
+            project.getVoqalLogger(this::class).debug("Highlighted edit range: $editRange")
         }
     }
 
