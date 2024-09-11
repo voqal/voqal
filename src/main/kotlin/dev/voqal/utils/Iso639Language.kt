@@ -61,10 +61,8 @@ enum class Iso639Language(val code: String, val displayName: String) {
     WELSH("cy", "Welsh");
 
     companion object {
-        fun findByCode(code: String): Iso639Language = Iso639Language.entries.first { it.code == code }
-
         @JvmStatic
-        fun findByName(name: String): Iso639Language =
-            Iso639Language.entries.first { it.displayName.equals(name, ignoreCase = true) }
+        fun findByName(name: String) = entries.first { it.displayName.equals(name, ignoreCase = true) }
+        fun findByCode(code: String) = entries.first { it.code == code }
     }
 }

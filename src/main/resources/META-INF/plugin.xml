@@ -48,7 +48,7 @@
     </extensions>
 
     <actions>
-        <action id="voqal.ShowQuickEdit"
+        <action id="voqal.showQuickEdit"
                 class="dev.voqal.ide.actions.ShowQuickEditAction"
                 text="Show Quick Edit" description="Show Quick Edit">
             <keyboard-shortcut first-keystroke="alt c" keymap="$default"/>
