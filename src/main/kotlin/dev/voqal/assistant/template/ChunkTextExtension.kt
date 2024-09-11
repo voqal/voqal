@@ -28,7 +28,6 @@ import io.pebbletemplates.pebble.template.EvaluationContext
 import io.pebbletemplates.pebble.template.PebbleTemplate
 import io.vertx.core.json.JsonObject
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.VisibleForTesting
 
 class ChunkTextExtension : AbstractExtension() {
 
@@ -37,11 +36,6 @@ class ChunkTextExtension : AbstractExtension() {
     )
 
     class ChunkTextFunction : Function {
-
-        companion object {
-            @VisibleForTesting
-            var VISIBLE_RANGE_FALLBACK = true
-        }
 
         override fun getArgumentNames(): List<String> {
             return listOf("viewingCode", "limit", "limitType")
@@ -122,14 +116,10 @@ class ChunkTextExtension : AbstractExtension() {
                     })
                     val smartEditRange = smartChunk(editor, psiFile, limit, editRange, initialVisibleRange!!)
 
-                    var visibleRangePass = smartEditRange.contains(initialVisibleRange!!)
-                    if (!VISIBLE_RANGE_FALLBACK) {
-                        visibleRangePass = true
-                    }
-                    if (smartEditRange != editRange && visibleRangePass) {
+                    if (smartEditRange != editRange) {
                         editRange = smartEditRange
                         log.debug("Smart code chunked code from $originalEditRange to $editRange")
-                    } else if (VISIBLE_RANGE_FALLBACK && smartEditRange != editRange) {
+                    } else if (smartEditRange != editRange) {
                         log.debug("Smart code chunking failed, falling back to initial visible range")
                         editRange = initialVisibleRange!!
                     }

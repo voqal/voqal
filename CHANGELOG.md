@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Smart chunking in chunk text extension erroneously disabled
+
 ## [2024.10.2] - 2024-09-09
 
 ### Changed

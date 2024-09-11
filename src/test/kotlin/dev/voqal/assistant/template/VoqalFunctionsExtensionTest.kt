@@ -23,7 +23,6 @@ import java.io.File
 class VoqalFunctionsExtensionTest : JBTest() {
 
     fun `test inside function edit range1`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/kt/InsideFunction1.kt")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -63,11 +62,9 @@ class VoqalFunctionsExtensionTest : JBTest() {
         val blockText = psiFile.descendants().filter { it.toString().contains("BLOCK") }.first().text
             .substringAfter("{\n").substringBefore("}")
         assertTrue(markdown.contains(blockText))
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test inside function edit range2`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/kt/InsideFunction2.kt")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -107,11 +104,9 @@ class VoqalFunctionsExtensionTest : JBTest() {
         val blockText = psiFile.descendants().filter { it.toString().contains("BLOCK") }.last().text
             .substringAfter("{\n").substringBefore("}")
         assertTrue(markdown.contains(blockText))
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test between functions edit range`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/php/BetweenFunctions.php")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -151,11 +146,9 @@ class VoqalFunctionsExtensionTest : JBTest() {
 
         val commonIndent = funcText.lines().first().takeWhile { it == ' ' }.length
         assertTrue(funcText.lines().all { it.startsWith(" ".repeat(commonIndent)) })
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test lots of mini functions edit range`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/java/MiniFunctions.java")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -200,11 +193,9 @@ class VoqalFunctionsExtensionTest : JBTest() {
         //todo: shouldn't end with new line
 //        val commonIndent = markdown.lines().first().takeWhile { it == ' ' }.length
 //        assertTrue(markdown.lines().all { it.startsWith(" ".repeat(commonIndent)) })
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test lots of fields edit range`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/java/ManyFields.java")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -245,11 +236,9 @@ class VoqalFunctionsExtensionTest : JBTest() {
 //        //todo: shouldn't end with new line
 //        val commonIndent = markdown.lines().first().takeWhile { it == ' ' }.length
 //        assertTrue(markdown.lines().all { it.startsWith(" ".repeat(commonIndent)) })
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test lots of fields edit range2`() {
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = false
         val codeFile = File("src/test/resources/java/ManyFields.java")
         val codeText = codeFile.readText().replace("\r\n", "\n")
         val virtualFile = myFixture.createFile(codeFile.name, codeText)
@@ -291,7 +280,6 @@ class VoqalFunctionsExtensionTest : JBTest() {
 //        //todo: shouldn't end with new line
 //        val commonIndent = markdown.lines().first().takeWhile { it == ' ' }.length
 //        assertTrue(markdown.lines().all { it.startsWith(" ".repeat(commonIndent)) })
-        ChunkTextFunction.VISIBLE_RANGE_FALLBACK = true
     }
 
     fun `test plsql parser1`() {
@@ -363,7 +351,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
             )
         )
         val markdown = directive.toMarkdown()
-        assertTrue(markdown.contains("// Generated"))
+        assertFalse(markdown.contains("// Generated"))
         assertTrue(markdown.contains("NULL=38,"))
     }
 
