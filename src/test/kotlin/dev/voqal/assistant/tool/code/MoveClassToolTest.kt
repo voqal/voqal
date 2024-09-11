@@ -31,7 +31,9 @@ class MoveClassToolTest : JBTest() {
         val realSearchService = project.service<VoqalSearchService>()
         val mockSearchService = mock<VoqalSearchService>(
             defaultAnswer = {
-                if (it.method.name == "getMainSourceRoot") {
+                if (it.method.name == "getProjectRoot") {
+                    return@mock realSearchService.getProjectRoot()
+                } else if (it.method.name == "getMainSourceRoot") {
                     return@mock srcRoot
                 } else if (it.method.name == "getSourceRoots") {
                     return@mock listOf(srcRoot)
