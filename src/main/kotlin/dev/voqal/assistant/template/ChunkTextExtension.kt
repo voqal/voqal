@@ -6,17 +6,18 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.util.ui.JBUI
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.services.VoqalDirectiveService
@@ -30,6 +31,21 @@ import io.vertx.core.json.JsonObject
 import kotlinx.serialization.json.Json
 
 class ChunkTextExtension : AbstractExtension() {
+
+    companion object {
+        fun setVisibleRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
+            val textAttributes = TextAttributes()
+            textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
+            val highlighter = editor.markupModel.addRangeHighlighter(
+                editRange.startOffset, editRange.endOffset,
+                HighlighterLayer.SELECTION,
+                textAttributes,
+                HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", highlighter)
+            project.getVoqalLogger(this::class).debug("Highlighted visible range: $editRange")
+        }
+    }
 
     override fun getFunctions() = mapOf(
         "chunkText" to ChunkTextFunction()
@@ -133,18 +149,7 @@ class ChunkTextExtension : AbstractExtension() {
                     val existingHighlighter = directive.project.service<VoqalMemoryService>()
                         .getUserData("visibleRangeHighlighter") as? RangeHighlighter
                     if (existingHighlighter == null) {
-                        val textAttributes = TextAttributes()
-                        textAttributes.backgroundColor = EditorColorsManager.getInstance()
-                            .globalScheme.defaultBackground.brighter()
-                        val highlighter = editor.markupModel.addRangeHighlighter(
-                            editRange.startOffset, editRange.endOffset,
-                            HighlighterLayer.SELECTION,
-                            textAttributes,
-                            HighlighterTargetArea.EXACT_RANGE
-                        )
-                        directive.project.service<VoqalMemoryService>()
-                            .putUserData("visibleRangeHighlighter", highlighter)
-                        log.debug("Highlighted visible range: $editRange")
+                        setVisibleRangeHighlighter(directive.project, editor, editRange)
                     }
                 }
             } else {
