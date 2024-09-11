@@ -18,8 +18,9 @@ allowing you to customize your experience and control your data.
 
 ## Demonstration
 
-<video src="https://github.com/user-attachments/assets/c964e671-5111-4b13-b8fa-8be7d69104ee" width="500">
-</video>
+Voice                                                                                                 |  Keyboard
+:----------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------:
+<video src="https://github.com/user-attachments/assets/c964e671-5111-4b13-b8fa-8be7d69104ee"></video> | <video src="https://github.com/user-attachments/assets/f9d93199-adc6-4081-8b33-daf9c7dc173b"></video>
 
 ## Code Structure
 
