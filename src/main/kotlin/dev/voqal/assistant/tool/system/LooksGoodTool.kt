@@ -4,6 +4,7 @@ import com.aallam.openai.api.chat.Tool
 import com.aallam.openai.api.core.Parameters
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
@@ -34,37 +35,27 @@ class LooksGoodTool : VoqalTool() {
         val log = project.getVoqalLogger(this::class)
         log.info("Triggering looks good")
 
-        val editor = directive.ide.editor
-        if (editor == null) {
-            log.warn("No editor found")
-            project.service<VoqalStatusService>().updateText("No editor found")
-            return
-        }
-
         if (project.service<VoqalStatusService>().getStatus() == VoqalStatus.EDITING) {
             log.info("Looks good while editing")
             val memoryService = project.service<VoqalMemoryService>()
             val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter")
             val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
+            val editor = (memoryService.getUserData("voqal.edit.editor") as Editor?) ?: directive.ide.editor
             memoryService.resetMemory()
 
-            inlay?.let {
-                project.invokeLater {
-                    Disposer.dispose(it)
-                }
-            }
+            inlay?.let { project.invokeLater { Disposer.dispose(it) } }
 
             //ensure highlighters removed
             if (editRangeHighlighter is RangeHighlighter) {
-                editor.markupModel.removeHighlighter(editRangeHighlighter)
+                editor?.markupModel?.removeHighlighter(editRangeHighlighter)
             }
-            val voqalHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()
+            val voqalHighlighters = editor?.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 voqalHighlighters.forEach {
-                    editor.markupModel.removeHighlighter(it)
+                    editor?.markupModel?.removeHighlighter(it)
                 }
             })
-            editor.putUserData(VOQAL_HIGHLIGHTERS, emptyList())
+            editor?.putUserData(VOQAL_HIGHLIGHTERS, emptyList())
 
             //reset status
             project.service<VoqalStatusService>().updateText("Accepted changes")

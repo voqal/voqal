@@ -58,11 +58,7 @@ class CancelTool : VoqalTool() {
         if (statusService.getStatus() == VoqalStatus.SEARCHING) {
             //nop
         } else if (statusService.getStatus() == VoqalStatus.EDITING) {
-            inlay?.let {
-                project.invokeLater {
-                    Disposer.dispose(it)
-                }
-            }
+            inlay?.let { project.invokeLater { Disposer.dispose(it) } }
 
             //todo: info diff size
             action?.finish()

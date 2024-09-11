@@ -13,7 +13,6 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.impl.view.FontLayoutService
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
-import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
@@ -28,7 +27,7 @@ import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.tool.system.CancelTool
 import dev.voqal.assistant.tool.system.LooksGoodTool
 import dev.voqal.assistant.tool.system.mode.ToggleEditModeTool
-import dev.voqal.ide.ui.toolwindow.chat.conversation.UserPromptTextArea
+import dev.voqal.ide.ui.toolwindow.chat.conversation.UserDirectiveTextArea
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
@@ -50,14 +49,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Displays [UserPromptTextArea] above the caret of the current [Editor] allowing for directive
+ * Displays [UserDirectiveTextArea] above the caret of the current [Editor] allowing for directive
  * input outside the Voqal Chat tool window.
  */
 class ShowQuickEditAction : AnAction() {
 
     companion object {
 
-        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange): RangeHighlighter {
+        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange) {
             val textAttributes = TextAttributes().apply {
                 val borderColor = JBUI.CurrentTheme.ActionButton.focusedBorder()
                 Reflect.on(this).call("withAdditionalEffect", EffectType.ROUNDED_BOX, borderColor)
@@ -68,7 +67,6 @@ class ShowQuickEditAction : AnAction() {
             )
             project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", quickEditRangeHighlighter)
             project.getVoqalLogger(this::class).debug("Highlighted quick edit range: $editRange")
-            return quickEditRangeHighlighter
         }
 
         internal const val QUICK_EDIT_LAYER = 6101
@@ -107,8 +105,7 @@ class ShowQuickEditAction : AnAction() {
         wrapperPanel.border = EmptyBorder(2, 0, 2, 0)
         wrapperPanel.layout = BorderLayout()
 
-        var earlyExit = false
-        val userPromptTextArea = UserPromptTextArea { message ->
+        val userDirectiveTextArea = UserDirectiveTextArea { message ->
             project.scope.launch {
                 val configService = project.service<VoqalConfigService>()
                 if (!configService.getConfig().pluginSettings.enabled) {
@@ -117,7 +114,6 @@ class ShowQuickEditAction : AnAction() {
                 }
 
                 if (message == "") {
-                    earlyExit = true
                     toolService.blindExecute(LooksGoodTool())
                 } else {
                     log.debug("Sending message: $message")
@@ -129,18 +125,11 @@ class ShowQuickEditAction : AnAction() {
                 }
             }
         }
-        userPromptTextArea.allowEmptyText = true
-        wrapperPanel.add(userPromptTextArea)
-        //        editor.scrollingModel.addVisibleAreaListener(controlBar)
+        userDirectiveTextArea.allowEmptyText = true
+        wrapperPanel.add(userDirectiveTextArea)
 
         val wrappedComponent = ComponentWrapper(project, editorWidthWatcher, wrapperPanel)
-
         editor.scrollPane.viewport.addComponentListener(editorWidthWatcher)
-        //        Disposer.register(this) {
-        //            editor.scrollPane.viewport.removeComponentListener(editorWidthWatcher)
-        //        }
-        //
-        //        EditorUtil.disposeWithEditor(editor, this)
 
         val caretPosition = ReadAction.compute(ThrowableComputable { editor.caretModel.offset })
         val editRange = getQuickEditRange(project, editor, psiFile, caretPosition)
@@ -155,7 +144,7 @@ class ShowQuickEditAction : AnAction() {
         }
 
         //show quick edit inlay and edit range
-        val quickEditRangeHighlighter = setEditRangeHighlighter(project, editor, editRange)
+        setEditRangeHighlighter(project, editor, editRange)
         project.invokeLater {
             EditorEmbeddedComponentManager.getInstance().addComponent(
                 editor, wrappedComponent,
@@ -170,14 +159,20 @@ class ShowQuickEditAction : AnAction() {
             )?.also {
                 memoryService.putUserData("voqal.edit.inlay", it)
                 Disposer.register(it) {
-                    editor.markupModel.removeHighlighter(quickEditRangeHighlighter)
+                    if (memoryService.getUserData("voqal.edit.inlay") != null) {
+                        //editor closed with quick edit inlay still active, auto-accept any changes
+                        memoryService.removeUserData("voqal.edit.inlay")
+                        project.scope.launch {
+                            toolService.blindExecute(LooksGoodTool())
+                        }
+                    }
+                    editor.scrollPane.viewport.removeComponentListener(editorWidthWatcher)
                 }
             }
 
-            userPromptTextArea.textArea.addKeyListener(object : KeyAdapter() {
+            userDirectiveTextArea.textArea.addKeyListener(object : KeyAdapter() {
                 override fun keyTyped(e: KeyEvent) {
                     if (e.keyChar.code == KeyEvent.VK_ESCAPE) {
-                        earlyExit = true
                         project.scope.launch {
                             toolService.blindExecute(CancelTool())
                         }
@@ -185,16 +180,7 @@ class ShowQuickEditAction : AnAction() {
                 }
             })
 
-//            userPromptTextArea.textArea.addFocusListener(object : FocusAdapter() {
-//                override fun focusLost(e: FocusEvent?) {
-//                    if (earlyExit) return
-//                    project.scope.launch {
-//                        toolService.blindExecute(LooksGoodTool())
-//                    }
-//                }
-//            })
-
-            userPromptTextArea.focus()
+            userDirectiveTextArea.focus()
         }
     }
 
@@ -261,7 +247,6 @@ class ShowQuickEditAction : AnAction() {
             editorTextWidth = newWidth
         }
 
-        //todo: make configurable and dynamic like ComponentSizeEvaluator.getDynamicSize
         private fun calcWidth(): Int {
             val visibleEditorTextWidth =
                 editor.scrollPane.viewport.width - getVerticalScrollbarWidth() - getGutterTextGap()

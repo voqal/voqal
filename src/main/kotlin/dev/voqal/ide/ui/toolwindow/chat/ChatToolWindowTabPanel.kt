@@ -18,7 +18,7 @@ import dev.voqal.ide.ui.VoqalUI.createScrollPaneWithSmartScroller
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatMessagePanel
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatMessageResponseBody
 import dev.voqal.ide.ui.toolwindow.chat.conversation.ChatToolWindowScrollablePanel
-import dev.voqal.ide.ui.toolwindow.chat.conversation.UserPromptTextArea
+import dev.voqal.ide.ui.toolwindow.chat.conversation.UserDirectiveTextArea
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
 import io.vertx.core.json.Json
@@ -46,14 +46,14 @@ class ChatToolWindowTabPanel(
 
     private val log = project.getVoqalLogger(this::class)
     private val rootPanel: JPanel
-    private val userPromptTextArea: UserPromptTextArea
+    private val userDirectiveTextArea: UserDirectiveTextArea
     private val toolWindowScrollablePanel = ChatToolWindowScrollablePanel()
 
     init {
-        userPromptTextArea = UserPromptTextArea { text: String -> handleSubmit(text) }
+        userDirectiveTextArea = UserDirectiveTextArea { text: String -> handleSubmit(text) }
         rootPanel = createRootPanel()
-        userPromptTextArea.requestFocusInWindow()
-        userPromptTextArea.requestFocus()
+        userDirectiveTextArea.requestFocusInWindow()
+        userDirectiveTextArea.requestFocus()
 
         project.invokeLater {
             addWelcomeMessage()
@@ -244,7 +244,7 @@ class ChatToolWindowTabPanel(
             JBUI.Borders.empty(8)
         )
         panel.addToTop(createUserPromptTextAreaHeader())
-        panel.addToBottom(userPromptTextArea)
+        panel.addToBottom(userDirectiveTextArea)
         return panel
     }
 
