@@ -33,7 +33,7 @@ import kotlinx.serialization.json.Json
 class ChunkTextExtension : AbstractExtension() {
 
     companion object {
-        fun setVisibleRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
+        fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: ProperTextRange) {
             val textAttributes = TextAttributes()
             textAttributes.backgroundColor = JBUI.CurrentTheme.ToolWindow.background()
             val highlighter = editor.markupModel.addRangeHighlighter(
@@ -42,7 +42,7 @@ class ChunkTextExtension : AbstractExtension() {
                 textAttributes,
                 HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", highlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", highlighter)
             project.getVoqalLogger(this::class).debug("Highlighted visible range: $editRange")
         }
     }
@@ -143,18 +143,18 @@ class ChunkTextExtension : AbstractExtension() {
                     memoryService.putUserData("visibleRange", editRange)
                 }
 
-                //paint visible range
+                //paint edit range
                 if (editRange.length != editor.document.textLength) {
                     val existingHighlighter = memoryService
-                        .getUserData("visibleRangeHighlighter") as? RangeHighlighter
+                        .getUserData("editRangeHighlighter") as? RangeHighlighter
                     if (existingHighlighter == null) {
-                        setVisibleRangeHighlighter(directive.project, editor, editRange)
+                        setEditRangeHighlighter(directive.project, editor, editRange)
                     }
                 }
             } else if (memoryService.getUserData("voqal.edit.inlay") == null) {
                 //if full code visible but current document is less than edit range, reset edit range
                 val existingHighlighter = directive.project.service<VoqalMemoryService>()
-                    .getUserData("visibleRangeHighlighter") as? RangeHighlighter
+                    .getUserData("editRangeHighlighter") as? RangeHighlighter
                 if (existingHighlighter == null && editRange.length > editor.document.text.length) {
                     editRange = ProperTextRange(0, editor.document.textLength)
                     directive.project.service<VoqalMemoryService>()

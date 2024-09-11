@@ -53,7 +53,7 @@ class DiffEditTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -98,7 +98,7 @@ class DiffEditTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -153,7 +153,7 @@ class DiffEditTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -227,7 +227,7 @@ class DiffEditTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {

@@ -189,7 +189,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -233,7 +233,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -277,7 +277,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -539,7 +539,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -640,7 +640,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {
@@ -693,7 +693,7 @@ class EditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 runBlocking {

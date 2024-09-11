@@ -226,7 +226,7 @@ class StreamingEditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
@@ -271,7 +271,7 @@ class StreamingEditTextToolTest : JBTest() {
                 testRange.startOffset, testRange.endOffset,
                 HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
             )
-            project.service<VoqalMemoryService>().putUserData("visibleRangeHighlighter", testHighlighter)
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
 
             val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {

@@ -45,7 +45,7 @@ class CancelTool : VoqalTool() {
         }
 
         val memoryService = project.service<VoqalMemoryService>()
-        val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+        val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter")
         val affectedFiles = memoryService.getUserData("affectedFiles")
         val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
         val editor = (memoryService.getUserData("voqal.edit.editor") as Editor?) ?: directive.ide.editor
@@ -74,8 +74,8 @@ class CancelTool : VoqalTool() {
         }
 
         //ensure highlighters removed
-        if (visibleRangeHighlighter is RangeHighlighter) {
-            editor?.markupModel?.removeHighlighter(visibleRangeHighlighter)
+        if (editRangeHighlighter is RangeHighlighter) {
+            editor?.markupModel?.removeHighlighter(editRangeHighlighter)
         }
         editor?.getUserData(VOQAL_HIGHLIGHTERS)?.forEach {
             editor.markupModel.removeHighlighter(it)

@@ -215,10 +215,10 @@ class EditTextTool : VoqalTool() {
             doFullTextEdit(editor, replacementText, project)
         }
 
-        //finally, ensure visible range highlighter is up-to-date
+        //finally, ensure edit range highlighter is up-to-date
         val memoryService = project.service<VoqalMemoryService>()
-        val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter") as RangeHighlighter?
-        val visibleRange = visibleRangeHighlighter?.range
+        val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter") as RangeHighlighter?
+        val visibleRange = editRangeHighlighter?.range
         if (visibleRange != null) {
             val newStartOffset = editHighlighters.minOfOrNull { it.startOffset } ?: visibleRange.startOffset
             val newEndOffset = editHighlighters.maxOfOrNull { it.endOffset } ?: visibleRange.endOffset
@@ -227,8 +227,8 @@ class EditTextTool : VoqalTool() {
                     Math.min(newStartOffset, visibleRange.startOffset),
                     Math.max(newEndOffset, visibleRange.endOffset)
                 )
-                editor.markupModel.removeHighlighter(visibleRangeHighlighter)
-                ChunkTextExtension.setVisibleRangeHighlighter(project, editor, updatedRange)
+                editor.markupModel.removeHighlighter(editRangeHighlighter)
+                ChunkTextExtension.setEditRangeHighlighter(project, editor, updatedRange)
             }
         }
 
@@ -254,7 +254,7 @@ class EditTextTool : VoqalTool() {
         //determine diff between original text and text streamed so far
         var origText = editor.document.text
         val highlighter = project.service<VoqalMemoryService>()
-            .getUserData("visibleRangeHighlighter") as RangeHighlighter?
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
         val visibleRange = highlighter?.range
         if (visibleRange != null) {
             ApplicationManager.getApplication().invokeAndWait {
@@ -551,7 +551,7 @@ class EditTextTool : VoqalTool() {
     ): Diff? {
         var oldText: String? = null
         val highlighter = project.service<VoqalMemoryService>()
-            .getUserData("visibleRangeHighlighter") as RangeHighlighter?
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
         if (highlighter == null) {
             return null
         }

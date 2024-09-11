@@ -158,8 +158,8 @@ class QuickEditAction : AnAction() {
             editRange.startOffset, editRange.endOffset,
             QUICK_EDIT_LAYER, textAttributes, HighlighterTargetArea.EXACT_RANGE
         )
-        memoryService.putUserData("visibleRangeHighlighter", quickEditRangeHighlighter)
-        log.debug("Highlighted visible range: $editRange")
+        memoryService.putUserData("editRangeHighlighter", quickEditRangeHighlighter)
+        log.debug("Highlighted edit range: $editRange")
         memoryService.putUserData("visibleRange", editRange)
 
         project.invokeLater {

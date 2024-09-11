@@ -44,7 +44,7 @@ class LooksGoodTool : VoqalTool() {
         if (project.service<VoqalStatusService>().getStatus() == VoqalStatus.EDITING) {
             log.info("Looks good while editing")
             val memoryService = project.service<VoqalMemoryService>()
-            val visibleRangeHighlighter = memoryService.getUserData("visibleRangeHighlighter")
+            val editRangeHighlighter = memoryService.getUserData("editRangeHighlighter")
             val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
             memoryService.resetMemory()
 
@@ -55,8 +55,8 @@ class LooksGoodTool : VoqalTool() {
             }
 
             //ensure highlighters removed
-            if (visibleRangeHighlighter is RangeHighlighter) {
-                editor.markupModel.removeHighlighter(visibleRangeHighlighter)
+            if (editRangeHighlighter is RangeHighlighter) {
+                editor.markupModel.removeHighlighter(editRangeHighlighter)
             }
             val voqalHighlighters = editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
