@@ -219,4 +219,27 @@ class CodeExtractorTest {
         val code = CodeExtractor.extractCodeBlock(responseCode)
         assertEquals("print(i, \"is odd\")", code)
     }
+
+    @Test
+    fun `test new line in string`() {
+        val responseCode = """
+            ```java
+            public void callsIt() {
+                long currentTime = System.currentTimeMillis();
+                System.out.print(currentTime + "\n");
+                myMethod();
+            }
+            ```
+        """.trimIndent()
+        val code = CodeExtractor.extractCodeBlock(responseCode)
+        assertEquals(
+            """
+            public void callsIt() {
+                long currentTime = System.currentTimeMillis();
+                System.out.print(currentTime + "\n");
+                myMethod();
+            }
+        """.trimIndent(), code
+        )
+    }
 }

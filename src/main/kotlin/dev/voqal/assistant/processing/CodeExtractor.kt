@@ -5,13 +5,7 @@ import java.util.regex.Pattern
 object CodeExtractor {
 
     fun extractCodeBlock(text: String): String {
-        var escapedText = text.replace("\r\n", "\n")
-        if (escapedText.contains("\\n")) { //todo: more robust check if code is escaped
-            escapedText = escapedText.replace("\\n", "\n")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-        }
-
+        val escapedText = text.replace("\r\n", "\n") //todo: is this necessary?
         val codeBlock = doStrictExtractCodeBlock(escapedText)
         if (codeBlock != null) {
             return codeBlock
