@@ -7,6 +7,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor
@@ -51,6 +52,8 @@ class ChatToolWindowTabPanel(
 
     init {
         userDirectiveTextArea = UserDirectiveTextArea(project) { text: String -> handleSubmit(text) }
+        Disposer.register(this, userDirectiveTextArea)
+
         rootPanel = createRootPanel()
         userDirectiveTextArea.requestFocusInWindow()
         userDirectiveTextArea.requestFocus()

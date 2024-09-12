@@ -7,6 +7,7 @@
 ### Fixed
 
 - Opening quick edit inlay with one already open causes un-closable inlay
+- Memory leak detected warning in UserDirectiveTextArea
 
 ## [2024.11.0] - 2024-09-11
 
