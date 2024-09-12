@@ -15,6 +15,8 @@ import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.invokeLater
+import dev.voqal.services.scope
+import kotlinx.coroutines.launch
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.FocusEvent
@@ -122,7 +124,7 @@ class UserDirectiveTextArea(
         add(iconsPanel, BorderLayout.EAST)
     }
 
-    private fun setPlaceholderText() {
+    private fun setPlaceholderText() = project.scope.launch {
         val aiProvider = project.service<VoqalConfigService>().getAiProvider()
         val hasVoiceDetectionProvider = aiProvider.isVadProvider()
         val hasSpeechToTextProvider = aiProvider.isSttProvider()
