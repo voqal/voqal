@@ -49,7 +49,7 @@ class VoqalBenchmarking : JBTest() {
     private var disposed = false
     private var error: Error? = null
 
-    fun `test run all suites`(): Unit = runBlocking {
+    fun `test run all suites`() {
         val config = TEST_CONFIG
 
         //idle mode
@@ -76,7 +76,7 @@ class VoqalBenchmarking : JBTest() {
         }
         if (fifoStack.isEmpty()) {
             log.warn("Found no benchmarks to run")
-            return@runBlocking
+            return
         }
 
         var benchPromise = fifoStack.pop()
