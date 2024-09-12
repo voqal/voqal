@@ -158,8 +158,9 @@ class SharedAudioCapture(private val project: Project) {
 
     private fun captureAudio() {
         try {
+            val testMode = listeners.any { it.isTestListener() }
             val configService = project.service<VoqalConfigService>()
-            if (configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.None) {
+            if (!testMode && configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.None) {
                 log.warn("No voice detection provider available")
                 return
             }
@@ -209,7 +210,6 @@ class SharedAudioCapture(private val project: Project) {
             val processJob = CoroutineScope(Dispatchers.Default).launch {
                 while (active) {
                     val audioData = audioQueue.take()
-                    val testMode = listeners.any { it.isTestListener() }
                     val liveDataListeners = listeners.filter { it.isLiveDataListener() }
 
                     for (listener in liveDataListeners) {
@@ -346,7 +346,7 @@ class SharedAudioCapture(private val project: Project) {
         }
     }
 
-    private fun restart() {
+    fun restart() {
         log.debug("Restarting audio capture")
         cancel()
         startCapture()

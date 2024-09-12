@@ -8,6 +8,7 @@
 
 - Opening quick edit inlay with one already open causes un-closable inlay
 - Memory leak detected warning in UserDirectiveTextArea
+- Always allow audio capture while testing config
 
 ## [2024.11.0] - 2024-09-11
 

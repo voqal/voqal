@@ -2,6 +2,7 @@ package dev.voqal.config.ui
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBPanel
 import dev.voqal.config.VoqalConfig
 import dev.voqal.ide.ui.config.PluginSettingsPanel
@@ -13,8 +14,8 @@ import javax.swing.JPanel
 
 class VoqalConfigurationPanel(val project: Project) : JBPanel<VoqalConfigurationPanel>() {
 
-    private var pluginSettings: PluginSettingsPanel? = null
-    private var voiceDetectionSettings: VoiceDetectionSettingsPanel? = null
+    private val pluginSettings: PluginSettingsPanel
+    private val voiceDetectionSettings: VoiceDetectionSettingsPanel
 
     init {
         layout = MigLayout("", "[grow,fill]", "[shrink][shrink][shrink][shrink]")
@@ -32,13 +33,14 @@ class VoqalConfigurationPanel(val project: Project) : JBPanel<VoqalConfiguration
         voiceDetectionSettings = VoiceDetectionSettingsPanel(project, project.audioCapture)
         voiceDetectionSettingsPanel.add(voiceDetectionSettings)
         add(voiceDetectionSettingsPanel, "cell 0 1")
+        Disposer.register(pluginSettings, voiceDetectionSettings)
     }
 
     fun isModified(config: VoqalConfig): Boolean {
-        if (pluginSettings!!.isModified(config.pluginSettings)) {
+        if (pluginSettings.isModified(config.pluginSettings)) {
             return true
         }
-        if (voiceDetectionSettings!!.isModified(config.voiceDetectionSettings)) {
+        if (voiceDetectionSettings.isModified(config.voiceDetectionSettings)) {
             return true
         }
         return false
@@ -47,8 +49,8 @@ class VoqalConfigurationPanel(val project: Project) : JBPanel<VoqalConfiguration
     fun getConfig(): VoqalConfig {
         val currentConfig = project.service<VoqalConfigService>().getConfig()
         return VoqalConfig(
-            pluginSettings!!.config,
-            voiceDetectionSettings!!.config,
+            pluginSettings.config,
+            voiceDetectionSettings.config,
             currentConfig.speechToTextSettings,
             currentConfig.languageModelsSettings,
             currentConfig.textToSpeechSettings,
@@ -57,7 +59,7 @@ class VoqalConfigurationPanel(val project: Project) : JBPanel<VoqalConfiguration
     }
 
     fun applyConfig(config: VoqalConfig) {
-        pluginSettings!!.applyConfig(config.pluginSettings)
-        voiceDetectionSettings!!.applyConfig(config.voiceDetectionSettings)
+        pluginSettings.applyConfig(config.pluginSettings)
+        voiceDetectionSettings.applyConfig(config.voiceDetectionSettings)
     }
 }

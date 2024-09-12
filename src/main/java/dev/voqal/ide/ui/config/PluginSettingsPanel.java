@@ -1,6 +1,8 @@
 package dev.voqal.ide.ui.config;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -14,9 +16,13 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.util.Objects;
 
-public class PluginSettingsPanel extends JBPanel<PluginSettingsPanel> {
+public class PluginSettingsPanel extends JBPanel<PluginSettingsPanel> implements Disposable {
+
+    private final SharedAudioCapture audioCapture;
 
     public PluginSettingsPanel(Project project, SharedAudioCapture audioCapture) {
+        this.audioCapture = audioCapture;
+
         initComponents();
 
         comboBox1.setModel(new DefaultComboBoxModel<>(
@@ -27,8 +33,11 @@ public class PluginSettingsPanel extends JBPanel<PluginSettingsPanel> {
         });
 
         WaveformVisualizer visualizer = new WaveformVisualizer(audioCapture);
-        visualizer.start();
         panel1.add(visualizer);
+        visualizer.start();
+        Disposer.register(this, visualizer);
+
+        audioCapture.restart();
     }
 
     public boolean isModified(PluginSettings config) {
@@ -54,6 +63,11 @@ public class PluginSettingsPanel extends JBPanel<PluginSettingsPanel> {
         enabledCheckBox.setSelected(config.getEnabled());
         comboBox1.setSelectedItem(config.getMicrophoneName());
         focusLostPauseCheckBox.setSelected(config.getPauseOnFocusLost());
+    }
+
+    @Override
+    public void dispose() {
+        audioCapture.restart();
     }
 
     private void initComponents() {

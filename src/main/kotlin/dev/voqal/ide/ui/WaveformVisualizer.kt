@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import javax.swing.JPanel
 
 class WaveformVisualizer(
-    private val microphone: SharedAudioCapture
+    private val audioCapture: SharedAudioCapture
 ) : JPanel(), Runnable, Disposable, SharedAudioCapture.AudioDataListener {
 
     private val audioQueue = LinkedBlockingQueue<ByteArray>()
@@ -25,7 +25,7 @@ class WaveformVisualizer(
     init {
         preferredSize = Dimension(100, height)
         setToZero()
-        microphone.registerListener(this)
+        audioCapture.registerListener(this)
     }
 
     override fun isTestListener() = true
@@ -68,7 +68,7 @@ class WaveformVisualizer(
 
     override fun dispose() {
         running = false
-        microphone.removeListener(this)
+        audioCapture.removeListener(this)
     }
 
     private fun setToZero() {
