@@ -11,12 +11,10 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
 import com.intellij.util.ui.UIUtil
-import dev.voqal.config.VoqalConfig
-import dev.voqal.config.settings.SpeechToTextSettings.STTProvider
-import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
 import dev.voqal.services.VoqalConfigService
+import dev.voqal.services.invokeLater
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.FocusEvent
@@ -26,7 +24,7 @@ import javax.swing.AbstractAction
 import javax.swing.JPanel
 
 class UserDirectiveTextArea(
-    project: Project,
+    private val project: Project,
     private val onSubmit: Consumer<String>,
 ) : JPanel(BorderLayout()), Disposable {
 
@@ -42,8 +40,10 @@ class UserDirectiveTextArea(
         textArea.wrapStyleWord = true
         textArea.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true)
 
-        project.service<VoqalConfigService>().onConfigChange(this) { setPlaceholderText(it) }
-        setPlaceholderText(project.service<VoqalConfigService>().getConfig())
+        project.service<VoqalConfigService>().onConfigChange(this) {
+            project.invokeLater { setPlaceholderText() }
+        }
+        setPlaceholderText()
 
         addShiftEnterInputMap(textArea, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
@@ -122,10 +122,12 @@ class UserDirectiveTextArea(
         add(iconsPanel, BorderLayout.EAST)
     }
 
-    private fun setPlaceholderText(config: VoqalConfig) {
-        val hasVoiceDetectionProvider = config.voiceDetectionSettings.provider != VoiceDetectionProvider.None
-        val hasSpeechToTextProvider = config.speechToTextSettings.provider != STTProvider.NONE
-        val placeholderText = if (hasVoiceDetectionProvider && hasSpeechToTextProvider) {
+    private fun setPlaceholderText() {
+        val aiProvider = project.service<VoqalConfigService>().getAiProvider()
+        val hasVoiceDetectionProvider = aiProvider.isVadProvider()
+        val hasSpeechToTextProvider = aiProvider.isSttProvider()
+        val hasSpeechToModelProvider = aiProvider.isStmProvider()
+        val placeholderText = if (hasVoiceDetectionProvider && (hasSpeechToTextProvider || hasSpeechToModelProvider)) {
             "Speak or type directive"
         } else {
             "Type directive here"
