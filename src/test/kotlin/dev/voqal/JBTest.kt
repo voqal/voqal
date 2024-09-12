@@ -16,8 +16,11 @@ import dev.voqal.config.settings.PromptSettings
 import dev.voqal.ide.logging.LoggerFactory
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.scope
 import io.vertx.junit5.VertxTestContext
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 
 abstract class JBTest : BasePlatformTestCase() {
 
@@ -88,5 +91,20 @@ abstract class JBTest : BasePlatformTestCase() {
         } else if (!testContext.completed()) {
             throw RuntimeException("Test timed out")
         }
+    }
+
+    fun <T> launchAndReturn(action: suspend () -> T): T {
+        val ref = AtomicReference<T>()
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            try {
+                ref.set(action.invoke())
+                testContext.completeNow()
+            } catch (e: Throwable) {
+                testContext.failNow(e)
+            }
+        }
+        errorOnTimeout(testContext)
+        return ref.get()
     }
 }

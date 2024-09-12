@@ -20,7 +20,6 @@ import dev.voqal.services.scope
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
@@ -29,7 +28,7 @@ import org.mockito.kotlin.mock
 
 class OpenFileToolTest : JBTest() {
 
-    fun `test open exact file`(): Unit = runBlocking {
+    fun `test open exact file`() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
@@ -42,7 +41,7 @@ class OpenFileToolTest : JBTest() {
             ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -75,11 +74,13 @@ class OpenFileToolTest : JBTest() {
         }
         project.replaceService(FileEditorManager::class.java, mockEditorManager, testRootDisposable)
 
-        val file = project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        val file = launchAndReturn {
+            project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        }
         assertEquals("UserManagement.java", file?.name)
     }
 
-    fun `test open exact class`(): Unit = runBlocking {
+    fun `test open exact class`() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management class"
         val directive = VoqalDirective(
@@ -92,7 +93,7 @@ class OpenFileToolTest : JBTest() {
             ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -125,11 +126,13 @@ class OpenFileToolTest : JBTest() {
         myFixture.addFileToProject("UserAccount.java", "")
         project.replaceService(FileEditorManager::class.java, mockEditorManager, testRootDisposable)
 
-        val file = project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        val file = launchAndReturn {
+            project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        }
         assertEquals("UserManagement.java", file?.name)
     }
 
-    fun `test close match`(): Unit = runBlocking {
+    fun `test close match`() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
@@ -142,7 +145,7 @@ class OpenFileToolTest : JBTest() {
             ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -166,11 +169,13 @@ class OpenFileToolTest : JBTest() {
         myFixture.addFileToProject("UserSettings.java", "")
         myFixture.addFileToProject("UserDashboard.java", "")
 
-        val result = project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        val result = launchAndReturn {
+            project.service<VoqalSearchService>().findFile(json.getString("name"), false)
+        }
         assertEquals("UserManager.java", result?.name)
     }
 
-    fun `test no files`(): Unit = runBlocking {
+    fun `test no files`() {
         val toolService = project.service<VoqalToolService>()
         val transcription = "Open the user management file"
         val directive = VoqalDirective(
@@ -183,7 +188,7 @@ class OpenFileToolTest : JBTest() {
             ide = IdeContext(project),
             developer = DeveloperContext(transcription = transcription)
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         assertEquals(1, response.toolCalls.size)//, response.toString())
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -197,7 +202,9 @@ class OpenFileToolTest : JBTest() {
             )//, json.getString("name")
         )
 
-        val result = project.service<VoqalSearchService>().findFile(json.getString("name"))
+        val result = launchAndReturn {
+            project.service<VoqalSearchService>().findFile(json.getString("name"))
+        }
         assertNull(result)
     }
 

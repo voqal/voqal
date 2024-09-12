@@ -11,15 +11,14 @@ import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
 import io.vertx.core.json.JsonObject
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class AddBreakpointsToolTest : JBTest() {
 
-    fun `test add by line number`(): Unit = runBlocking {
+    fun `test add by line number`() {
         if (System.getenv("VQL_LANG") !in setOf(null, "JAVA")) {
             log.info("Ignoring java test in non-java mode")
-            return@runBlocking
+            return
         }
         val lang = Language.findLanguageByID(System.getenv("VQL_LANG") ?: "JAVA")!!
         log.info("Testing language: $lang")
@@ -41,7 +40,7 @@ class AddBreakpointsToolTest : JBTest() {
                 viewingCode = ViewingCode(addMethodCode)
             )
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         assertEquals(response.toString(), 1, response.toolCalls.size)
         val toolCall = response.toolCalls[0] as ToolCall.Function
@@ -53,10 +52,10 @@ class AddBreakpointsToolTest : JBTest() {
         assertEquals(listOf(3), lineNumbers)
     }
 
-    fun `test add to print lines`(): Unit = runBlocking {
+    fun `test add to print lines`() {
         if (System.getenv("VQL_LANG") !in setOf(null, "JAVA")) {
             log.info("Ignoring java test in non-java mode")
-            return@runBlocking
+            return
         }
         val lang = Language.findLanguageByID(System.getenv("VQL_LANG") ?: "JAVA")!!
         log.info("Testing language: $lang")
@@ -78,7 +77,7 @@ class AddBreakpointsToolTest : JBTest() {
                 viewingCode = ViewingCode(addMethodCode)
             )
         )
-        val response = directive.assistant.memorySlice.addMessage(directive)
+        val response = launchAndReturn { directive.assistant.memorySlice.addMessage(directive) }
 
         if (response.toolCalls.size == 1) {
             assertEquals(response.toString(), 1, response.toolCalls.size)

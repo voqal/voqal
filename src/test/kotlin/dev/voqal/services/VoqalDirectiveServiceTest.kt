@@ -16,13 +16,12 @@ import dev.voqal.provider.clients.AiProvidersClient
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.joor.Reflect
 import org.mockito.kotlin.mock
 
 class VoqalDirectiveServiceTest : JBTest() {
 
-    fun `test retry on parse error`(): Unit = runBlocking {
+    fun `test retry on parse error`() {
         myFixture.addFileToProject("UserProfile.java", "")
         myFixture.addFileToProject("UserManagement.java", "")
         myFixture.addFileToProject("UserAccount.java", "")
@@ -86,7 +85,9 @@ class VoqalDirectiveServiceTest : JBTest() {
                 throw NotImplementedError("Method not implemented: ${it.method.name}")
             }
         )
-        val aiProvidersClient = project.service<VoqalConfigService>().getAiProvider() as AiProvidersClient
+        val aiProvidersClient = launchAndReturn {
+            project.service<VoqalConfigService>().getAiProvider() as AiProvidersClient
+        }
         //use reflect to skip Disposer.register
         Reflect.on(aiProvidersClient).get<MutableList<LlmProvider>>("llmProviders").add(mockLlmProvider)
 
