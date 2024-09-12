@@ -72,7 +72,7 @@ class DeepgramClient(
     init {
         if (isSttProvider) {
             project.audioCapture.registerListener(this)
-            project.scope.launch { restartConnection() }
+            restartConnection()
         }
     }
 
