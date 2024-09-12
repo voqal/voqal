@@ -35,6 +35,19 @@ class LanguageModelsConfigurable(val project: Project) : Configurable {
             }))
         }
 
+        //ensure prompts aren't using non-existent language models
+        val languageModelNames = updatedSettings.models.map { it.name }
+        if (oldConfig.promptLibrarySettings.prompts.any { !languageModelNames.contains(it.languageModel) }) {
+            val promptLibrarySettings = configService.getConfig().promptLibrarySettings
+            configService.updateConfig(promptLibrarySettings.copy(prompts = promptLibrarySettings.prompts.map {
+                if (languageModelNames.contains(it.languageModel)) {
+                    it
+                } else {
+                    it.copy(languageModel = updatedSettings.models.firstOrNull()?.name ?: "")
+                }
+            }))
+        }
+
         project.scope.launch {
             //todo: can do onConfigChange instead of resetAiProvider/getAiProvider
             configService.resetAiProvider()

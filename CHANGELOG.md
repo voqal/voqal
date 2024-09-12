@@ -10,6 +10,7 @@
 - Memory leak detected warning in UserDirectiveTextArea
 - Always allow audio capture while testing config
 - EDT warning in Deepgram provider
+- No such element exception when using non-existent language model
 
 ## [2024.11.0] - 2024-09-11
 
