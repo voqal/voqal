@@ -15,6 +15,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.util.concurrency.ThreadingAssertions
 import com.jetbrains.rd.util.Callable
 import dev.voqal.config.ConfigurableSettings
 import dev.voqal.config.VoqalConfig
@@ -174,6 +175,7 @@ class VoqalConfigService(private val project: Project) {
     }
 
     fun getAiProvider(): AiProvider {
+        ThreadingAssertions.assertBackgroundThread()
         var aiProvider = this.aiProvider
         if (aiProvider == null) {
             synchronized(syncLock) {
