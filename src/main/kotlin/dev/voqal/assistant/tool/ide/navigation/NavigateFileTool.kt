@@ -1,6 +1,5 @@
 package dev.voqal.assistant.tool.ide.navigation
 
-import ai.grazie.utils.capitalize
 import com.aallam.openai.api.chat.FunctionCall
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -21,8 +20,6 @@ abstract class NavigateFileTool(private val operation: NavigateOperation) : Voqa
     private val opLength = op.length
 
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
-        val project = directive.ide.project
-        val log = project.getVoqalLogger(this::class)
         var name = args.getString("name") ?: args.getString("directive")
 
         //todo: canShortcut should have already set this
@@ -55,7 +52,6 @@ abstract class NavigateFileTool(private val operation: NavigateOperation) : Voqa
             name = name.substring(opLength + 1)
         }
 
-        log.info("${op.lowercase().capitalize()}ing file: $name")
         doFileOperation(directive, name)
     }
 
