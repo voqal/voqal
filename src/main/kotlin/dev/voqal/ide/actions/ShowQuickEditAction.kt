@@ -105,7 +105,7 @@ class ShowQuickEditAction : AnAction() {
         wrapperPanel.border = EmptyBorder(2, 0, 2, 0)
         wrapperPanel.layout = BorderLayout()
 
-        val userDirectiveTextArea = UserDirectiveTextArea { message ->
+        val userDirectiveTextArea = UserDirectiveTextArea(project) { message ->
             project.scope.launch {
                 val configService = project.service<VoqalConfigService>()
                 if (!configService.getConfig().pluginSettings.enabled) {
@@ -168,6 +168,7 @@ class ShowQuickEditAction : AnAction() {
                     }
                     editor.scrollPane.viewport.removeComponentListener(editorWidthWatcher)
                 }
+                Disposer.register(it, userDirectiveTextArea)
             }
 
             userDirectiveTextArea.textArea.addKeyListener(object : KeyAdapter() {

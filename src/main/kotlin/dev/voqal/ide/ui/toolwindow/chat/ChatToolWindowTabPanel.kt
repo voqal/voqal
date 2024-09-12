@@ -50,7 +50,7 @@ class ChatToolWindowTabPanel(
     private val toolWindowScrollablePanel = ChatToolWindowScrollablePanel()
 
     init {
-        userDirectiveTextArea = UserDirectiveTextArea { text: String -> handleSubmit(text) }
+        userDirectiveTextArea = UserDirectiveTextArea(project) { text: String -> handleSubmit(text) }
         rootPanel = createRootPanel()
         userDirectiveTextArea.requestFocusInWindow()
         userDirectiveTextArea.requestFocus()

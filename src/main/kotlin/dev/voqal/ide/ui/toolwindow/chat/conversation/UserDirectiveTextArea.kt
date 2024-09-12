@@ -1,17 +1,22 @@
 package dev.voqal.ide.ui.toolwindow.chat.conversation
 
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.editor.ex.util.EditorUtil
-import com.intellij.openapi.util.registry.Registry
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
 import com.intellij.util.ui.UIUtil
+import dev.voqal.config.VoqalConfig
+import dev.voqal.config.settings.SpeechToTextSettings.STTProvider
+import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
+import dev.voqal.services.VoqalConfigService
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.FocusEvent
@@ -19,11 +24,11 @@ import java.awt.event.FocusListener
 import java.util.function.Consumer
 import javax.swing.AbstractAction
 import javax.swing.JPanel
-import javax.swing.UIManager
 
 class UserDirectiveTextArea(
+    project: Project,
     private val onSubmit: Consumer<String>,
-) : JPanel(BorderLayout()) {
+) : JPanel(BorderLayout()), Disposable {
 
     val textArea = JBTextArea()
     private val textAreaRadius = 4
@@ -35,16 +40,10 @@ class UserDirectiveTextArea(
         textArea.isOpaque = false
         textArea.lineWrap = true
         textArea.wrapStyleWord = true
-        textArea.emptyText.setText("").appendText(
-            true,
-            0,
-            VoqalIcons.logoOffset,
-            "Speak or type directive",
-            SimpleTextAttributes.REGULAR_ATTRIBUTES,
-            null
-        )
-
         textArea.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true)
+
+        project.service<VoqalConfigService>().onConfigChange(this) { setPlaceholderText(it) }
+        setPlaceholderText(project.service<VoqalConfigService>().getConfig())
 
         addShiftEnterInputMap(textArea, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent) {
@@ -123,11 +122,23 @@ class UserDirectiveTextArea(
         add(iconsPanel, BorderLayout.EAST)
     }
 
-    private fun updateFont() {
-        if (Registry.`is`("ide.find.use.editor.font", false)) {
-            textArea.font = EditorUtil.getEditorFont()
+    private fun setPlaceholderText(config: VoqalConfig) {
+        val hasVoiceDetectionProvider = config.voiceDetectionSettings.provider != VoiceDetectionProvider.None
+        val hasSpeechToTextProvider = config.speechToTextSettings.provider != STTProvider.NONE
+        val placeholderText = if (hasVoiceDetectionProvider && hasSpeechToTextProvider) {
+            "Speak or type directive"
         } else {
-            textArea.font = UIManager.getFont("TextField.font")
+            "Type directive here"
         }
+        textArea.emptyText.setText("").appendText(
+            true,
+            0,
+            VoqalIcons.logoOffset,
+            placeholderText,
+            SimpleTextAttributes.REGULAR_ATTRIBUTES,
+            null
+        )
     }
+
+    override fun dispose() = Unit
 }
