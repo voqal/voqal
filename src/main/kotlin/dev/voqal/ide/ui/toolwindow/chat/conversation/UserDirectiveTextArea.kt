@@ -125,7 +125,20 @@ class UserDirectiveTextArea(
     }
 
     private fun setPlaceholderText() = project.scope.launch {
-        val aiProvider = project.service<VoqalConfigService>().getAiProvider()
+        val configService = project.service<VoqalConfigService>()
+        if (!configService.getConfig().pluginSettings.enabled) {
+            textArea.emptyText.setText("").appendText(
+                true,
+                0,
+                VoqalIcons.logoOffset,
+                "Plugin is disabled",
+                SimpleTextAttributes.REGULAR_ATTRIBUTES,
+                null
+            )
+            return@launch
+        }
+
+        val aiProvider = configService.getAiProvider()
         val hasVoiceDetectionProvider = aiProvider.isVadProvider()
         val hasSpeechToTextProvider = aiProvider.isSttProvider()
         val hasSpeechToModelProvider = aiProvider.isStmProvider()
