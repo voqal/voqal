@@ -57,9 +57,7 @@ class FireworksClient(
     private val providerUrl = "https://api.fireworks.ai/inference/v1/chat/completions"
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
-        val requestJson = JsonObject()
-            .put("model", request.model.id)
-            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+        val requestJson = toRequestJson(request)
 
         val response = try {
             client.post(providerUrl) {
@@ -84,10 +82,7 @@ class FireworksClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val requestJson = JsonObject()
-            .put("model", request.model.id)
-            .put("messages", JsonArray(request.messages.map { it.toJson() }))
-            .put("stream", true)
+        val requestJson = toRequestJson(request).put("stream", true)
 
         try {
             client.preparePost(providerUrl) {
@@ -123,6 +118,13 @@ class FireworksClient(
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
+    }
+
+    private fun toRequestJson(request: ChatCompletionRequest): JsonObject {
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("messages", JsonArray(request.messages.map { it.toJson() }))
+        return requestJson
     }
 
     private suspend fun throwIfError(response: HttpResponse) {
