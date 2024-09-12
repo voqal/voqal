@@ -84,8 +84,8 @@ class ShowQuickEditAction : AnAction() {
 
     private suspend fun triggerQuickEdit(project: Project, editor: EditorImpl, psiFile: PsiFile) {
         val log = project.getVoqalLogger(this::class)
-        val status = project.service<VoqalStatusService>().getStatus()
-        if (status == VoqalStatus.DISABLED) {
+        val statusService = project.service<VoqalStatusService>()
+        if (statusService.getStatus() == VoqalStatus.DISABLED) {
             log.warnChat("Ignoring quick edit action. Plugin is disabled")
             return
         }
@@ -93,7 +93,7 @@ class ShowQuickEditAction : AnAction() {
         //only one quick edit inlay open at a time
         val memoryService = project.service<VoqalMemoryService>()
         val toolService = project.service<VoqalToolService>()
-        if (status == VoqalStatus.EDITING) {
+        if (statusService.getStatus() == VoqalStatus.EDITING) {
             val inlay = memoryService.getUserData("voqal.edit.inlay") as Inlay<*>?
             if (inlay != null) {
                 toolService.blindExecute(LooksGoodTool())
@@ -139,7 +139,7 @@ class ShowQuickEditAction : AnAction() {
         }
 
         //make sure we're in edit mode
-        if (status != VoqalStatus.EDITING) {
+        if (statusService.getStatus() != VoqalStatus.EDITING) {
             toolService.blindExecute(ToggleEditModeTool(), JsonObject().put("chatMessage", true))
         }
 

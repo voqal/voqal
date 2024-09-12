@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Opening quick edit inlay with one already open causes un-closable inlay
+
 ## [2024.11.0] - 2024-09-11
 
 ### Added
