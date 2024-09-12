@@ -439,10 +439,10 @@ class EditTextTool : VoqalTool() {
             var diffStartOffset = diff.startOffset1
             var diffEndOffset = diff.endOffset1
             diffOffsets.sortedBy { it.first }.forEach {
-                if (it.first < diff.startOffset1 && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
+                if (it.first < diffStartOffset) {// && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
                     diffStartOffset += it.second
                 }
-                if (it.first < diff.endOffset1) {
+                if (it.first <= diffEndOffset) {
                     diffEndOffset += it.second
                 }
             }
