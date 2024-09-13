@@ -4,8 +4,17 @@ import java.util.regex.Pattern
 
 object CodeExtractor {
 
-    fun extractCodeBlock(text: String): String {
-        val escapedText = text.replace("\r\n", "\n") //todo: is this necessary?
+    /**
+     * @param canEscape false in edit mode to avoid accidentally un-escaping valid strings
+     */
+    fun extractCodeBlock(text: String, canEscape: Boolean = true): String {
+        var escapedText = text.replace("\r\n", "\n") //todo: is this necessary?
+        if (canEscape && escapedText.contains("\\n")) { //todo: more robust check if code is escaped
+            escapedText = escapedText.replace("\\n", "\n")
+                .replace("\\t", "\t")
+                .replace("\\\"", "\"")
+        }
+
         val codeBlock = doStrictExtractCodeBlock(escapedText)
         if (codeBlock != null) {
             return codeBlock
