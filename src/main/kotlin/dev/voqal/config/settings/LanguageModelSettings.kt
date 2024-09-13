@@ -9,6 +9,7 @@ import dev.voqal.provider.clients.googleapi.GoogleApiClient
 import dev.voqal.provider.clients.groq.GroqClient
 import dev.voqal.provider.clients.mistralai.MistralAiClient
 import dev.voqal.provider.clients.openai.OpenAiClient
+import dev.voqal.provider.clients.sambanova.SambaNovaClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
 import io.vertx.core.json.JsonObject
@@ -51,6 +52,7 @@ data class LanguageModelSettings(
                 LMProvider.TOGETHER_AI -> LanguageModelSettings(provider, modelName = TogetherAiClient.DEFAULT_MODEL)
                 LMProvider.MISTRAL_AI -> LanguageModelSettings(provider, modelName = MistralAiClient.DEFAULT_MODEL)
                 LMProvider.VERTEX_AI -> LanguageModelSettings(provider, modelName = VertexAiClient.DEFAULT_MODEL)
+                LMProvider.SAMBANOVA -> LanguageModelSettings(provider, modelName = SambaNovaClient.DEFAULT_MODEL)
 
                 LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
@@ -129,6 +131,7 @@ data class LanguageModelSettings(
         NONE("None"),
         OPENAI("OpenAI"),
         GOOGLE_API("Google API"),
+        SAMBANOVA("SambaNova"),
         ANTHROPIC("Anthropic"),
         TOGETHER_AI("TogetherAI"),
         MISTRAL_AI("MistralAI"),
@@ -153,6 +156,7 @@ data class LanguageModelSettings(
                 this == ANTHROPIC -> VoqalIcons.Compute.anthropic
                 this == DEEPSEEK -> VoqalIcons.Compute.deepseek
                 this == FIREWORKS_AI -> VoqalIcons.Compute.fireworks
+                this == SAMBANOVA -> VoqalIcons.Compute.sambanova
                 else -> null
             }
         }
@@ -170,7 +174,7 @@ data class LanguageModelSettings(
                 OPENAI, TOGETHER_AI, MISTRAL_AI,
                 GROQ, OLLAMA, CUSTOM,
                 VERTEX_AI, GOOGLE_API, ANTHROPIC,
-                DEEPSEEK, FIREWORKS_AI
+                DEEPSEEK, FIREWORKS_AI, SAMBANOVA
             )
         }
 

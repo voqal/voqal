@@ -15,6 +15,7 @@ import dev.voqal.provider.clients.groq.GroqClient;
 import dev.voqal.provider.clients.mistralai.MistralAiClient;
 import dev.voqal.provider.clients.ollama.OllamaClient;
 import dev.voqal.provider.clients.openai.OpenAiClient;
+import dev.voqal.provider.clients.sambanova.SambaNovaClient;
 import dev.voqal.provider.clients.togetherai.TogetherAiClient;
 import dev.voqal.provider.clients.vertexai.VertexAiClient;
 
@@ -53,6 +54,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
                 tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
             } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.MISTRAL_AI) {
                 tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
+            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
+                tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
             }
         });
 
@@ -258,6 +261,10 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
         } else if (lmProvider == LMProvider.FIREWORKS_AI) {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(
                     FireworksClient.getMODELS().toArray(new String[0]))
+            );
+        } else if (lmProvider == LMProvider.SAMBANOVA) {
+            modelNameComboBox.setModel(new DefaultComboBoxModel<>(
+                    SambaNovaClient.getMODELS().toArray(new String[0]))
             );
         } else {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {""}));

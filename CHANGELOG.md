@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- SambaNova language model provider
+
 ## [2024.11.2] - 2024-09-13
 
 ### Fixed

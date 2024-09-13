@@ -41,6 +41,7 @@ import dev.voqal.provider.clients.picovoice.PicovoiceCobraClient
 import dev.voqal.provider.clients.picovoice.PicovoiceLeopardClient
 import dev.voqal.provider.clients.picovoice.PicovoiceOrcaClient
 import dev.voqal.provider.clients.picovoice.error.PicovoiceError
+import dev.voqal.provider.clients.sambanova.SambaNovaClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
 import dev.voqal.provider.clients.voqal.VoqalVadClient
@@ -490,6 +491,20 @@ class VoqalConfigService(private val project: Project) {
                         providerKey = modelSettings.providerKey
                     )
                     addLlmProvider(fireworksClient)
+                } else {
+                    log.warnChat("Missing language model provider key")
+                }
+            }
+
+            LMProvider.SAMBANOVA -> {
+                log.debug("Using SambaNova language model provider")
+                if (modelSettings.providerKey.isNotEmpty()) {
+                    val sambaNovaClient = SambaNovaClient(
+                        modelSettings.name,
+                        project,
+                        providerKey = modelSettings.providerKey
+                    )
+                    addLlmProvider(sambaNovaClient)
                 } else {
                     log.warnChat("Missing language model provider key")
                 }
