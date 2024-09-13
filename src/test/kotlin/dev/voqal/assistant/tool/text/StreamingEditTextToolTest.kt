@@ -377,10 +377,7 @@ class StreamingEditTextToolTest : JBTest() {
 
             val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
             testContext.verify {
-                assertEquals(1, voqalHighlighters1.size)
-
-                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
-                assertEquals(0, editHighlighters.size)
+                assertEquals(0, voqalHighlighters1.size)
             }
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
 
