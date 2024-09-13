@@ -256,7 +256,7 @@ class EditTextTool : VoqalTool() {
         }
 
         //last line can't be empty or can mess up diff compare
-        if (fullTextWithEdits.lines().last() == "") {
+        while (fullTextWithEdits.lines().last() == "" && fullTextWithEdits.lines().size > 1) {
             fullTextWithEdits = fullTextWithEdits.lines().dropLast(1).joinToString("\n")
         }
         if (fullTextWithEdits.isEmpty()) {
