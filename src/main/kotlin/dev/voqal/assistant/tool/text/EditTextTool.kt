@@ -467,6 +467,7 @@ class EditTextTool : VoqalTool() {
                 diffOffsets.add(Pair(diffStartOffset, renameOffset))
                 if (text1.isNotEmpty() && validName) {
                     log.debug("Renaming element: $text1 -> $text2")
+                    val posBeforeRename = ReadAction.compute(ThrowableComputable { element.textRange.startOffset })
                     val renameProcessor = ReadAction.compute(ThrowableComputable {
                         RenameProcessor(project, element, text2, element.useScope, false, true)
                     })
@@ -476,6 +477,14 @@ class EditTextTool : VoqalTool() {
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                         renameProcessor.executeEx(usageInfos)
                     })
+                    val posAfterRename = ReadAction.compute(ThrowableComputable { element.textRange.startOffset })
+                    if (posBeforeRename != posAfterRename) {
+                        //rename processor did more than just rename (e.g. removed extra import)
+                        val posOffset = posAfterRename - posBeforeRename
+                        diffOffsets.add(Pair(posBeforeRename, posOffset))
+                        diffStartOffset += posOffset
+                        diffEndOffset += posOffset
+                    }
 
                     val affectedFiles = mutableListOf<PsiFile>()
                     project.service<VoqalMemoryService>().putUserData("affectedFiles", affectedFiles)

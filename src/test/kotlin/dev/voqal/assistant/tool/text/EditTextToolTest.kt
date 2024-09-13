@@ -72,6 +72,51 @@ class EditTextToolTest : JBTest() {
         )
     }
 
+    fun `test edit visible range import auto removed`() {
+        val responseCode = File("src/test/resources/edit/rename-log-to-logger.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit/ImportTest.kt").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("ImportTest.kt", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = TextRange(46, 769)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
+
+            val voqalHighlighters = EditTextTool().doDocumentEdits(project, responseCode, testEditor)
+            testContext.verify {
+                assertEquals(5, voqalHighlighters.size)
+
+                val editHighlighters = voqalHighlighters.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertTrue(editHighlighters[0].let { it.startOffset == 52 && it.endOffset == 58 })
+                assertTrue(editHighlighters[1].let { it.startOffset == 369 && it.endOffset == 375 })
+                assertTrue(editHighlighters[2].let { it.startOffset == 570 && it.endOffset == 576 })
+                assertTrue(editHighlighters[3].let { it.startOffset == 666 && it.endOffset == 672 })
+                assertTrue(editHighlighters[4].let { it.startOffset == 734 && it.endOffset == 740 })
+            }
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(
+            testEditor.document.text,
+            testEditor.document.text
+                .replace("val log = ", "val logger = ")
+                .replace("log.", "logger.")
+        )
+    }
+
     fun `test edit empty file`() {
         val content = "package test;\n\npublic class Test {\n}"
         val testDocument = EditorFactory.getInstance().createDocument("")
