@@ -289,6 +289,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
         } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.MISTRAL_AI) {
             tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
+        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
+            tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
         }
 
         if (config.getTemperature() == null) {
