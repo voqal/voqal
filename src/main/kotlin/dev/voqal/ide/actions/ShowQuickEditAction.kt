@@ -90,6 +90,13 @@ class ShowQuickEditAction : AnAction() {
             return
         }
 
+        val configService = project.service<VoqalConfigService>()
+        val aiProvider = configService.getAiProvider()
+        if (!aiProvider.isLlmProvider()) {
+            log.warnChat("No language model provider available")
+            return
+        }
+
         //only one quick edit inlay open at a time
         val memoryService = project.service<VoqalMemoryService>()
         val toolService = project.service<VoqalToolService>()
@@ -107,7 +114,6 @@ class ShowQuickEditAction : AnAction() {
 
         val userDirectiveTextArea = UserDirectiveTextArea(project) { message ->
             project.scope.launch {
-                val configService = project.service<VoqalConfigService>()
                 if (!configService.getConfig().pluginSettings.enabled) {
                     log.warnChat("Plugin is disabled")
                     return@launch

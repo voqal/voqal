@@ -61,7 +61,7 @@ object ResponseParser {
         } else {
             messageContent.toString()
         }
-        val codeBlock = CodeExtractor.extractCodeBlock(textContent)
+        val codeBlock = CodeExtractor.extractCodeBlock(textContent, false)
 
         //remove line numbers (if present)
         val hasLineNumbers = codeBlock.lines().let {

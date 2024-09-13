@@ -125,7 +125,7 @@ class VoqalDirectiveService(private val project: Project) {
 
         val aiProvider = project.service<VoqalConfigService>().getAiProvider()
         if (!aiProvider.isLlmProvider()) {
-            log.warnChat("No language model provider found")
+            log.warnChat("No language model provider available")
             return
         }
 

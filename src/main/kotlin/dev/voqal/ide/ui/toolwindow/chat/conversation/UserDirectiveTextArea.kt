@@ -6,10 +6,10 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.JBUI.CurrentTheme
+import com.intellij.util.ui.StatusText
 import com.intellij.util.ui.UIUtil
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.ide.ui.VoqalUI.addShiftEnterInputMap
@@ -43,7 +43,7 @@ class UserDirectiveTextArea(
         textArea.putClientProperty(UIUtil.HIDE_EDITOR_FROM_DATA_CONTEXT_PROPERTY, true)
 
         project.service<VoqalConfigService>().onConfigChange(this) {
-            project.invokeLater { setPlaceholderText() }
+            project.invokeLater { setPlaceholderText() } //todo: onAiProviderChange so invokeLater isn't needed
         }
         setPlaceholderText()
 
@@ -127,14 +127,16 @@ class UserDirectiveTextArea(
     private fun setPlaceholderText() = project.scope.launch {
         val configService = project.service<VoqalConfigService>()
         if (!configService.getConfig().pluginSettings.enabled) {
-            textArea.emptyText.setText("").appendText(
-                true,
-                0,
-                VoqalIcons.logoOffset,
-                "Plugin is disabled",
-                SimpleTextAttributes.REGULAR_ATTRIBUTES,
-                null
-            )
+            project.invokeLater {
+                textArea.emptyText.clear().appendText(
+                    true,
+                    0,
+                    VoqalIcons.logoOffset,
+                    "Plugin is disabled",
+                    StatusText.DEFAULT_ATTRIBUTES,
+                    null
+                )
+            }
             return@launch
         }
 
@@ -147,14 +149,16 @@ class UserDirectiveTextArea(
         } else {
             "Type directive here"
         }
-        textArea.emptyText.setText("").appendText(
-            true,
-            0,
-            VoqalIcons.logoOffset,
-            placeholderText,
-            SimpleTextAttributes.REGULAR_ATTRIBUTES,
-            null
-        )
+        project.invokeLater {
+            textArea.emptyText.clear().appendText(
+                true,
+                0,
+                VoqalIcons.logoOffset,
+                placeholderText,
+                StatusText.DEFAULT_ATTRIBUTES,
+                null
+            )
+        }
     }
 
     override fun dispose() = Unit

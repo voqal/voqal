@@ -255,6 +255,14 @@ class EditTextTool : VoqalTool() {
             return null
         }
 
+        //last line can't be empty or can mess up diff compare
+        while (fullTextWithEdits.lines().last() == "" && fullTextWithEdits.lines().size > 1) {
+            fullTextWithEdits = fullTextWithEdits.lines().dropLast(1).joinToString("\n")
+        }
+        if (fullTextWithEdits.isEmpty()) {
+            return null
+        }
+
         //determine diff between original text and text streamed so far
         var origText = editor.document.text
         val highlighter = project.service<VoqalMemoryService>()
@@ -439,10 +447,10 @@ class EditTextTool : VoqalTool() {
             var diffStartOffset = diff.startOffset1
             var diffEndOffset = diff.endOffset1
             diffOffsets.sortedBy { it.first }.forEach {
-                if (it.first < diff.startOffset1 && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
+                if (it.first < diffStartOffset) {// && (diff.startOffset1 - diffStartOffset) + it.first != diff.startOffset1) {
                     diffStartOffset += it.second
                 }
-                if (it.first < diff.endOffset1) {
+                if (it.first <= diffEndOffset) {
                     diffEndOffset += it.second
                 }
             }
@@ -467,6 +475,7 @@ class EditTextTool : VoqalTool() {
                 diffOffsets.add(Pair(diffStartOffset, renameOffset))
                 if (text1.isNotEmpty() && validName) {
                     log.debug("Renaming element: $text1 -> $text2")
+                    val posBeforeRename = ReadAction.compute(ThrowableComputable { element.textRange.startOffset })
                     val renameProcessor = ReadAction.compute(ThrowableComputable {
                         RenameProcessor(project, element, text2, element.useScope, false, true)
                     })
@@ -476,6 +485,14 @@ class EditTextTool : VoqalTool() {
                     WriteCommandAction.writeCommandAction(project).compute(ThrowableComputable {
                         renameProcessor.executeEx(usageInfos)
                     })
+                    val posAfterRename = ReadAction.compute(ThrowableComputable { element.textRange.startOffset })
+                    if (posBeforeRename != posAfterRename) {
+                        //rename processor did more than just rename (e.g. removed extra import)
+                        val posOffset = posAfterRename - posBeforeRename
+                        diffOffsets.add(Pair(posBeforeRename, posOffset))
+                        diffStartOffset += posOffset
+                        diffEndOffset += posOffset
+                    }
 
                     val affectedFiles = mutableListOf<PsiFile>()
                     project.service<VoqalMemoryService>().putUserData("affectedFiles", affectedFiles)

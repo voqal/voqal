@@ -62,7 +62,7 @@ class ToggleEditModeTool : VoqalTool() {
             )
             return
         } else if (!aiProvider.isLlmProvider()) {
-            log.warnChat("No language model provider found")
+            log.warnChat("No language model provider available")
             return
         }
 

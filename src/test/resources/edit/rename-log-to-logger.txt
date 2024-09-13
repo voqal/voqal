@@ -1,0 +1,21 @@
+    fun doRename() {
+        val logger = project.getVoqalLogger(this::class)
+        if (editRange == null) {
+            var visibleRange: TextRange? = null
+            ApplicationManager.getApplication().invokeAndWait {
+                visibleRange = editor.calculateVisibleRange()
+            }
+            editRange = visibleRange!!
+            logger.debug("1")
+
+            val file = directive.developer.viewingFile
+            if (file != null && limitType == "LINES") {
+                if (smartEditRange != editRange) {
+                    logger.debug("2")
+                } else if (smartEditRange != editRange) {
+                    logger.debug("3")
+                }
+            }
+        }
+        logger.debug("4")
+    }
