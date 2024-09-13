@@ -231,7 +231,7 @@ class CodeExtractorTest {
             }
             ```
         """.trimIndent()
-        val code = CodeExtractor.extractCodeBlock(responseCode)
+        val code = CodeExtractor.extractCodeBlock(responseCode, false)
         assertEquals(
             """
             public void callsIt() {
