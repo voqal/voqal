@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Disallow quick edit without language model provider
+- Properly handle extracting code with "\n" in strings
+- Invalid text modification due to incorrect diff offsets
+- Invalid text modification due to rename processor auto removing imports
+- Invalid text modification when streaming edit last line is empty
+
 ## [2024.11.1] - 2024-09-12
 
 ### Fixed
