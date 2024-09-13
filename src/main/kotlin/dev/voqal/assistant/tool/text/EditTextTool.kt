@@ -255,6 +255,14 @@ class EditTextTool : VoqalTool() {
             return null
         }
 
+        //last line can't be empty or can mess up diff compare
+        if (fullTextWithEdits.lines().last() == "") {
+            fullTextWithEdits = fullTextWithEdits.lines().dropLast(1).joinToString("\n")
+        }
+        if (fullTextWithEdits.isEmpty()) {
+            return null
+        }
+
         //determine diff between original text and text streamed so far
         var origText = editor.document.text
         val highlighter = project.service<VoqalMemoryService>()

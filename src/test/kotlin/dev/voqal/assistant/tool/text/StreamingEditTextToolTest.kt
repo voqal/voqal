@@ -356,6 +356,42 @@ class StreamingEditTextToolTest : JBTest() {
         )
     }
 
+    fun `test streaming edit visible range last line empty`() {
+        val responseCode = File("src/test/resources/edit-stream/last-line-empty.txt").readText()
+            .replace("\r\n", "\n")
+        val originalText = File("src/test/resources/edit-stream/RenameTest.kt").readText()
+            .replace("\r\n", "\n")
+
+        val testDocument = LightVirtualFile("RenameTest.kt", originalText).getDocument()
+        val testEditor = EditorFactory.getInstance().createEditor(testDocument, project)
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val testRange = TextRange(19, 742)
+            val testHighlighter = testEditor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
+
+            val voqalHighlighters1 = EditTextTool().doDocumentEdits(project, responseCode, testEditor, true)
+            testContext.verify {
+                assertEquals(1, voqalHighlighters1.size)
+
+                val editHighlighters = voqalHighlighters1.filter { it.layer == EditTextTool.ACTIVE_EDIT_LAYER }
+                assertEquals(0, editHighlighters.size)
+            }
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(testEditor)
+
+        assertEquals(originalText, testEditor.document.text) //no changes
+    }
+
     fun `test streaming edit groq bad spacing`() {
         val responseCode = File("src/test/resources/edit-stream/groq-bad-spacing.txt").readText()
             .replace("\r\n", "\n")
