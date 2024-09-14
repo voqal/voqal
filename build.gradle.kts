@@ -198,6 +198,8 @@ tasks {
     runIde {
         systemProperty("ide.enable.slow.operations.in.edt", false)
         systemProperty("idea.log.debug.categories", "#dev.voqal")
+        systemProperty("jdk.updater", false)
+        systemProperty("jdk.downloader", false)
     }
 }
 
