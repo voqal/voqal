@@ -2,14 +2,18 @@ package dev.voqal.ide.ui
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel
 import com.intellij.openapi.util.Disposer
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.ui.ScrollPaneFactory
+import com.intellij.util.ui.JBUI
 import dev.voqal.ide.ui.toolwindow.chat.conversation.SmartScroller
+import dev.voqal.services.ProjectScopedService
 import org.intellij.lang.annotations.Language
 import java.net.URISyntaxException
 import javax.swing.*
@@ -17,6 +21,28 @@ import javax.swing.event.HyperlinkEvent
 import javax.swing.event.HyperlinkListener
 
 object VoqalUI {
+
+    fun createLogsViewer(project: Project): Editor {
+        val editorFactory = EditorFactory.getInstance()
+        val editor = editorFactory.createViewer(editorFactory.createDocument(""))
+        Disposer.register(project.service<ProjectScopedService>()) {
+            if (!editor.isDisposed) {
+                editorFactory.releaseEditor(editor)
+            }
+        }
+        editor.component.border = BorderFactory.createLineBorder(JBUI.CurrentTheme.ToolWindow.background())
+
+        val settings = editor.settings
+        settings.isLineNumbersShown = false
+        settings.isLineMarkerAreaShown = false
+        settings.isIndentGuidesShown = false
+        settings.additionalColumnsCount = 0
+        settings.additionalLinesCount = 0
+        settings.setGutterIconsShown(false)
+        settings.isIndentGuidesShown = false
+        (editor.gutter as EditorGutterComponentEx).isPaintBackground = false
+        return editor
+    }
 
     @JvmStatic
     fun createPreviewComponent(

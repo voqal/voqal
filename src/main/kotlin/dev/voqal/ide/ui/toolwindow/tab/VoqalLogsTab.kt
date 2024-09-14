@@ -2,12 +2,10 @@ package dev.voqal.ide.ui.toolwindow.tab
 
 import com.intellij.ide.ui.UISettingsListener
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.TextAttributes
@@ -17,7 +15,6 @@ import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.ui.DarculaColors
 import com.intellij.ui.OnePixelSplitter
 import dev.voqal.ide.ui.VoqalUI
-import dev.voqal.services.ProjectScopedService
 import dev.voqal.services.invokeLater
 import dev.voqal.services.messageBusConnection
 import java.awt.BorderLayout
@@ -27,7 +24,6 @@ import java.util.*
 import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JPanel
-import javax.swing.border.EmptyBorder
 
 class VoqalLogsTab(private val project: Project) {
 
@@ -49,7 +45,7 @@ class VoqalLogsTab(private val project: Project) {
 
     private fun initUi() {
         if (System.getProperty("VQL_TEST_MODE") == "true") return
-        logEditor = VoqalUI.createPreviewComponent(project, "", false, project.service<ProjectScopedService>())
+        logEditor = VoqalUI.createLogsViewer(project)
         logEditor.settings.isLineNumbersShown = false
         logEditor.settings.isRightMarginShown = false
 
@@ -69,11 +65,6 @@ class VoqalLogsTab(private val project: Project) {
 
         splitter.setResizeEnabled(false)
         splitter.dividerWidth = 2
-
-        //todo: seems odd but gets rid of gutter (also need left line border)
-        val scrollPane = (logEditor as EditorImpl).scrollPane
-        scrollPane.setRowHeaderView(null)
-        logEditor.contentComponent.border = EmptyBorder(0, 6, 0, 0)
 
         splitter.firstComponent = logEditor.component
         splitter.secondComponent = JPanel().apply {
