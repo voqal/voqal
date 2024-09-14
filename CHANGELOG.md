@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.11.3] - 2024-09-14
+
 ### Added
 
 - SambaNova language model provider
@@ -569,7 +571,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.2...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.3...HEAD
+[2024.11.3]: https://github.com/voqal/voqal/compare/v2024.11.2...v2024.11.3
 [2024.11.2]: https://github.com/voqal/voqal/compare/v2024.11.1...v2024.11.2
 [2024.11.1]: https://github.com/voqal/voqal/compare/v2024.11.0...v2024.11.1
 [2024.11.0]: https://github.com/voqal/voqal/compare/v2024.10.3...v2024.11.0
