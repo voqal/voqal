@@ -47,7 +47,9 @@ class LooksGoodTool : VoqalTool() {
 
             //ensure highlighters removed
             if (editRangeHighlighter is RangeHighlighter) {
-                editor?.markupModel?.removeHighlighter(editRangeHighlighter)
+                if (editor?.virtualFile != null) {
+                    editor.markupModel.removeHighlighter(editRangeHighlighter)
+                }
             }
             val voqalHighlighters = editor?.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()
             WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
