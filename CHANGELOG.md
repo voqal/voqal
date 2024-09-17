@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Stream audio setting to Picovoice/Deepgram STT providers
+
+### Fixed
+
+- Range highlighter tree assertion error
+
 ## [2024.11.3] - 2024-09-14
 
 ### Added
