@@ -74,10 +74,10 @@ class LooksGoodTool : VoqalTool() {
     }
 
     internal fun attemptIntentExtract(rawString: String): Pair<String, Map<String, String>>? {
-        return if (rawString == "looks good") {
-            Pair(NAME, mapOf())
-        } else {
-            null
+        return when (rawString) {
+            "looks good" -> Pair(NAME, mapOf())
+            "it looks good" -> Pair(NAME, mapOf())
+            else -> null
         }
     }
 
