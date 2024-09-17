@@ -39,6 +39,16 @@ class ChatToolWindowContentManager(private val project: Project) {
         }
     }
 
+    fun updateDirectiveInput(partialTranscript: String) {
+        project.invokeLater {
+            tryFindFirstChatTabContent().updateDirectiveInput(partialTranscript)
+        }
+    }
+
+    fun getDirectiveInput(): String {
+        return tryFindFirstChatTabContent().getDirectiveInput()
+    }
+
     private fun tryFindFirstChatTabContent(): ChatToolWindowTabPanel {
         val toolWindowManager = ToolWindowManager.getInstance(project)
         val toolWindow = toolWindowManager.getToolWindow("Voqal")!!

@@ -37,6 +37,8 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
             queryParamsTextField.setVisible(provider.isQueryParamsSupported());
             label2.setVisible(provider.isLanguageCodeSupported());
             languageComboBox.setVisible(provider.isLanguageCodeSupported());
+            label6.setVisible(provider.isStreamAudioSupported());
+            streamAudioComboBox.setVisible(provider.isStreamAudioSupported());
             revalidate();
             repaint();
 
@@ -94,6 +96,11 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
                 return true;
             }
         }
+        if (STTProvider.lenientValueOf(providerComboBox.getSelectedItem().toString()).isStreamAudioSupported()) {
+            if (!Objects.equals(config.getStreamAudio(), Boolean.valueOf(streamAudioComboBox.getSelectedItem().toString()))) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -111,6 +118,10 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
         if (!sttProvider.isQueryParamsSupported()) {
             queryParams = ""; //reset
         }
+        boolean streamAudio = Boolean.valueOf(streamAudioComboBox.getSelectedItem().toString());
+        if (!sttProvider.isStreamAudioSupported()) {
+            streamAudio = false; //reset
+        }
         return new SpeechToTextSettings(
                 sttProvider,
                 providerKey,
@@ -118,7 +129,8 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
                 providerUrl,
                 modelNameComboBox.getSelectedItem().toString(),
                 queryParams,
-                Iso639Language.findByName(languageComboBox.getSelectedItem().toString())
+                Iso639Language.findByName(languageComboBox.getSelectedItem().toString()),
+                streamAudio
         );
     }
 
@@ -130,6 +142,7 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
         modelNameComboBox.setSelectedItem(config.getModelName());
         queryParamsTextField.setText(config.getQueryParams());
         languageComboBox.setSelectedItem(config.getLanguage().getDisplayName());
+        streamAudioComboBox.setSelectedItem(Boolean.toString(config.getStreamAudio()));
 
         var provider = STTProvider.lenientValueOf(providerComboBox.getSelectedItem().toString());
         label3.setVisible(provider.isKeyRequired());
@@ -190,10 +203,12 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
         queryParamsLabel = new JBLabel();
         queryParamsTextField = new JBTextField();
         queryParamsTextField.getEmptyText().setText("query=param&query2=param2");
+        label6 = new JBLabel();
+        streamAudioComboBox = new JComboBox<>();
         var vSpacer1 = new Spacer();
 
         //======== this ========
-        setLayout(new GridLayoutManager(8, 2, new Insets(0, 0, 0, 0), 5, -1));
+        setLayout(new GridLayoutManager(9, 2, new Insets(0, 0, 0, 0), 5, -1));
 
         //---- label1 ----
         label1.setText("Provider:");
@@ -310,7 +325,26 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null, null, null));
-        add(vSpacer1, new GridConstraints(7, 0, 1, 2,
+
+        //---- label6 ----
+        label6.setText("Stream Audio:");
+        add(label6, new GridConstraints(7, 0, 1, 1,
+            GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+
+        //---- streamAudioComboBox ----
+        streamAudioComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
+            "true",
+            "false"
+        }));
+        add(streamAudioComboBox, new GridConstraints(7, 1, 1, 1,
+            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null, null, null));
+        add(vSpacer1, new GridConstraints(8, 0, 1, 2,
             GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK,
             GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
@@ -334,5 +368,7 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
     private JComboBox<String> languageComboBox;
     private JBLabel queryParamsLabel;
     private JBTextField queryParamsTextField;
+    private JBLabel label6;
+    private JComboBox<String> streamAudioComboBox;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

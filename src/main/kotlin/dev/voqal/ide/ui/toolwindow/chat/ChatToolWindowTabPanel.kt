@@ -136,6 +136,15 @@ class ChatToolWindowTabPanel(
         responseContainer.update(message)
     }
 
+    fun updateDirectiveInput(partialTranscript: String) {
+        userDirectiveTextArea.textArea.text = partialTranscript
+        userDirectiveTextArea.textArea.caretPosition = userDirectiveTextArea.textArea.text.length
+    }
+
+    fun getDirectiveInput(): String {
+        return userDirectiveTextArea.textArea.text
+    }
+
     private fun createResponsePanel(
         isUser: Boolean,
         speechId: String?,

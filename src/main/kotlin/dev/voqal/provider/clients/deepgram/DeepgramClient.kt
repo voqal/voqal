@@ -33,6 +33,7 @@ class DeepgramClient(
     private val project: Project,
     private val providerKey: String,
     private val isSttProvider: Boolean = false,
+    private val enableMicrophoneStreaming: Boolean = false,
     private val testMode: Boolean = false
 ) : SttProvider, TtsProvider, SharedAudioCapture.AudioDataListener {
 
@@ -65,9 +66,11 @@ class DeepgramClient(
     private var disposed = false
     private lateinit var session: DefaultClientWebSocketSession
     private lateinit var readThread: Thread
+    private lateinit var writeThread: Thread
     private lateinit var pingThread: Thread
     private var restartOnClose = false
     private var startListeningTime = -1L
+    private var capturing = false
 
     init {
         if (isSttProvider) {
@@ -143,6 +146,7 @@ class DeepgramClient(
             log.debug("Connected to Deepgram")
 
             readThread = Thread(readLoop(), "DeepgramClient-Read").apply { start() }
+            writeThread = Thread(writeLoop(), "DeepgramClient-Write").apply { start() }
             pingThread = Thread(pingLoop(), "DeepgramClient-Ping").apply { start() }
         } catch (e: WebSocketException) {
             if (!testMode && e.toString().contains("expected status code 101 but was 401")) {
@@ -170,9 +174,10 @@ class DeepgramClient(
 
     private fun readLoop(): Thread {
         return Thread {
-            try {
-                val configService = project.service<VoqalConfigService>()
+            val configService = project.service<VoqalConfigService>()
+            val fullTranscript = StringBuilder()
 
+            try {
                 while (true) {
                     val frame = runBlocking { session.incoming.receive() }
                     when (frame) {
@@ -193,7 +198,6 @@ class DeepgramClient(
                             if (transcript.isBlank()) continue
 
                             val final = json.getBoolean("is_final", false)
-//                            if (enableMicrophoneStreaming) {
                             if (final) {
                                 log.info(buildString {
                                     append("Transcript (streaming, final")
@@ -209,14 +213,17 @@ class DeepgramClient(
                                     append(transcript)
                                 })
                             }
+                            if (fullTranscript.isNotEmpty() && !fullTranscript.toString().endsWith(" ")) {
+                                fullTranscript.append(" ")
+                            }
+                            fullTranscript.append(transcript)
 
                             val aiProvider = configService.getAiProvider()
                             val speechId = aiProvider.asVadProvider().speechId
-                            val spokenTranscript = SpokenTranscript(transcript, speechId, isFinal = true)
-                            log.info("Transcript: $spokenTranscript")
+                            val spokenTranscript = SpokenTranscript(fullTranscript.toString(), speechId, isFinal = true)
 
                             runBlocking {
-                                project.service<VoqalDirectiveService>().handleTranscription(spokenTranscript)
+                                project.service<VoqalDirectiveService>().handlePartialTranscription(spokenTranscript)
                             }
                         }
 
@@ -238,9 +245,37 @@ class DeepgramClient(
                 if (restartOnClose) {
                     restartOnClose = false
                     project.scope.launch {
+                        val aiProvider = configService.getAiProvider()
+                        val speechId = aiProvider.asVadProvider().speechId
+                        val spokenTranscript = SpokenTranscript(fullTranscript.toString(), speechId, isFinal = true)
+                        project.service<VoqalDirectiveService>().handleTranscription(spokenTranscript)
+
                         restartConnection()
                     }
                 }
+            }
+        }
+    }
+
+    private fun writeLoop(): Thread {
+        val log = project.getVoqalLogger(this::class)
+        return Thread {
+            try {
+                while (true) {
+                    val buffer = try {
+                        audioQueue.take()
+                    } catch (_: InterruptedException) {
+                        break
+                    }
+
+                    runBlocking {
+                        session.send(Frame.Binary(true, buffer))
+                    }
+                }
+            } catch (_: InterruptedException) {
+            } catch (_: CancellationException) {
+            } catch (e: Exception) {
+                log.error("Error processing audio: ${e.message}", e)
             }
         }
     }
@@ -348,9 +383,23 @@ class DeepgramClient(
     }
 
     override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
-        throw UnsupportedOperationException("Not supported")
+        if (detection.speechDetected.get()) {
+            capturing = true
+            detection.framesBeforeVoiceDetected.forEach {
+                audioQueue.put(it.data)
+            }
+            audioQueue.put(data)
+        } else if (capturing && !detection.speechDetected.get()) {
+            capturing = false
+            restartOnClose = true
+            project.scope.launch {
+                log.debug("No speech detected, closing stream")
+                session.send(Frame.Text("{ \"type\": \"CloseStream\" }"))
+            }
+        }
     }
 
+    override fun isLiveDataListener() = enableMicrophoneStreaming
     override fun isTestListener() = testMode
     override fun isWavOutput() = true
     override fun isRawOutput() = false //todo: changing to true adds a pop sound to beginning of audio???

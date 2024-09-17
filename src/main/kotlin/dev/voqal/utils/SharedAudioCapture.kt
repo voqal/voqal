@@ -9,6 +9,7 @@ import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
+import dev.voqal.utils.SharedAudioCapture.AudioDetection.Companion.PRE_SPEECH_BUFFER_SIZE
 import dev.voqal.utils.SharedAudioSystem.SharedAudioLine
 import kotlinx.coroutines.*
 import java.io.ByteArrayInputStream
@@ -28,6 +29,7 @@ class SharedAudioCapture(private val project: Project) {
         const val BUFFER_SIZE = 1024
         const val SAMPLE_RATE = 16000
         val FORMAT = AudioFormat(SAMPLE_RATE.toFloat(), 16, 1, true, false)
+        val EMPTY_BUFFER = ByteArray(BUFFER_SIZE)
 
         @JvmStatic
         fun convertBytesToShorts(audioBytes: ByteArray): ShortArray {
@@ -50,8 +52,13 @@ class SharedAudioCapture(private val project: Project) {
     data class AudioDetection(
         val voiceCaptured: AtomicBoolean = AtomicBoolean(false),
         val voiceDetected: AtomicBoolean = AtomicBoolean(false),
-        val speechDetected: AtomicBoolean = AtomicBoolean(false)
-    )
+        val speechDetected: AtomicBoolean = AtomicBoolean(false),
+        val framesBeforeVoiceDetected: CircularListFIFO<Frame> = CircularListFIFO(PRE_SPEECH_BUFFER_SIZE)
+    ) {
+        companion object {
+            const val PRE_SPEECH_BUFFER_SIZE = 25
+        }
+    }
 
     fun interface AudioDataListener {
         fun onAudioData(data: ByteArray, detection: AudioDetection)
@@ -202,8 +209,6 @@ class SharedAudioCapture(private val project: Project) {
             var speechDetected = false
             var readyForMicrophoneAudio = false
             var capturedWhilePaused = false
-            val preSpeechBufferSize = 25
-            val framesBeforeVoiceDetected = CircularListFIFO<Frame>(preSpeechBufferSize)
             val capturedVoice = LinkedList<Frame>()
             val audioDetection = AudioDetection()
 
@@ -230,13 +235,13 @@ class SharedAudioCapture(private val project: Project) {
                         voiceCaptured = false
                     }
                     if (audioDetection.speechDetected.get()) {
-                        if (framesBeforeVoiceDetected.isNotEmpty()) {
+                        if (audioDetection.framesBeforeVoiceDetected.isNotEmpty()) {
                             log.info("Developer started talking. Frame: ${audioData.index}")
                             speechDetected = true
-                            framesBeforeVoiceDetected.forEach {
+                            audioDetection.framesBeforeVoiceDetected.forEach {
                                 capturedVoice.add(it)
                             }
-                            framesBeforeVoiceDetected.clear()
+                            audioDetection.framesBeforeVoiceDetected.clear()
                         }
                         capturedVoice.add(audioData)
 
@@ -283,20 +288,23 @@ class SharedAudioCapture(private val project: Project) {
 
                         val directiveService = project.service<VoqalDirectiveService>()
                         if (aiProvider.isSttProvider()) {
+                            val sttProvider = aiProvider.asSttProvider()
+                            if ((sttProvider as? AudioDataListener)?.isLiveDataListener() == true) {
+                                continue //already sent data
+                            }
+
                             val sttModelName = configService.getConfig().speechToTextSettings.modelName
                             try {
-                                val transcript = aiProvider.asSttProvider().transcribe(speechFile, sttModelName)
+                                val transcript = sttProvider.transcribe(speechFile, sttModelName)
                                 val spokenTranscript = SpokenTranscript(transcript, speechId, isFinal = true)
                                 log.info("Transcript: ${spokenTranscript.transcript}")
                                 directiveService.handleTranscription(spokenTranscript)
                             } catch (e: OpenAIException) {
                                 val errorMessage = e.message ?: "An unknown error occurred"
-                                log.warn(errorMessage)
-                                directiveService.handleResponse(errorMessage)
+                                log.warnChat(errorMessage)
                             } catch (e: Exception) {
                                 val errorMessage = e.message ?: "An unknown error occurred"
-                                log.error(errorMessage, e)
-                                directiveService.handleResponse(errorMessage)
+                                log.errorChat(errorMessage, e)
                             }
                         } else if (aiProvider.isStmProvider()) {
                             val audioInputStream = AudioSystem.getAudioInputStream(speechFile)
@@ -318,9 +326,9 @@ class SharedAudioCapture(private val project: Project) {
                             log.warnChat("No speech-to-text provider available")
                         }
                     } else {
-                        framesBeforeVoiceDetected.add(audioData)
+                        audioDetection.framesBeforeVoiceDetected.add(audioData)
 
-                        if (!readyForMicrophoneAudio && framesBeforeVoiceDetected.size == preSpeechBufferSize) {
+                        if (!readyForMicrophoneAudio && audioDetection.framesBeforeVoiceDetected.size == PRE_SPEECH_BUFFER_SIZE) {
                             readyForMicrophoneAudio = true
                             log.info("Ready for microphone audio")
                         }
@@ -420,7 +428,7 @@ class SharedAudioCapture(private val project: Project) {
         }
     }
 
-    private data class Frame(
+    data class Frame(
         val index: Long,
         val data: ByteArray
     )

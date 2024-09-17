@@ -12,6 +12,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.project.Project
@@ -32,6 +33,7 @@ import dev.voqal.assistant.focus.DirectiveExecution
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.assistant.memory.local.LocalMemorySlice
 import dev.voqal.config.settings.TextToSpeechSettings
+import dev.voqal.ide.actions.ShowQuickEditAction.Companion.USER_DIRECTIVE_TEXT_AREA
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.status.VoqalStatus.*
 import kotlinx.coroutines.delay
@@ -92,6 +94,23 @@ class VoqalDirectiveService(private val project: Project) {
         }
     }
 
+    suspend fun handlePartialTranscription(spokenTranscript: SpokenTranscript) {
+        if (project.service<VoqalStatusService>().getStatus() == EDITING) {
+            val inlay = project.service<VoqalMemoryService>().getUserData("voqal.edit.inlay") as Inlay<*>?
+            if (inlay != null) {
+                val textArea = inlay.getUserData(USER_DIRECTIVE_TEXT_AREA)?.textArea
+                if (textArea != null) {
+                    project.invokeLater {
+                        textArea.text = spokenTranscript.transcript
+                        textArea.caretPosition = textArea.text.length
+                    }
+                }
+            }
+        }
+        project.service<ChatToolWindowContentManager>()
+            .updateDirectiveInput(spokenTranscript.transcript)
+    }
+
     /**
      * Send the finalized developer transcription to the appropriate Voqal mode for processing.
      */
@@ -107,10 +126,24 @@ class VoqalDirectiveService(private val project: Project) {
                 return
             }
 
-            //add to chat window
-            project.service<ChatToolWindowContentManager>()
-                .addUserMessage(spokenTranscript.transcript, spokenTranscript.speechId)
+            if (project.service<VoqalStatusService>().getStatus() == EDITING) {
+                val inlay = project.service<VoqalMemoryService>().getUserData("voqal.edit.inlay") as Inlay<*>?
+                if (inlay != null) {
+                    val textArea = inlay.getUserData(USER_DIRECTIVE_TEXT_AREA)?.textArea
+                    if (textArea != null && spokenTranscript.transcript.startsWith(textArea.text)) {
+                        project.invokeLater {
+                            textArea.text = ""
+                        }
+                    }
+                }
+            }
 
+            //add to chat window
+            val chatContentManager = project.service<ChatToolWindowContentManager>()
+            if (spokenTranscript.transcript.startsWith(chatContentManager.getDirectiveInput())) {
+                chatContentManager.updateDirectiveInput("")
+            }
+            chatContentManager.addUserMessage(spokenTranscript.transcript, spokenTranscript.speechId)
 
             //final intent check
             val detectedIntent = project.service<VoqalToolService>().intentCheck(spokenTranscript)

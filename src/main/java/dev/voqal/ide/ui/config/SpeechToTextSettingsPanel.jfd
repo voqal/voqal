@@ -5,7 +5,7 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
 			"$columnCount": 2
-			"$rowCount": 8
+			"$rowCount": 9
 			"hGap": 5
 		} ) {
 			name: "this"
@@ -126,18 +126,38 @@ new FormModel {
 				"row": 6
 				"fill": 1
 			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label6"
+				"text": "Stream Audio:"
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"row": 7
+				"anchor": 8
+				"hSizePolicy": 1
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "streamAudioComboBox"
+				"model": new javax.swing.DefaultComboBoxModel {
+					selectedItem: "true"
+					addElement( "true" )
+					addElement( "false" )
+				}
+			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+				"column": 1
+				"row": 7
+				"fill": 1
+			} )
 			add( new FormComponent( "com.jformdesigner.designer.wrapper.VSpacer" ) {
 				name: "vSpacer1"
 				auxiliary() {
 					"JavaCodeGenerator.variableLocal": true
 				}
 			}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-				"row": 7
+				"row": 8
 				"colSpan": 2
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 685, 315 )
+			"size": new java.awt.Dimension( 685, 370 )
 		} )
 	}
 }

@@ -37,6 +37,7 @@ import dev.voqal.provider.clients.huggingface.HuggingFaceClient
 import dev.voqal.provider.clients.mistralai.MistralAiClient
 import dev.voqal.provider.clients.ollama.OllamaClient
 import dev.voqal.provider.clients.openai.OpenAiClient
+import dev.voqal.provider.clients.picovoice.PicovoiceCheetahClient
 import dev.voqal.provider.clients.picovoice.PicovoiceCobraClient
 import dev.voqal.provider.clients.picovoice.PicovoiceLeopardClient
 import dev.voqal.provider.clients.picovoice.PicovoiceOrcaClient
@@ -524,12 +525,21 @@ class VoqalConfigService(private val project: Project) {
                 log.debug("Using Picovoice speech-to-text provider")
                 if (voqalConfig.speechToTextSettings.providerKey.isNotEmpty()) {
                     try {
-                        addSttProvider(
-                            PicovoiceLeopardClient(
-                                project,
-                                voqalConfig.speechToTextSettings.providerKey
+                        if (voqalConfig.speechToTextSettings.streamAudio) {
+                            addSttProvider(
+                                PicovoiceCheetahClient(
+                                    project,
+                                    voqalConfig.speechToTextSettings.providerKey
+                                )
                             )
-                        )
+                        } else {
+                            addSttProvider(
+                                PicovoiceLeopardClient(
+                                    project,
+                                    voqalConfig.speechToTextSettings.providerKey
+                                )
+                            )
+                        }
                     } catch (e: PicovoiceError) {
                         log.warnChat("Unable to validate speech-to-text provider key")
                     }
@@ -582,7 +592,8 @@ class VoqalConfigService(private val project: Project) {
                     val deepgramClient = DeepgramClient(
                         project = project,
                         providerKey = voqalConfig.speechToTextSettings.providerKey,
-                        isSttProvider = true
+                        isSttProvider = true,
+                        enableMicrophoneStreaming = voqalConfig.speechToTextSettings.streamAudio
                     )
                     addSttProvider(deepgramClient)
                 } else {

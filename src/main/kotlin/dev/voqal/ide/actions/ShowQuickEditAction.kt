@@ -15,10 +15,7 @@ import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.ProperTextRange
-import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.util.ThrowableComputable
+import com.intellij.openapi.util.*
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
@@ -70,6 +67,7 @@ class ShowQuickEditAction : AnAction() {
         }
 
         internal const val QUICK_EDIT_LAYER = 6101
+        val USER_DIRECTIVE_TEXT_AREA = Key.create<UserDirectiveTextArea>("USER_DIRECTIVE_TEXT_AREA")
     }
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -163,6 +161,8 @@ class ShowQuickEditAction : AnAction() {
                     caretPosition
                 )
             )?.also {
+                it.putUserData(USER_DIRECTIVE_TEXT_AREA, userDirectiveTextArea)
+
                 memoryService.putUserData("voqal.edit.inlay", it)
                 Disposer.register(it) {
                     if (memoryService.getUserData("voqal.edit.inlay") != null) {

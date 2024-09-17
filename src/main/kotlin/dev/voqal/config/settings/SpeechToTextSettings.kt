@@ -11,7 +11,8 @@ data class SpeechToTextSettings(
     val providerUrl: String = "",
     val modelName: String = "whisper-1",
     val queryParams: String = "",
-    val language: Iso639Language = Iso639Language.ENGLISH
+    val language: Iso639Language = Iso639Language.ENGLISH,
+    val streamAudio: Boolean = true
 ) : ConfigurableSettings {
 
     /**
@@ -24,7 +25,8 @@ data class SpeechToTextSettings(
         providerUrl = json.getString("providerUrl", ""),
         modelName = json.getString("modelName", "whisper-1"),
         queryParams = json.getString("queryParams", ""),
-        language = Iso639Language.findByCode(json.getString("language", Iso639Language.ENGLISH.code))
+        language = Iso639Language.findByCode(json.getString("language", Iso639Language.ENGLISH.code)),
+        streamAudio = json.getBoolean("streamAudio", true)
     )
 
     override fun toJson(): JsonObject {
@@ -36,6 +38,7 @@ data class SpeechToTextSettings(
             put("modelName", modelName)
             put("queryParams", queryParams)
             put("language", language.code)
+            put("streamAudio", streamAudio)
         }
     }
 
@@ -84,6 +87,10 @@ data class SpeechToTextSettings(
 
         fun isLanguageCodeSupported(): Boolean {
             return this in setOf(OPENAI, GROQ, DEEPGRAM)
+        }
+
+        fun isStreamAudioSupported(): Boolean {
+            return this in setOf(PICOVOICE, DEEPGRAM)
         }
 
         companion object {
