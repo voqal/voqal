@@ -39,7 +39,7 @@ class ChunkTextExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 18, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 18, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),

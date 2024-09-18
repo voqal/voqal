@@ -12,7 +12,6 @@ import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.code.ViewingCode
-import dev.voqal.assistant.template.ChunkTextExtension.ChunkTextFunction
 import dev.voqal.config.settings.PromptSettings
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.any
@@ -42,7 +41,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -84,7 +83,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -126,7 +125,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -168,7 +167,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 10, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -215,7 +214,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 20, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 20, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -258,7 +257,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 23, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 23, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -302,7 +301,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -339,7 +338,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -375,7 +374,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 400, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
@@ -410,7 +409,7 @@ class VoqalFunctionsExtensionTest : JBTest() {
                 availableActions = emptyList(),
                 promptSettings = PromptSettings(
                     provider = PromptSettings.PProvider.CUSTOM_TEXT,
-                    promptText = "{{ chunkText(developer.viewingCode, 200, \"LINES\").codeWithCaret }}"
+                    promptText = "{{ chunkText(developer.viewingCode, 200, \"LINES\").code }}"
                 ),
                 languageModelSettings = mock {}
             ),
