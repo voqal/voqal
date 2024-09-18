@@ -5,6 +5,7 @@ import benchmark.model.DirectiveResult
 import benchmark.model.context.ProjectFileContext
 import benchmark.model.context.PromptSettingsContext
 import benchmark.model.context.VirtualFileContext
+import benchmark.model.context.VisibleRangeContext
 import benchmark.model.metadata.SupportLanguages
 import benchmark.suites.edit.*
 import benchmark.suites.idle.AddBreakpointsSuite
@@ -15,6 +16,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.util.ProperTextRange
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.utils.vfs.getDocument
@@ -43,7 +45,7 @@ import kotlin.reflect.full.declaredMembers
 
 class VoqalBenchmarking : JBTest() {
 
-    private val editors = mutableListOf<Editor>()
+    private val editors = mutableListOf<DelegateEditor>()
     private val benchmarkVersion = System.getenv("VQL_BENCHMARK_VERSION") ?: "unknown"
     private val benchmarkPromises = mutableListOf<BenchmarkPromise>()
     private var disposed = false
@@ -98,7 +100,7 @@ class VoqalBenchmarking : JBTest() {
                 } else {
                     project.invokeLater {
                         editors.forEach {
-                            EditorFactory.getInstance().releaseEditor(it)
+                            EditorFactory.getInstance().releaseEditor(it.delegate)
                         }
                         disposed = true
                     }
@@ -174,8 +176,16 @@ class VoqalBenchmarking : JBTest() {
             }
 
             val virtualFile = (contexts.find { it is VirtualFileContext } as? VirtualFileContext)?.virtualFile
-            val editor = virtualFile?.let { EditorFactory.getInstance().createEditor(it.getDocument(), project) }
+            val editor = virtualFile?.let {
+                object : DelegateEditor(EditorFactory.getInstance().createEditor(it.getDocument(), project)) {
+                    override fun calculateVisibleRange(): ProperTextRange {
+                        val visibleRange = contexts.filterIsInstance<VisibleRangeContext>().firstOrNull()?.visibleRange
+                        return visibleRange ?: ProperTextRange(0, document.textLength)
+                    }
+                }
+            }
             editor?.let { editors.add(it) }
+
             benchPromise.startFloorTime()
             val directive = VoqalDirective(
                 assistant = AssistantContext(
@@ -272,5 +282,9 @@ class VoqalBenchmarking : JBTest() {
                     .get() as Sdk
             }
         }
+    }
+
+    private abstract class DelegateEditor(val delegate: Editor) : Editor by delegate {
+        abstract override fun calculateVisibleRange(): ProperTextRange
     }
 }

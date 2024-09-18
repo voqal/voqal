@@ -69,8 +69,6 @@ class ChunkTextExtension : AbstractExtension() {
                 return args["viewingCode"]
             } else if (args["viewingCode"] == null) {
                 return null
-            } else if (System.getenv("VQL_BENCHMARK_MODE") == "true") {
-                return args["viewingCode"] //todo: this
             }
 
             val log = directive.project.getVoqalLogger(this::class)
