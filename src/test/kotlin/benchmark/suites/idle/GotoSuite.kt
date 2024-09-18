@@ -12,6 +12,7 @@ import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.assistant.tool.ide.navigation.GotoLineTool
 import dev.voqal.assistant.tool.ide.navigation.GotoTextTool
 import dev.voqal.config.settings.PromptSettings
+import dev.voqal.services.getFunctions
 import io.vertx.core.json.JsonObject
 
 /**

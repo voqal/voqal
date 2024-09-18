@@ -9,6 +9,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiNamedElement
+import com.intellij.psi.util.descendants
 import com.intellij.util.messages.MessageBusConnection
 import dev.voqal.ide.logging.LoggerFactory
 import dev.voqal.ide.logging.LoggerFactory.VoqalLogger
@@ -122,6 +125,33 @@ fun PsiElement.isPython(): Boolean {
 
 fun PsiElement.isGo(): Boolean {
     return this.language.id.lowercase() == "go"
+}
+
+fun PsiElement.getCodeBlock(): PsiElement {
+    return descendants()
+        .filter { it.isCodeBlock() }
+        .first()
+}
+
+fun PsiFile.getFunctions(): List<PsiNamedElement> {
+    return descendants()
+        .filter { it is PsiNamedElement }
+        .filter { it.isFunction() }
+        .map { it as PsiNamedElement }.toList()
+}
+
+fun PsiFile.getFields(): List<PsiNamedElement> {
+    return descendants()
+        .filter { it is PsiNamedElement }
+        .filter { it.isField() }
+        .map { it as PsiNamedElement }.toList()
+}
+
+fun PsiFile.getClasses(): List<PsiNamedElement> {
+    return descendants()
+        .filter { it is PsiNamedElement }
+        .filter { it.isClass() }
+        .map { it as PsiNamedElement }.toList()
 }
 
 val RangeMarker.range: TextRange?

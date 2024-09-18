@@ -8,6 +8,8 @@ import com.intellij.psi.PsiFile
 import dev.voqal.assistant.context.VoqalContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.config.settings.PromptSettings
+import dev.voqal.services.getClasses
+import dev.voqal.services.getFunctions
 
 /**
  * A suite to test the modification of function(s) in source code.

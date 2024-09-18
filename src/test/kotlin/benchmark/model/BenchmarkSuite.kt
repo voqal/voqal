@@ -9,16 +9,14 @@ import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.*
-import com.intellij.psi.util.descendants
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiErrorElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.util.descendantsOfType
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
-import dev.voqal.services.isClass
-import dev.voqal.services.isCodeBlock
-import dev.voqal.services.isField
-import dev.voqal.services.isFunction
 import java.io.File
 
 interface BenchmarkSuite {
@@ -104,33 +102,6 @@ interface BenchmarkSuite {
         } else {
             it.fail(check)
         }
-    }
-
-    fun PsiElement.getCodeBlock(): PsiElement {
-        return descendants()
-            .filter { it.isCodeBlock() }
-            .first()
-    }
-
-    fun PsiFile.getFunctions(): List<PsiNamedElement> {
-        return descendants()
-            .filter { it is PsiNamedElement }
-            .filter { it.isFunction() }
-            .map { it as PsiNamedElement }.toList()
-    }
-
-    fun PsiFile.getFields(): List<PsiNamedElement> {
-        return descendants()
-            .filter { it is PsiNamedElement }
-            .filter { it.isField() }
-            .map { it as PsiNamedElement }.toList()
-    }
-
-    fun PsiFile.getClasses(): List<PsiNamedElement> {
-        return descendants()
-            .filter { it is PsiNamedElement }
-            .filter { it.isClass() }
-            .map { it as PsiNamedElement }.toList()
     }
 
     fun deleteFile(project: Project, file: VirtualFile) {

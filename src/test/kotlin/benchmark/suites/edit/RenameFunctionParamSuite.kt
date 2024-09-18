@@ -8,6 +8,7 @@ import com.intellij.psi.PsiFile
 import dev.voqal.assistant.context.VoqalContext
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.config.settings.PromptSettings
+import dev.voqal.services.getClasses
 
 /**
  * A suite to test the renaming of function parameters in source code.
