@@ -54,5 +54,16 @@ class ChunkTextExtensionTest : JBTest() {
         assertEquals(18, markdown.trim().lines().count())
         assertTrue(markdown.startsWith("  public void createRoutes(Service server) {"))
         assertTrue(markdown.endsWith("  }\n"))
+
+        val directive2 = directive.copy(
+            assistant = directive.assistant.copy(
+                promptSettings = directive.assistant.promptSettings?.copy(
+                    promptText = "{{ chunkText(developer.viewingCode, 18, \"LINES\").codeWithLineNumbers }}"
+                )
+            )
+        )
+        val markdown2 = directive2.toMarkdown()
+        assertTrue(markdown2.lines().first().startsWith("23|"))
+        assertTrue(markdown2.lines().last { it.isNotEmpty() }.startsWith("40|"))
     }
 }
