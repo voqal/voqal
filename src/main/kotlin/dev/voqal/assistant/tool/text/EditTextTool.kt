@@ -73,13 +73,12 @@ class EditTextTool : VoqalTool() {
         log.debug("Triggering edit text")
 
         val editor = directive.ide.editor!!
-        var editText = args.getString("text")
+        val editText = args.getString("text")
         if (editText.isBlank()) {
             log.debug("Ignoring empty edit text")
             return
         }
         log.trace("Got completion: ${editText.replace("\n", "\\n")}")
-        editText = editText.replace("↕", "") //remove any carets
 
         //check for vui interactions
         val streaming = args.getBoolean("streaming") ?: false
