@@ -112,7 +112,7 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}.zip
+          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}
           path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}.json
 
   benchCalc:
@@ -147,6 +147,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./benchmark/
+
+      - run: ls ./benchmark/
 
       - name: Extract downloaded artifacts
         run: |
