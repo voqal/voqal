@@ -154,7 +154,8 @@ jobs:
         run: |
           cd ./benchmark/
           for artifact in *; do
-          unzip "$artifact" -d "${artifact%.zip}"
+            mv "$artifact" "$artifact.zip"
+            unzip "$artifact.zip" -d "${artifact}"
           done
 
       - run: ls ./benchmark/
