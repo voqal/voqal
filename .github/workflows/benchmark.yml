@@ -113,7 +113,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ matrix.lang }})
-          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}).json
+          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}.json
 
   benchCalc:
     name: Benchmark Calculator
