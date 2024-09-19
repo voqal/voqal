@@ -5,8 +5,11 @@ import benchmark.model.BenchmarkSuite
 import benchmark.model.context.*
 import benchmark.model.metadata.SupportLanguages
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.ProperTextRange
 import com.intellij.openapi.util.ThrowableComputable
+import com.intellij.openapi.vfs.isFile
 import com.intellij.psi.PsiFile
 import dev.voqal.assistant.context.VoqalContext
 import dev.voqal.assistant.context.code.ViewingCode
@@ -63,6 +66,15 @@ class EditRangeSuite : BenchmarkSuite {
                 it.success("No extra changes")
             } else {
                 it.fail("Extra change: $codeBeforeFunc")
+            }
+
+            //clean up
+            ProjectFileIndex.getInstance(project).iterateContent {
+                if (it.isFile) {
+                    FileEditorManager.getInstance(this.project).closeFile(it)
+                    deleteFile(project, it)
+                }
+                true
             }
 
             it.testFinished()
