@@ -267,7 +267,7 @@ class VoqalBenchmarking : JBTest() {
                 .put("results", directiveResults)
 
             val benchOut = File("benchmark").apply { mkdirs() }
-            val currentLang = System.getenv("VQL_LANG").lowercase()
+            val currentLang = System.getenv("VQL_LANG")
             File(benchOut, "$benchmarkSuite-$currentLang.json").writeText(benchmarkResult.toString())
         } else {
             log.warn("Skipping telemetry due to unknown benchmark version")
