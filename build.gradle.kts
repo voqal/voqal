@@ -73,7 +73,7 @@ dependencies {
     intellijPlatform {
         if (System.getenv("VQL_BENCHMARK_MODE") == "true") {
             intellijPlatform {
-                val platformType = when(System.getenv("VQL_LANG")) {
+                val platformType = when (System.getenv("VQL_LANG")) {
                     "JavaScript" -> "PY" //todo: why is this avail in PY but not IU?
                     "Python" -> "PY"
                     "go" -> "GO"
@@ -82,7 +82,7 @@ dependencies {
                 create(platformType, providers.gradleProperty("platformVersion"))
                 println("Benchmarking platform type: $platformType")
 
-                val bundledPlugins = when(System.getenv("VQL_LANG")) {
+                val bundledPlugins = when (System.getenv("VQL_LANG")) {
                     "JavaScript" -> listOf("Pythonid")
                     "Python" -> listOf("Pythonid")
                     "go" -> listOf("org.jetbrains.plugins.go")
@@ -271,4 +271,9 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
+}
+
+tasks.register<JavaExec>("runBenchmarkCalculator") {
+    classpath = sourceSets["test"].runtimeClasspath + sourceSets["test"].compileClasspath
+    mainClass.set("benchmark.BenchmarkCalculatorKt")
 }
