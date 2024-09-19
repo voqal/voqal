@@ -114,3 +114,29 @@ jobs:
         with:
           name: all-${{ matrix.lang }})
           path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}).json
+
+  benchCalc:
+    name: Benchmark Calculator
+    needs: [ langTest ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+
+      # Check out the current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./benchmark/
+
+      - name: Benchmark Calculator
+        run: ./gradlew --scan :runBenchmarkCalculator
