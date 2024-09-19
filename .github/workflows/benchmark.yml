@@ -150,6 +150,8 @@ jobs:
 
       - run: ls ./benchmark/
 
+      - run: cat ./benchmark/edit_mode-JAVA-gemini-1.5-flash-latest
+
       - name: Extract downloaded artifacts
         run: |
           cd ./benchmark/
