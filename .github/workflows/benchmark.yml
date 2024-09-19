@@ -112,7 +112,7 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}
+          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}.zip
           path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}.json
 
   benchCalc:
@@ -129,14 +129,31 @@ jobs:
           tool-cache: false
           large-packages: false
 
-      # Check out the current repository
       - name: Fetch Sources
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-home-cache-cleanup: true
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./benchmark/
+
+      - name: Extract downloaded artifacts
+        run: |
+          cd ./benchmark/
+          for artifact in *.zip; do
+          unzip "$artifact" -d "${artifact%.zip}"
+          done
 
       - run: ls ./benchmark/
 
