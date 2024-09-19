@@ -43,22 +43,21 @@ class VoqalBenchmarking : JBTest() {
 
     private val editors = mutableListOf<DelegateEditor>()
     private val benchmarkVersion = System.getenv("VQL_BENCHMARK_VERSION") ?: "unknown"
-    private var benchmarkSuite = ""
+    private var benchmarkSuite = System.getenv("VQL_BENCHMARK_SUITE") ?: "unknown"
     private val benchmarkPromises = mutableListOf<BenchmarkPromise>()
     private var disposed = false
     private var error: Error? = null
 
-    fun `test run idle mode suites`() {
-        benchmarkSuite = "idle_mode"
+    fun `test run suite`() {
         val config = TEST_CONFIG
-        executeIdleMode(config)
-        waitTillFinished()
-    }
-
-    fun `test run edit mode suites`() {
-        benchmarkSuite = "edit_mode"
-        val config = TEST_CONFIG
-        executeEditMode(config)
+        when (benchmarkSuite) {
+            "edit_mode" -> executeEditMode(config)
+            "idle_mode" -> executeIdleMode(config)
+            else -> {
+                executeEditMode(config)
+                executeIdleMode(config)
+            }
+        }
         waitTillFinished()
     }
 

@@ -14,6 +14,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        suite:
+          - "edit_mode"
+          - "idle_mode"
         modelName:
 #          - "gpt-4o-2024-08-06"
 #          - "gpt-4o-mini"
@@ -88,9 +91,10 @@ jobs:
             echo "VQL_MODEL_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
           fi
 
-      - name: Run Benchmark (${{ matrix.modelName }} - ${{ matrix.lang }})
+      - name: Run Benchmark (${{ matrix.suite }} - ${{ matrix.modelName }} - ${{ matrix.lang }})
         run: ./gradlew --scan :test -PrunSpecificTests='benchmark/**'
         env:
+          VQL_BENCHMARK_SUITE: ${{ matrix.suite }}
           VQL_LANG: ${{ matrix.lang }}
           VQL_BENCHMARK_VERSION: ${{ github.sha }}
           VQL_MODEL_NAME: ${{ matrix.modelName }}
@@ -109,10 +113,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: all-${{ matrix.lang }})
-          path: ./benchmark/edit_mode-${{ matrix.lang }}).json
-
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-${{ matrix.lang }})
-          path: ./benchmark/idle_mode-${{ matrix.lang }}).json
+          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}).json
