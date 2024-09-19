@@ -150,18 +150,6 @@ jobs:
 
       - run: ls ./benchmark/
 
-      - run: cat ./benchmark/edit_mode-JAVA-gemini-1.5-flash-latest
-
-      - name: Extract downloaded artifacts
-        run: |
-          cd ./benchmark/
-          for artifact in *; do
-            mv "$artifact" "$artifact.zip"
-            unzip "$artifact.zip" -d "${artifact}"
-          done
-
-      - run: ls ./benchmark/
-
       - name: Benchmark Calculator
         run: ./gradlew --scan :runBenchmarkCalculator
 
