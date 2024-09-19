@@ -132,6 +132,9 @@ class VoqalStatusService(private val project: Project) {
     }
 
     fun warnChat(input: String) {
+        if (System.getProperty("VQL_TEST_MODE") == "true") {
+            return
+        }
         ThreadingAssertions.assertBackgroundThread()
         project.service<ChatToolWindowContentManager>().addErrorMessage(input)
     }
