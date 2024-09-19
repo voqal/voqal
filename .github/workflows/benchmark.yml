@@ -24,7 +24,7 @@ jobs:
 #          - "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
 #          - "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
           - "gemini-1.5-flash-latest"
-#          - "gemini-1.5-pro-latest"
+          - "gemini-1.5-pro-latest"
 #          - "gemini-1.5-pro-exp-0801"
 #          - "claude-3-5-sonnet-20240620"
 #          - "claude-3-sonnet-20240229"
@@ -33,9 +33,9 @@ jobs:
         lang:
           - "JAVA"
           - "kotlin"
-#          - "Python"
-#          - "go"
-#          - "JavaScript"
+          - "Python"
+          - "go"
+          - "JavaScript"
 #        markdownTools:
 #          - "true"
 #          - "false"
@@ -148,9 +148,15 @@ jobs:
         with:
           path: ./benchmark/
 
-      - run: ls ./benchmark/
-
       - name: Benchmark Calculator
         run: ./gradlew --scan :runBenchmarkCalculator
 
-      - run: ls ./benchmark/
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./benchmark/edit_mode.js
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./benchmark/idle_mode.js
