@@ -12,6 +12,7 @@
 ### Fixed
 
 - Range highlighter tree assertion error
+- Invalid indent when completion is longer than edit range
 
 ## [2024.11.3] - 2024-09-14
 

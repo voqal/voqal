@@ -403,29 +403,36 @@ class EditTextTool : VoqalTool() {
 
         //find smallest way to modify text to desired completion
         val result = coroutineScope {
+            val highlighter = project.service<VoqalMemoryService>()
+                .getUserData("editRangeHighlighter") as RangeHighlighter?
+
             val diffList = mutableListOf<Deferred<Diff?>>()
-            val fullTextDiff = async { getTextDiff(project, oldText, newText) }
-            diffList.add(fullTextDiff)
-
-            val visibleTextDiff = async { getVisibleTextDiff(project, editor, newText) }
-            diffList.add(visibleTextDiff)
-
-            val indentedVisibleTextDiff = async { getVisibleTextDiff(project, editor, newText, true) }
-            diffList.add(indentedVisibleTextDiff)
-
-            val commonIndentedVisibleTextDiff = async {
-                getVisibleTextDiff(project, editor, newText, true, true)
+            if (highlighter == null || highlighter.range?.length == editor.document.textLength) {
+                val fullTextDiff = async { getTextDiff(project, oldText, newText) }
+                diffList.add(fullTextDiff)
             }
-            diffList.add(commonIndentedVisibleTextDiff)
+            if (highlighter != null) {
+                val visibleTextDiff = async {
+                    getVisibleTextDiff(project, editor, newText)
+                }
+                diffList.add(visibleTextDiff)
+                val indentedVisibleTextDiff = async {
+                    getVisibleTextDiff(project, editor, newText, true)
+                }
+                diffList.add(indentedVisibleTextDiff)
+                val commonIndentedVisibleTextDiff = async {
+                    getVisibleTextDiff(project, editor, newText, true, true)
+                }
+                diffList.add(commonIndentedVisibleTextDiff)
+            }
 
-            diffList.map { it.await() }
+            removeInvalidIndentDiffs(project, diffList.mapNotNull { it.await() })
         }
-        val fullTextDiff = result[0]!!
-        var smallestDiff = fullTextDiff
-        var diffFragments = fullTextDiff.fragments
-        var updatedNewText = newText
+        var smallestDiff = result.first()
+        var diffFragments = smallestDiff.fragments
+        var updatedNewText = smallestDiff.newText
         var diffType: String
-        result.filterNotNull().forEach { diff ->
+        result.forEach { diff ->
             val fewerChanges = diff.diffAmount == smallestDiff.diffAmount && diff.fragments.size < diffFragments.size
             if (diff.diffAmount < smallestDiff.diffAmount || fewerChanges) {
                 smallestDiff = diff
@@ -562,6 +569,35 @@ class EditTextTool : VoqalTool() {
         return activeHighlighters
     }
 
+    /**
+     * There are some cases where the smallest diff is smallest because it removes valid indents.
+     * This attempts to determine and removes those that become smallest via invalid indents.
+     */
+    private fun removeInvalidIndentDiffs(project: Project, diffs: List<Diff>): List<Diff> {
+        val highlighter = project.service<VoqalMemoryService>()
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
+        if (highlighter == null) {
+            return diffs
+        } else if (diffs.size == 1) {
+            return diffs //todo: check newText spacing
+        }
+
+        val validDiffs = diffs.toMutableList()
+        val diffOffset = highlighter.startOffset
+        validDiffs.toList().forEach {
+            if (it.diffType == "visible:indent:false") {
+                val oldText = it.oldText
+                val allSpacing = it.fragments.all {
+                    oldText.substring(it.startOffset1 - diffOffset, it.endOffset1 - diffOffset).isBlank()
+                }
+                if (allSpacing) {
+                    validDiffs.remove(it)
+                }
+            }
+        }
+        return validDiffs
+    }
+
     private fun getVisibleTextDiff(
         project: Project,
         editor: Editor,
@@ -680,7 +716,7 @@ class EditTextTool : VoqalTool() {
             )
         }.toMutableList()
 
-        return Diff(fragments, newText, "visible:indent:$indent")
+        return Diff(fragments, oldText!!, newText, "visible:indent:$indent")
     }
 
     private fun getTextDiff(project: Project, oldText: String, newText: String): Diff {
@@ -704,7 +740,7 @@ class EditTextTool : VoqalTool() {
                 )
             }.toMutableList()
 
-        return Diff(fragments, newText, "full")
+        return Diff(fragments, oldText, newText, "full")
     }
 
     private fun getSimpleDiffChanges(oldText: String, newText: String, project: Project): List<SimpleDiffChange> {
@@ -801,6 +837,7 @@ class EditTextTool : VoqalTool() {
 
     private data class Diff(
         val fragments: List<DiffFragmentImpl>,
+        val oldText: String,
         val newText: String,
         val diffType: String
     ) {

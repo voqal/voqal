@@ -1,6 +1,7 @@
 package dev.voqal.assistant.tool.text
 
 import com.intellij.lang.Language
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
@@ -17,6 +18,7 @@ import dev.voqal.assistant.processing.CodeExtractor
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.services.VoqalMemoryService
 import dev.voqal.services.VoqalStatusService
+import dev.voqal.services.getFunctions
 import dev.voqal.services.scope
 import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
@@ -796,5 +798,69 @@ class EditTextToolTest : JBTest() {
         EditorFactory.getInstance().releaseEditor(editor)
 
         assertFalse(editor.document.text.contains("import java.util.Scanner;"))
+    }
+
+    fun `test java force edit range diff if edit range present`() {
+        val codeFile = File("src/test/resources/java/MathOperations.java")
+        val codeText = codeFile.readText()
+        val psiFile = myFixture.addFileToProject("MathOperations.java", codeText)
+        val editor = EditorFactory.getInstance().createEditor(psiFile.fileDocument)
+
+        val responseCode = """
+            /**
+             * Calculates the result of a complex mathematical expression involving two integers.
+             *
+             * @param p The first integer.
+             * @param q The second integer.
+             * @return The result of the expression 2 * (p + q + p * q - p - q).
+             */
+            public int calculateResult2(int p, int q) {
+                int difference = p - q;
+                int product = p * q;
+                int sum = p + q;
+                return 2 * (sum + product - difference);
+            }
+        """.trimIndent()
+
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+
+            val exactRange = ReadAction.compute(ThrowableComputable {
+                psiFile.getFunctions().find { it.name == "calculateResult2" }!!.textRange
+            })
+            val startLine = ReadAction.compute(ThrowableComputable {
+                psiFile.fileDocument.getLineNumber(exactRange.startOffset)
+            })
+            val endLine = ReadAction.compute(ThrowableComputable {
+                psiFile.fileDocument.getLineNumber(exactRange.endOffset)
+            })
+            val testRange = ProperTextRange(
+                psiFile.fileDocument.getLineStartOffset(startLine),
+                psiFile.fileDocument.getLineEndOffset(endLine)
+            )
+            val testHighlighter = editor.markupModel.addRangeHighlighter(
+                testRange.startOffset, testRange.endOffset,
+                HighlighterLayer.SELECTION, TextAttributes(), HighlighterTargetArea.EXACT_RANGE
+            )
+            project.service<VoqalMemoryService>().putUserData("editRangeHighlighter", testHighlighter)
+
+            val rangeHighlighters = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
+                runBlocking {
+                    EditTextTool().doDocumentEdits(project, responseCode, editor)
+                }
+            })
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.verify {
+                assertEquals(1, rangeHighlighters.size)
+            }
+            testContext.completeNow()
+        }
+        errorOnTimeout(testContext)
+        EditorFactory.getInstance().releaseEditor(editor)
+
+        assertTrue(editor.document.text.contains("public class MathOperations {"))
+        assertTrue(editor.document.text.contains("    public int calculateResult2(int p, int q) {"))
     }
 }
