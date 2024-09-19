@@ -5,22 +5,21 @@ import io.vertx.core.json.JsonObject
 import java.io.File
 
 fun main() {
-    outputResults("all")
     outputResults("edit_mode")
     outputResults("idle_mode")
 }
 
 private fun outputResults(mode: String) {
     val benchmarkResults = JsonArray()
-    File("benchmark").listFiles { _, name ->
-        name.startsWith(mode) && name.endsWith(".json")
-    }?.forEach {
-        val result = JsonObject(it.readText())
-        val keyResults = JsonObject().put("modelName", result.getString("modelName"))
-        benchmarkResults.add(keyResults)
-        val results = JsonArray()
-        results.add(result.getJsonArray("results"))
-        keyResults.put("results", results)
+    File("benchmark").walk().forEach { file ->
+        if (file.isFile && file.name.startsWith(mode) && file.name.endsWith(".json")) {
+            val result = JsonObject(file.readText())
+            val keyResults = JsonObject().put("modelName", result.getString("modelName"))
+            benchmarkResults.add(keyResults)
+            val results = JsonArray()
+            results.add(result.getJsonArray("results"))
+            keyResults.put("results", results)
+        }
     }
     if (!benchmarkResults.isEmpty) {
         outputChart(mode, benchmarkResults)
