@@ -138,5 +138,9 @@ jobs:
         with:
           path: ./benchmark/
 
+      - run: ls ./benchmark/
+
       - name: Benchmark Calculator
         run: ./gradlew --scan :runBenchmarkCalculator
+
+      - run: ls ./benchmark/
