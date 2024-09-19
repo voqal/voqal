@@ -19,6 +19,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.util.ui.JBUI
 import dev.voqal.assistant.VoqalDirective
+import dev.voqal.assistant.context.code.ChunkedCode
 import dev.voqal.assistant.context.code.ViewingCode
 import dev.voqal.services.VoqalDirectiveService
 import dev.voqal.services.VoqalMemoryService
@@ -162,14 +163,15 @@ class ChunkTextExtension : AbstractExtension() {
             visibleText = editRange.substring(editor.document.text)
             val viewingCode = ViewingCode(JsonObject.mapFrom(args["viewingCode"]))
             val startLine = editor.document.getLineNumber(editRange.startOffset)
-            val finalViewingCode = viewingCode.copy(
+            val chunkedCode = ChunkedCode(
                 code = visibleText,
-                codeWithLineNumbers = visibleText.split("\n").mapIndexed { index, line ->
-                    "${startLine + index + 1}|$line"
-                }.joinToString("\n")
+                language = viewingCode.language,
+                filename = viewingCode.filename,
+                problems = viewingCode.problems,
+                startLine = startLine
             )
             return VoqalDirectiveService.convertJsonElementToMap(
-                Json.parseToJsonElement(finalViewingCode.toJson().toString())
+                Json.parseToJsonElement(chunkedCode.toJson().toString())
             )
         }
 

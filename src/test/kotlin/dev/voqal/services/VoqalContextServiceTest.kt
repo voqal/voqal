@@ -3,6 +3,7 @@ package dev.voqal.services
 import com.intellij.lang.Language
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.util.ProperTextRange
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.utils.vfs.getDocument
 import dev.voqal.JBTest
@@ -11,8 +12,10 @@ import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.code.ViewingCode
+import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.assistant.tool.code.CreateClassTool.Companion.getFileExtensionForLanguage
 import dev.voqal.config.settings.PromptSettings
+import dev.voqal.status.VoqalStatus
 import io.vertx.junit5.VertxTestContext
 import kotlinx.coroutines.launch
 import java.io.File
@@ -128,15 +131,17 @@ class VoqalContextServiceTest : JBTest() {
                 memorySlice = getMemorySystem().getMemorySlice(),
                 availableActions = emptyList(),
                 languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
-                promptSettings = PromptSettings(promptName = "Idle Mode")
+                promptSettings = PromptSettings(
+                    provider = PromptSettings.PProvider.CUSTOM_TEXT,
+                    promptText = "```\n{{ developer.viewingCode.code }}\n```"
+                ),
             ),
             ide = IdeContext(project),
             developer = DeveloperContext(
                 transcription = "",
                 viewingFile = null,
                 viewingCode = ViewingCode(
-                    code = "1\n\n\n2",
-                    codeWithLineNumbers = "1\n\n\n2" //force for testing
+                    code = "1\n\n\n2\n",
                 ),
                 selectedCode = null,
                 textOnly = true
@@ -207,5 +212,43 @@ class VoqalContextServiceTest : JBTest() {
 
         //reset token limit
         project.service<VoqalConfigService>().updateConfig(previousLanguageModelSettings)
+    }
+
+    fun `test open files does not include visible range`() {
+        val lang = Language.findLanguageByID(System.getenv("VQL_LANG") ?: "JAVA")!!
+        val fileExt = getFileExtensionForLanguage(lang)
+        val codeFile = File("src/test/resources/$fileExt/TestFileAccess.$fileExt")
+        val codeText = codeFile.readText()
+        val psiFile = myFixture.addFileToProject("TestFileAccess.$fileExt", codeText)
+        myFixture.openFileInEditor(psiFile.virtualFile)
+
+        val exactRange = psiFile.getFunctions().find { it.name == "calculate" }!!.textRange
+        val startLine = psiFile.fileDocument.getLineNumber(exactRange.startOffset)
+        val endLine = psiFile.fileDocument.getLineNumber(exactRange.endOffset)
+        val fullMethodRange = ProperTextRange(
+            psiFile.fileDocument.getLineStartOffset(startLine),
+            psiFile.fileDocument.getLineEndOffset(endLine)
+        )
+
+        val selectedTextEditor = project.service<VoqalContextService>().getSelectedTextEditor()!!
+        val testContext = VertxTestContext()
+        project.scope.launch {
+            project.service<VoqalStatusService>().update(VoqalStatus.EDITING)
+            ChunkTextExtension.setEditRangeHighlighter(project, selectedTextEditor, fullMethodRange)
+            val openFiles = project.service<VoqalContextService>().getOpenFiles(selectedTextEditor)
+            project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
+
+            testContext.verify {
+                assertEquals(1, openFiles.size)
+
+                val viewingCode = openFiles.first()
+                assertEquals(2, viewingCode.includedLines.size)
+                assertEquals(IntRange(0, 4), viewingCode.includedLines.first())
+                assertEquals(IntRange(7, 8), viewingCode.includedLines.last())
+            }
+            testContext.completeNow()
+        }
+
+        errorOnTimeout(testContext)
     }
 }

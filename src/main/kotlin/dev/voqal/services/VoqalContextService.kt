@@ -11,6 +11,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -54,21 +55,43 @@ class VoqalContextService(private val project: Project) {
     fun getOpenFiles(selectedTextEditor: Editor?): MutableList<ViewingCode> {
         val openVirtualFiles = ReadAction.compute(ThrowableComputable {
             FileEditorManager.getInstance(project).openFiles.filter {
-                it.path != selectedTextEditor?.virtualFile?.path && //ignore the current file
-                        !it.name.contains("voqal-response") &&//ignore voqal responses
+                !it.name.contains("voqal-response") && //ignore voqal responses
                         !it.path.contains(".voqal") && //ignore voqal files
                         !ChangeListManager.getInstance(project).isIgnoredFile(it) //ignore VCS ignored files
             }
         })
+
+        val highlighter = project.service<VoqalMemoryService>()
+            .getUserData("editRangeHighlighter") as RangeHighlighter?
+
         val openFiles = ReadAction.compute(ThrowableComputable {
             openVirtualFiles.mapNotNull {
+                var omittedLines: IntRange? = null
+                if (highlighter == null) {
+                    if (it.path != selectedTextEditor?.virtualFile?.path) {
+                        return@mapNotNull null //ignore the current file
+                    }
+                } else {
+                    //omit view range
+                    val omittedRange = highlighter.range
+                    val omitLineStart = omittedRange?.let { highlighter.document.getLineNumber(it.startOffset) }
+                    val omitLineEnd = omittedRange?.let { highlighter.document.getLineNumber(it.endOffset) }
+                    if (omitLineStart != null && omitLineEnd != null) {
+                        omittedLines = IntRange(omitLineStart, omitLineEnd)
+                    }
+                }
+
                 val fileType = FileTypeManager.getInstance().getFileTypeByFile(it)
                 val language = (fileType as? LanguageFileType)?.language
                 if (language != null) {
+                    val document = FileDocumentManager.getInstance().getDocument(it)
                     ViewingCode(
-                        code = FileDocumentManager.getInstance().getDocument(it)?.text,
+                        code = document?.text,
                         language = language.id,
-                        filename = it.name
+                        filename = it.name,
+                        includedLines = document?.let { doc ->
+                            getIncludedLines(omittedLines, doc.lineCount)
+                        } ?: emptyList()
                     )
                 } else {
                     null
@@ -76,6 +99,13 @@ class VoqalContextService(private val project: Project) {
             }
         }).toMutableList()
         return openFiles
+    }
+
+    private fun getIncludedLines(omittedLines: IntRange?, lineCount: Int): List<IntRange> {
+        if (omittedLines == null) return listOf(IntRange(0, lineCount))
+        val start = if (omittedLines.first > 0) 0..<omittedLines.first else null
+        val end = if (omittedLines.last < lineCount - 1) omittedLines.last + 1..<lineCount else null
+        return listOfNotNull(start, end)
     }
 
     fun getSelectedTextEditor(): Editor? {

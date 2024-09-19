@@ -78,9 +78,25 @@ If the developer says looks good, respond with `{"accept": true}`.
 
 {% endif %}
 
+## Open Files
+
+> The files the developer currently has open. May or may not be relevant to the developer's transcription.
+
+{% for file in developer.openFiles %}
+
+#### {{ file.filename }}
+
+```{{ file.language }}
+
+{{ file.codeWithLineNumbers }}
+
+```
+
+{% endfor %}
+
 ## Visible Text
 
-> The text of the file the developer is viewing.
+> The text of the file the developer is viewing. The code you return must be within the bounds of the below code.
 
 {% if assistant.parentDirective != null %}
 

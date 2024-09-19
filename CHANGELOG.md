@@ -7,6 +7,7 @@
 ### Added
 
 - Stream audio setting to Picovoice/Deepgram STT providers
+- Open files to edit mode prompt
 
 ### Fixed
 
