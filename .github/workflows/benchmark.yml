@@ -112,7 +112,8 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}.json
+          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ matrix.modelName }}
+          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}.json
 
   benchCalc:
     name: Benchmark Calculator
