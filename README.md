@@ -40,9 +40,9 @@ The codebase is structured as follows:
 
 The following benchmarks were produced via these [suites](./src/test/kotlin/benchmark/suites).
 
-|                                                 Idle Mode                                                  |                                            Edit Mode                                             |
-|:----------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
-| ![](.github/media/benchmark/idle_dark.svg#gh-dark-mode-only)![](.github/media/idle.svg#gh-light-mode-only) | ![](.github/media/edit_dark.svg#gh-dark-mode-only)![](.github/media/edit.svg#gh-light-mode-only) |
+|                                                  Idle Mode                                                  |                                             Edit Mode                                             |
+|:-----------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+| ![](.github/media/benchmark/idle_dark.svg#gh-dark-mode-only) ![](.github/media/idle.svg#gh-light-mode-only) | ![](.github/media/edit_dark.svg#gh-dark-mode-only) ![](.github/media/edit.svg#gh-light-mode-only) |
 
 > Legend: X-axis: Time (ms), Y-axis: Accuracy (%), Size: Cost ($)
 
