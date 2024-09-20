@@ -181,4 +181,9 @@ jobs:
           name: results
           path: ./benchmark/results.jsonl
 
-#todo: remove edit_mode- & idle_mode- artifacts
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            edit_mode-*
+            idle_mode-*
