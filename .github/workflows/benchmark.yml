@@ -157,9 +157,11 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
+          name: edit_mode
           path: ./benchmark/edit_mode.js
 
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
+          name: idle_mode
           path: ./benchmark/idle_mode.js
