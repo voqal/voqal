@@ -171,3 +171,14 @@ jobs:
         with:
           name: all
           path: ./benchmark/all.js
+
+      - name: Results Combiner
+        run: ./gradlew --scan :runResultsCombiner
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: ./benchmark/results.jsonl
+
+#todo: remove edit_mode- & idle_mode- artifacts

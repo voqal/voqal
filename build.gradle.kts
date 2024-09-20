@@ -277,3 +277,8 @@ tasks.register<JavaExec>("runBenchmarkCalculator") {
     classpath = sourceSets["test"].runtimeClasspath + sourceSets["test"].compileClasspath
     mainClass.set("benchmark.BenchmarkCalculatorKt")
 }
+
+tasks.register<JavaExec>("runResultsCombiner") {
+    classpath = sourceSets["test"].runtimeClasspath + sourceSets["test"].compileClasspath
+    mainClass.set("benchmark.ResultsCombinerKt")
+}
