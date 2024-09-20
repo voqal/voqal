@@ -73,7 +73,7 @@ dependencies {
     intellijPlatform {
         if (System.getenv("VQL_BENCHMARK_MODE") == "true") {
             intellijPlatform {
-                val platformType = when(System.getenv("VQL_LANG")) {
+                val platformType = when (System.getenv("VQL_LANG")) {
                     "JavaScript" -> "PY" //todo: why is this avail in PY but not IU?
                     "Python" -> "PY"
                     "go" -> "GO"
@@ -82,7 +82,7 @@ dependencies {
                 create(platformType, providers.gradleProperty("platformVersion"))
                 println("Benchmarking platform type: $platformType")
 
-                val bundledPlugins = when(System.getenv("VQL_LANG")) {
+                val bundledPlugins = when (System.getenv("VQL_LANG")) {
                     "JavaScript" -> listOf("Pythonid")
                     "Python" -> listOf("Pythonid")
                     "go" -> listOf("org.jetbrains.plugins.go")
@@ -222,15 +222,6 @@ configurations {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
     }
-    testCompileClasspath {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-common")
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
-        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
-        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
-    }
     testRuntimeClasspath {
         exclude(group = "org.slf4j", module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
@@ -280,4 +271,14 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
+}
+
+tasks.register<JavaExec>("runBenchmarkCalculator") {
+    classpath = sourceSets["test"].runtimeClasspath + sourceSets["test"].compileClasspath
+    mainClass.set("benchmark.BenchmarkCalculatorKt")
+}
+
+tasks.register<JavaExec>("runResultsCombiner") {
+    classpath = sourceSets["test"].runtimeClasspath + sourceSets["test"].compileClasspath
+    mainClass.set("benchmark.ResultsCombinerKt")
 }

@@ -2,12 +2,10 @@ package benchmark
 
 import benchmark.model.BenchmarkPromise
 import benchmark.model.DirectiveResult
-import benchmark.model.context.ProjectFileContext
-import benchmark.model.context.PromptSettingsContext
-import benchmark.model.context.VirtualFileContext
-import benchmark.model.context.VisibleRangeContext
+import benchmark.model.context.*
 import benchmark.model.metadata.SupportLanguages
 import benchmark.suites.edit.*
+import benchmark.suites.edit.range.EditRangeSuite
 import benchmark.suites.idle.AddBreakpointsSuite
 import benchmark.suites.idle.GotoSuite
 import benchmark.suites.idle.OpenFileSuite
@@ -27,18 +25,17 @@ import dev.voqal.assistant.context.AssistantContext
 import dev.voqal.assistant.context.DeveloperContext
 import dev.voqal.assistant.context.IdeContext
 import dev.voqal.assistant.context.code.ViewingCode
+import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.config.VoqalConfig
 import dev.voqal.config.settings.PromptSettings.EditFormat
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus.ERROR
-import io.ktor.client.*
-import io.ktor.client.engine.java.*
-import io.ktor.client.request.*
+import dev.voqal.status.VoqalStatus.IDLE
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.joor.Reflect
+import java.io.File
 import java.util.*
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMembers
@@ -47,19 +44,25 @@ class VoqalBenchmarking : JBTest() {
 
     private val editors = mutableListOf<DelegateEditor>()
     private val benchmarkVersion = System.getenv("VQL_BENCHMARK_VERSION") ?: "unknown"
+    private var benchmarkSuite = System.getenv("VQL_BENCHMARK_SUITE") ?: "unknown"
     private val benchmarkPromises = mutableListOf<BenchmarkPromise>()
     private var disposed = false
     private var error: Error? = null
 
-    fun `test run all suites`() {
+    fun `test run suite`() {
         val config = TEST_CONFIG
+        when (benchmarkSuite) {
+            "edit_mode" -> executeEditMode(config)
+            "idle_mode" -> executeIdleMode(config)
+            else -> {
+                executeEditMode(config)
+                executeIdleMode(config)
+            }
+        }
+        waitTillFinished()
+    }
 
-        //idle mode
-        runBenchmarkSuite(AddBreakpointsSuite(), benchmarkVersion, config, benchmarkPromises)
-        runBenchmarkSuite(OpenFileSuite(), benchmarkVersion, config, benchmarkPromises)
-        runBenchmarkSuite(GotoSuite(), benchmarkVersion, config, benchmarkPromises)
-
-        //edit mode
+    private fun executeEditMode(config: VoqalConfig) {
         runBenchmarkSuite(AddFieldSuite(), benchmarkVersion, config, benchmarkPromises)
         runBenchmarkSuite(RemoveFunctionSuite(), benchmarkVersion, config, benchmarkPromises)
         runBenchmarkSuite(RenameFunctionParamSuite(), benchmarkVersion, config, benchmarkPromises)
@@ -69,9 +72,19 @@ class VoqalBenchmarking : JBTest() {
         runBenchmarkSuite(InlineFunctionSuite(), benchmarkVersion, config, benchmarkPromises)
         runBenchmarkSuite(MissingImportsSuite(), benchmarkVersion, config, benchmarkPromises)
 
-        //todo: neither full text nor diff handle well yet
-//        runBenchmarkSuite(MoveFunctionSuite(), benchmarkVersion, config, benchmarkPromises)
+        runBenchmarkSuite(EditRangeSuite(), benchmarkVersion, config, benchmarkPromises)
 
+        //todo: neither full text nor diff handle well yet
+        //runBenchmarkSuite(MoveFunctionSuite(), benchmarkVersion, config, benchmarkPromises)
+    }
+
+    private fun executeIdleMode(config: VoqalConfig) {
+        runBenchmarkSuite(AddBreakpointsSuite(), benchmarkVersion, config, benchmarkPromises)
+        runBenchmarkSuite(OpenFileSuite(), benchmarkVersion, config, benchmarkPromises)
+        runBenchmarkSuite(GotoSuite(), benchmarkVersion, config, benchmarkPromises)
+    }
+
+    private fun waitTillFinished() {
         val fifoStack = LinkedList<BenchmarkPromise>()
         benchmarkPromises.forEach {
             fifoStack.add(it)
@@ -174,48 +187,68 @@ class VoqalBenchmarking : JBTest() {
             contexts.mapNotNull { it as? ProjectFileContext }.forEach {
                 myFixture.addFileToProject(it.virtualFile.name, it.virtualFile.getDocument().text)
             }
+            contexts.mapNotNull { it as? OpenFileContext }.forEach {
+                myFixture.openFileInEditor(it.virtualFile) //todo: auto clean up
+            }
 
             val virtualFile = (contexts.find { it is VirtualFileContext } as? VirtualFileContext)?.virtualFile
+            val visibleRange = contexts.filterIsInstance<VisibleRangeContext>().firstOrNull()?.visibleRange
             val editor = virtualFile?.let {
                 object : DelegateEditor(EditorFactory.getInstance().createEditor(it.getDocument(), project)) {
                     override fun calculateVisibleRange(): ProperTextRange {
-                        val visibleRange = contexts.filterIsInstance<VisibleRangeContext>().firstOrNull()?.visibleRange
                         return visibleRange ?: ProperTextRange(0, document.textLength)
                     }
                 }
             }
-            editor?.let { editors.add(it) }
+            editor?.let {
+                editors.add(it)
+
+                if (visibleRange != null) {
+                    ChunkTextExtension.setEditRangeHighlighter(project, it, visibleRange)
+                }
+            }
 
             benchPromise.startFloorTime()
-            val directive = VoqalDirective(
-                assistant = AssistantContext(
-                    memorySlice = getMemorySystem().getMemorySlice(),
-                    availableActions = project.service<VoqalToolService>().getAvailableTools().values,
-                    promptSettings = contexts.filterIsInstance<PromptSettingsContext>().first().settings.copy(
-                        codeSmellCorrection = false, //todo: set via env
-                        editFormat = EditFormat.valueOf(System.getenv("VQL_EDIT_FORMAT") ?: "FULL_TEXT")
-                    ),
-                    languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
-                    includeToolsInMarkdown = System.getenv("VQL_MARKDOWN_TOOLS") != "false"
-                ),
-                ide = IdeContext(
-                    project = project,
-                    editor = editor,
-                    projectFileTree = project.service<VoqalContextService>().getProjectStructureAsMarkdownTree()
-                ),
-                developer = DeveloperContext(
-                    transcription = transcription.text,
-                    viewingFile = virtualFile,
-                    viewingCode = contexts.find { it is ViewingCode } as? ViewingCode,
-                    textOnly = true
-                )
-            )
             project.scope.launch {
+                val statusService = project.service<VoqalStatusService>()
                 try {
+                    contexts.mapNotNull { it as? VoqalStatusContext }.forEach {
+                        statusService.update(it.status)
+                    }
+
+                    val contextService = project.service<VoqalContextService>()
+                    val directive = VoqalDirective(
+                        assistant = AssistantContext(
+                            memorySlice = getMemorySystem().getMemorySlice(),
+                            availableActions = project.service<VoqalToolService>().getAvailableTools().values,
+                            promptSettings = contexts.filterIsInstance<PromptSettingsContext>().first().settings.copy(
+                                codeSmellCorrection = false, //todo: set via env
+                                editFormat = EditFormat.valueOf(System.getenv("VQL_EDIT_FORMAT") ?: "FULL_TEXT")
+                            ),
+                            languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
+                            includeToolsInMarkdown = System.getenv("VQL_MARKDOWN_TOOLS") != "false"
+                        ),
+                        ide = IdeContext(
+                            project = project,
+                            editor = editor,
+                            projectFileTree = contextService.getProjectStructureAsMarkdownTree()
+                        ),
+                        developer = DeveloperContext(
+                            transcription = transcription.text,
+                            viewingFile = virtualFile,
+                            viewingCode = contexts.find { it is ViewingCode } as? ViewingCode,
+                            textOnly = true,
+                            openFiles = contextService.getOpenFiles(editor)
+                        )
+                    )
                     directiveService.executeDirective(directive)
+
+                    if (statusService.getStatus() != IDLE) {
+                        statusService.update(IDLE)
+                    }
                 } catch (e: Error) {
                     e.printStackTrace()
-                    project.service<VoqalStatusService>().update(ERROR)
+                    statusService.update(ERROR)
                 }
             }
         }
@@ -238,15 +271,12 @@ class VoqalBenchmarking : JBTest() {
             val benchmarkResult = JsonObject()
                 .put("modelName", modelName)
                 .put("benchmarkVersion", benchmarkVersion)
+                .put("benchmarkSuite", benchmarkSuite)
                 .put("results", directiveResults)
-            HttpClient(Java).use { client ->
-                runBlocking {
-                    client.post("https://telemetry.voqal.dev/benchmark") {
-                        header("Content-Type", "application/json")
-                        setBody(benchmarkResult.toString())
-                    }
-                }
-            }
+
+            val benchOut = File("benchmark").apply { mkdirs() }
+            val currentLang = System.getenv("VQL_LANG")
+            File(benchOut, "$benchmarkSuite-$currentLang.json").writeText(benchmarkResult.toString())
         } else {
             log.warn("Skipping telemetry due to unknown benchmark version")
         }

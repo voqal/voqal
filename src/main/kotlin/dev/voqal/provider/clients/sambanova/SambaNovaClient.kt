@@ -72,6 +72,15 @@ class SambaNovaClient(
 
         throwIfError(response)
         val responseBody = JsonObject(response.bodyAsText())
+        if (responseBody.containsKey("error")) {
+            val errorMessage = responseBody.getJsonObject("error").getString("message")
+            throw InvalidRequestException(
+                response.status.value,
+                OpenAIError(OpenAIErrorDetails(message = errorMessage)),
+                ClientRequestException(response, responseBody.toString())
+            )
+        }
+
         responseBody.getJsonArray("choices").forEach {
             (it as JsonObject).getJsonObject("message").put("role", "assistant")
         }

@@ -14,8 +14,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        suite:
+          - "edit_mode"
+          - "idle_mode"
         modelName:
-          - "gpt-4o-2024-08-06"
+#          - "gpt-4o-2024-08-06"
           - "gpt-4o-mini"
 #          - "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
           - "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
@@ -56,7 +59,7 @@ jobs:
           java-version: 17
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-home-cache-cleanup: true
 
@@ -88,9 +91,10 @@ jobs:
             echo "VQL_MODEL_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
           fi
 
-      - name: Run Benchmark (${{ matrix.modelName }} - ${{ matrix.lang }})
+      - name: Run Benchmark (${{ matrix.suite }} - ${{ matrix.modelName }} - ${{ matrix.lang }})
         run: ./gradlew --scan :test -PrunSpecificTests='benchmark/**'
         env:
+          VQL_BENCHMARK_SUITE: ${{ matrix.suite }}
           VQL_LANG: ${{ matrix.lang }}
           VQL_BENCHMARK_VERSION: ${{ github.sha }}
           VQL_MODEL_NAME: ${{ matrix.modelName }}
@@ -104,3 +108,82 @@ jobs:
       - name: Output log
         run: cat /tmp/voqal-test.log
         if: always()
+
+      - name: Set sanitized modelName
+        run: echo "modelName=$(echo '${{ matrix.modelName }}' | sed 's/\//-/g')" >> $GITHUB_ENV
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.suite }}-${{ matrix.lang }}-${{ env.modelName }}
+          path: ./benchmark/${{ matrix.suite }}-${{ matrix.lang }}.json
+
+  benchCalc:
+    name: Benchmark Calculator
+    needs: [ langTest ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./benchmark/
+
+      - name: Benchmark Calculator
+        run: ./gradlew --scan :runBenchmarkCalculator
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: edit_mode
+          path: ./benchmark/edit_mode.js
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: idle_mode
+          path: ./benchmark/idle_mode.js
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: all
+          path: ./benchmark/all.js
+
+      - name: Results Combiner
+        run: ./gradlew --scan :runResultsCombiner
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: ./benchmark/results.jsonl
+
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            edit_mode-*
+            idle_mode-*

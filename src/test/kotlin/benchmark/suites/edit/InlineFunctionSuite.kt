@@ -60,22 +60,26 @@ class InlineFunctionSuite : BenchmarkSuite {
             } else {
                 val functionBody = calculateResult1.getCodeBlock()
 
-                val x = 5
-                val y = 6
-                val expression = functionBody.text.replace("x", x.toString()).replace("y", y.toString())
-                    .replace("val ", "") //de-kotlin
-                    .replace(":=", "=") //de-go
-                    .replace("const ", "") //de-javascript
+                if (functionBody != null) {
+                    val x = 5
+                    val y = 6
+                    val expression = functionBody.text.replace("x", x.toString()).replace("y", y.toString())
+                        .replace("val ", "") //de-kotlin
+                        .replace(":=", "=") //de-go
+                        .replace("const ", "") //de-javascript
 
-                try {
-                    val result = scriptEngine.eval(expression)
-                    if (result == 52) {
-                        success("calculateResult1 is correct")
-                    } else {
-                        fail("calculateResult1 is incorrect: $result")
+                    try {
+                        val result = scriptEngine.eval(expression)
+                        if (result == 52) {
+                            success("calculateResult1 is correct")
+                        } else {
+                            fail("calculateResult1 is incorrect: $result")
+                        }
+                    } catch (e: Throwable) {
+                        fail(e.toString())
                     }
-                } catch (e: Throwable) {
-                    fail(e.toString())
+                } else {
+                    it.fail("Missing calculateResult1 function body")
                 }
             }
             val calculateResult2 = psiFunctions.find { it.name == "calculateResult2" }
@@ -84,23 +88,27 @@ class InlineFunctionSuite : BenchmarkSuite {
             } else {
                 val functionBody = calculateResult2.getCodeBlock()
 
-                val p = 5
-                val q = 6
-                val expression = functionBody.text.replace("p", p.toString()).replace("q", q.toString())
-                    .replace("val", "") //de-kotlin
-                    .replace(":=", "=") //do-go
-                    .replace("const ", "") //de-javascript
-                    .replace("5roduct", "product")
+                if (functionBody != null) {
+                    val p = 5
+                    val q = 6
+                    val expression = functionBody.text.replace("p", p.toString()).replace("q", q.toString())
+                        .replace("val", "") //de-kotlin
+                        .replace(":=", "=") //do-go
+                        .replace("const ", "") //de-javascript
+                        .replace("5roduct", "product")
 
-                try {
-                    val result = scriptEngine.eval(expression)
-                    if (result == 84) {
-                        success("calculateResult2 is correct")
-                    } else {
-                        fail("calculateResult2 is incorrect: $result")
+                    try {
+                        val result = scriptEngine.eval(expression)
+                        if (result == 84) {
+                            success("calculateResult2 is correct")
+                        } else {
+                            fail("calculateResult2 is incorrect: $result")
+                        }
+                    } catch (e: Throwable) {
+                        fail(e.toString())
                     }
-                } catch (e: Throwable) {
-                    fail(e.toString())
+                } else {
+                    it.fail("Missing calculateResult2 function body")
                 }
             }
 

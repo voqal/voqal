@@ -72,7 +72,11 @@ class ExtractFunctionSuite : BenchmarkSuite {
                     //javascript preferences
                     "return (sum + product - difference) + 10"
                 )
-                checkTextContains(checks, functionBody, it)
+                if (functionBody != null) {
+                    checkTextContains(checks, functionBody, it)
+                } else {
+                    it.fail("Missing calculateResult1 function body")
+                }
             }
             val calculateResult2 = psiFunctions.find { it.name == "calculateResult2" }
             if (calculateResult2 == null) {
@@ -95,7 +99,11 @@ class ExtractFunctionSuite : BenchmarkSuite {
                     //javascript preferences
                     "return 2 * (sum + product - difference)"
                 )
-                checkTextContains(checks, functionBody, it)
+                if (functionBody != null) {
+                    checkTextContains(checks, functionBody, it)
+                } else {
+                    it.fail("Missing calculateResult2 function body")
+                }
             }
 
             it.testFinished()
