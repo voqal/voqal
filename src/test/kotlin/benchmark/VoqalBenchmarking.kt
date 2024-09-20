@@ -29,7 +29,8 @@ import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.config.VoqalConfig
 import dev.voqal.config.settings.PromptSettings.EditFormat
 import dev.voqal.services.*
-import dev.voqal.status.VoqalStatus.*
+import dev.voqal.status.VoqalStatus.ERROR
+import dev.voqal.status.VoqalStatus.IDLE
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.launch
@@ -187,7 +188,7 @@ class VoqalBenchmarking : JBTest() {
                 myFixture.addFileToProject(it.virtualFile.name, it.virtualFile.getDocument().text)
             }
             contexts.mapNotNull { it as? OpenFileContext }.forEach {
-                myFixture.openFileInEditor(it.virtualFile)
+                myFixture.openFileInEditor(it.virtualFile) //todo: auto clean up
             }
 
             val virtualFile = (contexts.find { it is VirtualFileContext } as? VirtualFileContext)?.virtualFile
@@ -209,8 +210,12 @@ class VoqalBenchmarking : JBTest() {
 
             benchPromise.startFloorTime()
             project.scope.launch {
+                val statusService = project.service<VoqalStatusService>()
                 try {
-                    project.service<VoqalStatusService>().update(EDITING)
+                    contexts.mapNotNull { it as? VoqalStatusContext }.forEach {
+                        statusService.update(it.status)
+                    }
+
                     val contextService = project.service<VoqalContextService>()
                     val directive = VoqalDirective(
                         assistant = AssistantContext(
@@ -237,10 +242,13 @@ class VoqalBenchmarking : JBTest() {
                         )
                     )
                     directiveService.executeDirective(directive)
-                    project.service<VoqalStatusService>().update(IDLE)
+
+                    if (statusService.getStatus() != IDLE) {
+                        statusService.update(IDLE)
+                    }
                 } catch (e: Error) {
                     e.printStackTrace()
-                    project.service<VoqalStatusService>().update(ERROR)
+                    statusService.update(ERROR)
                 }
             }
         }
