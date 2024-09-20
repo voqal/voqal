@@ -40,16 +40,15 @@ The codebase is structured as follows:
 
 The following benchmarks were produced via these [suites](./src/test/kotlin/benchmark/suites).
 
-![](.github/media/vb-scatter-dark.svg#gh-dark-mode-only)
-![](.github/media/vb-scatter-light.svg#gh-light-mode-only)
+|                                                 Idle Mode                                                  |                                            Edit Mode                                             |
+|:----------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
+| ![](.github/media/benchmark/idle_dark.svg#gh-dark-mode-only)![](.github/media/idle.svg#gh-light-mode-only) | ![](.github/media/edit_dark.svg#gh-dark-mode-only)![](.github/media/edit.svg#gh-light-mode-only) |
 
 > Legend: X-axis: Time (ms), Y-axis: Accuracy (%), Size: Cost ($)
 
 ### Commentary
 
-The benchmarks show that the Voqal Assistant works best with `Meta-Llama-3.1-405B-Instruct-Turbo` but requires a
-bit more time to process the response. `gemini-1.5-flash-latest` is the cheapest and fastest model with high accuracy,
-but may require more follow-up messages to get the desired result. Further work needs to be done to break down
-performance by specific modes (e.g. idle, edit, search). Further work also needs to be done to improve the performance
+The benchmarks show that the Voqal Assistant works best with `Meta-Llama-3.1-405B-Instruct-Turbo` in Edit Mode
+and `gemini-1.5-flash-latest` in Idle Mode. Further work also needs to be done to improve the performance
 of the unified diff format-based editing as diff-based editing enables faster and more cost-effective editing.
 Diff-based editing is currently disabled as it is not yet production-ready.
