@@ -19,10 +19,10 @@ jobs:
           - "idle_mode"
         modelName:
 #          - "gpt-4o-2024-08-06"
-#          - "gpt-4o-mini"
+          - "gpt-4o-mini"
 #          - "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
-#          - "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
-#          - "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
+          - "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+          - "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
           - "gemini-1.5-flash-latest"
           - "gemini-1.5-pro-latest"
 #          - "gemini-1.5-pro-exp-0801"
