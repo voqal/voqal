@@ -127,10 +127,10 @@ fun PsiElement.isGo(): Boolean {
     return this.language.id.lowercase() == "go"
 }
 
-fun PsiElement.getCodeBlock(): PsiElement {
+fun PsiElement.getCodeBlock(): PsiElement? {
     return descendants()
         .filter { it.isCodeBlock() }
-        .first()
+        .firstOrNull()
 }
 
 fun PsiFile.getFunctions(): List<PsiNamedElement> {

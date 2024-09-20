@@ -59,14 +59,22 @@ class RecursifyFunctionSuite : BenchmarkSuite {
                 it.fail("Factorial iterative function not found")
             } else {
                 val functionBody = factorialIterative.getCodeBlock()
-                checkNotTextContains("factorialIterative(", functionBody, it)
+                if (functionBody != null) {
+                    checkNotTextContains("factorialIterative(", functionBody, it)
+                } else {
+                    it.fail("Missing factorialIterative function body")
+                }
             }
             val findMaxRecursive = psiFunctions.find { it.name == "findMaxRecursive" }
             if (findMaxRecursive == null) {
                 it.fail("Find max recursive function not found")
             } else {
                 val functionBody = findMaxRecursive.getCodeBlock()
-                checkTextContains("findMaxRecursive(", functionBody, it)
+                if (functionBody != null) {
+                    checkTextContains("findMaxRecursive(", functionBody, it)
+                } else {
+                    it.fail("Missing findMaxRecursive function body")
+                }
             }
 
             it.testFinished()
