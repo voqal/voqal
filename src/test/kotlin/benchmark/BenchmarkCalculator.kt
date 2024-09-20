@@ -7,6 +7,24 @@ import java.io.File
 fun main() {
     outputResults("edit_mode")
     outputResults("idle_mode")
+    combineResults()
+}
+
+private fun combineResults() {
+    val benchmarkResults = JsonArray()
+    File("benchmark").walk().forEach { file ->
+        if (file.isFile && file.name.endsWith(".json")) {
+            val result = JsonObject(file.readText())
+            val keyResults = JsonObject().put("modelName", result.getString("modelName"))
+            benchmarkResults.add(keyResults)
+            val results = JsonArray()
+            results.add(result.getJsonArray("results"))
+            keyResults.put("results", results)
+        }
+    }
+    if (!benchmarkResults.isEmpty) {
+        outputChart("all", benchmarkResults)
+    }
 }
 
 private fun outputResults(mode: String) {
