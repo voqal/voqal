@@ -39,29 +39,7 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
         var lmProvider = settings.getProvider();
         modelNameComboBox.addActionListener(e -> {
             if (setupMode) return;
-            if (lmProvider == LMProvider.OPENAI) {
-                tokenLimitSpinner.setValue(OpenAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.TOGETHER_AI) {
-                tokenLimitSpinner.setValue(TogetherAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.VERTEX_AI) {
-                tokenLimitSpinner.setValue(VertexAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.GOOGLE_API) {
-                tokenLimitSpinner.setValue(GoogleApiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.ANTHROPIC) {
-                tokenLimitSpinner.setValue(AnthropicClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.DEEPSEEK) {
-                tokenLimitSpinner.setValue(DeepSeekClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.GROQ) {
-                tokenLimitSpinner.setValue(GroqClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.FIREWORKS_AI) {
-                tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.MISTRAL_AI) {
-                tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.SAMBANOVA) {
-                tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (lmProvider == LMProvider.CEREBRAS) {
-                tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            }
+            tokenLimitSpinner.setValue(getTokenLimit(lmProvider));
         });
 
         observabilityComboBox.addActionListener(e -> {
@@ -281,28 +259,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
         }
         modelNameComboBox.setSelectedItem(config.getModelName());
         tokenLimitSpinner.setValue(config.getTokenLimit());
-        if (lmProvider == LMProvider.TOGETHER_AI) {
-            tokenLimitSpinner.setValue(TogetherAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.OPENAI) {
-            tokenLimitSpinner.setValue(OpenAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.VERTEX_AI) {
-            tokenLimitSpinner.setValue(VertexAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.GOOGLE_API) {
-            tokenLimitSpinner.setValue(GoogleApiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.ANTHROPIC) {
-            tokenLimitSpinner.setValue(AnthropicClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.DEEPSEEK) {
-            tokenLimitSpinner.setValue(DeepSeekClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.GROQ) {
-            tokenLimitSpinner.setValue(GroqClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.FIREWORKS_AI) {
-            tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.MISTRAL_AI) {
-            tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.SAMBANOVA) {
-            tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (lmProvider == LMProvider.CEREBRAS) {
-            tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
+        if (config.getTokenLimit() == -1) {
+            tokenLimitSpinner.setValue(getTokenLimit(lmProvider));
         }
 
         if (config.getTemperature() == null) {
@@ -381,6 +339,34 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
         } else {
             headerParamsLabel.setVisible(false);
             headerParamsTextField.setVisible(false);
+        }
+    }
+
+    private int getTokenLimit(LMProvider lmProvider) {
+        if (lmProvider == LMProvider.OPENAI) {
+            return OpenAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.TOGETHER_AI) {
+            return TogetherAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.VERTEX_AI) {
+            return VertexAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.GOOGLE_API) {
+            return GoogleApiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.ANTHROPIC) {
+            return AnthropicClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.DEEPSEEK) {
+            return DeepSeekClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.GROQ) {
+            return GroqClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.FIREWORKS_AI) {
+            return FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.MISTRAL_AI) {
+            return MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.SAMBANOVA) {
+            return SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.CEREBRAS) {
+            return CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else {
+            return -1;
         }
     }
 
