@@ -37,6 +37,7 @@ object VoqalIcons {
         val deepseek: Icon = IconLoader.getIcon("/icons/compute/deepseek.svg", VoqalIcons::class.java)
         val fireworks: Icon = IconLoader.getIcon("/icons/compute/fireworks.svg", VoqalIcons::class.java)
         val sambanova: Icon = IconLoader.getIcon("/icons/compute/sambanova.svg", VoqalIcons::class.java)
+        val cerebras: Icon = IconLoader.getIcon("/icons/compute/cerebras.svg", VoqalIcons::class.java)
     }
 
     val DARK_RED = JBColor(JBColor.PINK, Color(0x5E3838))

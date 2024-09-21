@@ -3,6 +3,7 @@ package dev.voqal.config.settings
 import dev.voqal.config.ConfigurableSettings
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.provider.clients.anthropic.AnthropicClient
+import dev.voqal.provider.clients.cerebras.CerebrasClient
 import dev.voqal.provider.clients.deepseek.DeepSeekClient
 import dev.voqal.provider.clients.fireworks.FireworksClient
 import dev.voqal.provider.clients.googleapi.GoogleApiClient
@@ -53,6 +54,7 @@ data class LanguageModelSettings(
                 LMProvider.MISTRAL_AI -> LanguageModelSettings(provider, modelName = MistralAiClient.DEFAULT_MODEL)
                 LMProvider.VERTEX_AI -> LanguageModelSettings(provider, modelName = VertexAiClient.DEFAULT_MODEL)
                 LMProvider.SAMBANOVA -> LanguageModelSettings(provider, modelName = SambaNovaClient.DEFAULT_MODEL)
+                LMProvider.CEREBRAS -> LanguageModelSettings(provider, modelName = CerebrasClient.DEFAULT_MODEL)
 
                 LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
@@ -132,6 +134,7 @@ data class LanguageModelSettings(
         OPENAI("OpenAI"),
         GOOGLE_API("Google API"),
         SAMBANOVA("SambaNova"),
+        CEREBRAS("Cerebras"),
         ANTHROPIC("Anthropic"),
         TOGETHER_AI("TogetherAI"),
         MISTRAL_AI("MistralAI"),
@@ -157,6 +160,7 @@ data class LanguageModelSettings(
                 this == DEEPSEEK -> VoqalIcons.Compute.deepseek
                 this == FIREWORKS_AI -> VoqalIcons.Compute.fireworks
                 this == SAMBANOVA -> VoqalIcons.Compute.sambanova
+                this == CEREBRAS -> VoqalIcons.Compute.cerebras
                 else -> null
             }
         }
@@ -174,7 +178,8 @@ data class LanguageModelSettings(
                 OPENAI, TOGETHER_AI, MISTRAL_AI,
                 GROQ, OLLAMA, CUSTOM,
                 VERTEX_AI, GOOGLE_API, ANTHROPIC,
-                DEEPSEEK, FIREWORKS_AI, SAMBANOVA
+                DEEPSEEK, FIREWORKS_AI, SAMBANOVA,
+                CEREBRAS
             )
         }
 

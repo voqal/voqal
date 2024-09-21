@@ -8,6 +8,7 @@ import dev.voqal.config.settings.LanguageModelSettings;
 import dev.voqal.config.settings.LanguageModelSettings.LMProvider;
 import dev.voqal.config.settings.LanguageModelSettings.OProvider;
 import dev.voqal.provider.clients.anthropic.AnthropicClient;
+import dev.voqal.provider.clients.cerebras.CerebrasClient;
 import dev.voqal.provider.clients.deepseek.DeepSeekClient;
 import dev.voqal.provider.clients.fireworks.FireworksClient;
 import dev.voqal.provider.clients.googleapi.GoogleApiClient;
@@ -56,6 +57,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
                 tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
             } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
                 tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
+            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.CEREBRAS) {
+                tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
             }
         });
 
@@ -266,6 +269,10 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(
                     SambaNovaClient.getMODELS().toArray(new String[0]))
             );
+        } else if (lmProvider == LMProvider.CEREBRAS) {
+            modelNameComboBox.setModel(new DefaultComboBoxModel<>(
+                    CerebrasClient.getMODELS().toArray(new String[0]))
+            );
         } else {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {""}));
         }
@@ -291,6 +298,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
         } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
             tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
+        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.CEREBRAS) {
+            tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
         }
 
         if (config.getTemperature() == null) {

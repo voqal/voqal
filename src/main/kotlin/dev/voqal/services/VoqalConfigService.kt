@@ -26,6 +26,7 @@ import dev.voqal.provider.AiProvider
 import dev.voqal.provider.clients.AiProvidersClient
 import dev.voqal.provider.clients.anthropic.AnthropicClient
 import dev.voqal.provider.clients.assemblyai.AssemblyAiClient
+import dev.voqal.provider.clients.cerebras.CerebrasClient
 import dev.voqal.provider.clients.deepgram.DeepgramClient
 import dev.voqal.provider.clients.deepseek.DeepSeekClient
 import dev.voqal.provider.clients.fireworks.FireworksClient
@@ -506,6 +507,20 @@ class VoqalConfigService(private val project: Project) {
                         providerKey = modelSettings.providerKey
                     )
                     addLlmProvider(sambaNovaClient)
+                } else {
+                    log.warnChat("Missing language model provider key")
+                }
+            }
+
+            LMProvider.CEREBRAS -> {
+                log.debug("Using Cerebras language model provider")
+                if (modelSettings.providerKey.isNotEmpty()) {
+                    val cerebrasClient = CerebrasClient(
+                        modelSettings.name,
+                        project,
+                        providerKey = modelSettings.providerKey
+                    )
+                    addLlmProvider(cerebrasClient)
                 } else {
                     log.warnChat("Missing language model provider key")
                 }
