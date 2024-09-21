@@ -29,6 +29,7 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
 
     private final Project project;
     private final LanguageModelSettings settings;
+    private boolean setupMode = false;
 
     public LanguageModelSettingsPanel(Project project, LanguageModelSettings settings) {
         this.project = project;
@@ -37,27 +38,28 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
 
         var lmProvider = settings.getProvider();
         modelNameComboBox.addActionListener(e -> {
-            if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.OPENAI) {
+            if (setupMode) return;
+            if (lmProvider == LMProvider.OPENAI) {
                 tokenLimitSpinner.setValue(OpenAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.TOGETHER_AI) {
+            } else if (lmProvider == LMProvider.TOGETHER_AI) {
                 tokenLimitSpinner.setValue(TogetherAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.VERTEX_AI) {
+            } else if (lmProvider == LMProvider.VERTEX_AI) {
                 tokenLimitSpinner.setValue(VertexAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.GOOGLE_API) {
+            } else if (lmProvider == LMProvider.GOOGLE_API) {
                 tokenLimitSpinner.setValue(GoogleApiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.ANTHROPIC) {
+            } else if (lmProvider == LMProvider.ANTHROPIC) {
                 tokenLimitSpinner.setValue(AnthropicClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.DEEPSEEK) {
+            } else if (lmProvider == LMProvider.DEEPSEEK) {
                 tokenLimitSpinner.setValue(DeepSeekClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.GROQ) {
+            } else if (lmProvider == LMProvider.GROQ) {
                 tokenLimitSpinner.setValue(GroqClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.FIREWORKS_AI) {
+            } else if (lmProvider == LMProvider.FIREWORKS_AI) {
                 tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.MISTRAL_AI) {
+            } else if (lmProvider == LMProvider.MISTRAL_AI) {
                 tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
+            } else if (lmProvider == LMProvider.SAMBANOVA) {
                 tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-            } else if (settings.getTokenLimit() == -1 && lmProvider == LMProvider.CEREBRAS) {
+            } else if (lmProvider == LMProvider.CEREBRAS) {
                 tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
             }
         });
@@ -210,6 +212,7 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
     }
 
     public void applyConfig(LanguageModelSettings config) {
+        setupMode = true;
         providerPasswordField.setText(config.getProviderKey());
         orgIdTextField.setText(config.getOrgId());
         apiUrlTextField.setText(config.getApiUrl());
@@ -278,27 +281,27 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
         }
         modelNameComboBox.setSelectedItem(config.getModelName());
         tokenLimitSpinner.setValue(config.getTokenLimit());
-        if (config.getTokenLimit() == -1 && lmProvider == LMProvider.TOGETHER_AI) {
+        if (lmProvider == LMProvider.TOGETHER_AI) {
             tokenLimitSpinner.setValue(TogetherAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.OPENAI) {
+        } else if (lmProvider == LMProvider.OPENAI) {
             tokenLimitSpinner.setValue(OpenAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.VERTEX_AI) {
+        } else if (lmProvider == LMProvider.VERTEX_AI) {
             tokenLimitSpinner.setValue(VertexAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.GOOGLE_API) {
+        } else if (lmProvider == LMProvider.GOOGLE_API) {
             tokenLimitSpinner.setValue(GoogleApiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.ANTHROPIC) {
+        } else if (lmProvider == LMProvider.ANTHROPIC) {
             tokenLimitSpinner.setValue(AnthropicClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.DEEPSEEK) {
+        } else if (lmProvider == LMProvider.DEEPSEEK) {
             tokenLimitSpinner.setValue(DeepSeekClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.GROQ) {
+        } else if (lmProvider == LMProvider.GROQ) {
             tokenLimitSpinner.setValue(GroqClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.FIREWORKS_AI) {
+        } else if (lmProvider == LMProvider.FIREWORKS_AI) {
             tokenLimitSpinner.setValue(FireworksClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.MISTRAL_AI) {
+        } else if (lmProvider == LMProvider.MISTRAL_AI) {
             tokenLimitSpinner.setValue(MistralAiClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.SAMBANOVA) {
+        } else if (lmProvider == LMProvider.SAMBANOVA) {
             tokenLimitSpinner.setValue(SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
-        } else if (config.getTokenLimit() == -1 && lmProvider == LMProvider.CEREBRAS) {
+        } else if (lmProvider == LMProvider.CEREBRAS) {
             tokenLimitSpinner.setValue(CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString()));
         }
 
@@ -316,6 +319,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
 
         observabilityComboBox.setSelectedItem(config.getObservabilityProvider().name());
         observabilityPasswordField.setText(config.getObservabilityKey());
+        setupMode = false;
+        
         if (Objects.equals(observabilityComboBox.getSelectedItem(), OProvider.Helicone.name())) {
             label8.setVisible(true);
             observabilityPasswordField.setVisible(true);
@@ -323,7 +328,6 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             label8.setVisible(false);
             observabilityPasswordField.setVisible(false);
         }
-
         if (lmProvider.isModelNameRequired()) {
             label5.setVisible(true);
             modelNameComboBox.setVisible(true);
