@@ -28,18 +28,22 @@ class SambaNovaClient(
 ) : LlmProvider {
 
     companion object {
-        const val DEFAULT_MODEL = "Meta-Llama-3.1-405B-Instruct"
+        const val DEFAULT_MODEL = "Meta-Llama-3.1-405B-Instruct-8k"
 
         @JvmStatic
         val MODELS = listOf(
+            "Meta-Llama-3.1-405B-Instruct-8k",
             "Meta-Llama-3.1-405B-Instruct",
+            "Meta-Llama-3.1-70B-Instruct-8k",
             "Meta-Llama-3.1-70B-Instruct",
+            "Meta-Llama-3.1-8B-Instruct-8k",
             "Meta-Llama-3.1-8B-Instruct"
         )
 
         @JvmStatic
         fun getTokenLimit(modelName: String): Int {
             return when {
+                modelName.endsWith("-8k") -> 8192
                 modelName.startsWith("Meta-Llama-3.1") -> 4096
                 else -> -1
             }
