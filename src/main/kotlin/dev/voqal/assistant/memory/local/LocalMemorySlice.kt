@@ -163,7 +163,6 @@ class LocalMemorySlice(
                             memoryId = directive.assistant.memorySlice.id
                         )
                     } catch (e: Throwable) {
-                        println(e)
                         return@collect
                     }
                 }

@@ -69,7 +69,6 @@ class DeepgramClient(
     private lateinit var writeThread: Thread
     private lateinit var pingThread: Thread
     private var restartOnClose = false
-    private var startListeningTime = -1L
     private var capturing = false
 
     init {
@@ -142,7 +141,6 @@ class DeepgramClient(
                 }
                 session!!
             }
-            startListeningTime = System.currentTimeMillis()
             log.debug("Connected to Deepgram")
 
             readThread = Thread(readLoop(), "DeepgramClient-Read").apply { start() }
