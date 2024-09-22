@@ -240,7 +240,7 @@ jobs:
       # Run Verify Plugin task and IntelliJ Plugin Verifier tool
       - name: Run Plugin Verification tasks
         timeout-minutes: 20
-        run: ./gradlew --scan verifyPlugin -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }} -mute ReleaseVersionAndPluginVersionMismatch
+        run: ./gradlew --scan verifyPlugin -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }} -Dmute ReleaseVersionAndPluginVersionMismatch
 
       # Collect Plugin Verifier Result
       - name: Collect Plugin Verifier Result
