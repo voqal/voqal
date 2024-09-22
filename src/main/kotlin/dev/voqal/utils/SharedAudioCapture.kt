@@ -386,13 +386,13 @@ class SharedAudioCapture(private val project: Project) {
 
     fun pause() {
         if (paused) return
-        log.debug("Pausing audio capture")
+        log.trace("Pausing audio capture")
         this.paused = true
     }
 
     fun resume() {
         if (!paused) return
-        log.debug("Resuming audio capture")
+        log.trace("Resuming audio capture")
         this.paused = false
     }
 

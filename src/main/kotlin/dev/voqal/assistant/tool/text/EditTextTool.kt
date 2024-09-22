@@ -70,7 +70,7 @@ class EditTextTool : VoqalTool() {
     override suspend fun actionPerformed(args: JsonObject, directive: VoqalDirective) {
         val project = directive.project
         val log = project.getVoqalLogger(this::class)
-        log.debug("Triggering edit text")
+        log.trace("Triggering edit text")
 
         val editor = directive.ide.editor!!
         val editText = args.getString("text")
@@ -96,7 +96,7 @@ class EditTextTool : VoqalTool() {
             return
         }
 
-        log.debug("Editing started")
+        log.trace("Editing started")
         project.service<VoqalMemoryService>().saveEditLabel(directive.assistant.memorySlice.id, editor)
         val newHighlighters = doDocumentEdits(project, editText, editor, streaming)
         val allHighlighters = (editor.getUserData(VOQAL_HIGHLIGHTERS) ?: emptyList()) + newHighlighters
@@ -139,7 +139,7 @@ class EditTextTool : VoqalTool() {
                 }
             }
         }
-        log.debug("Editing complete")
+        log.trace("Editing complete")
     }
 
     //todo: checking for code smells shouldn't be here (perhaps auto-added CheckCodeSmellsTool?)
@@ -444,7 +444,7 @@ class EditTextTool : VoqalTool() {
         diffFragments = smallestDiff.fragments
         newText = updatedNewText
         diffType = smallestDiff.diffType
-        log.debug("Smallest diff: $diffType")
+        log.trace("Smallest diff: $diffType")
 
         val activeHighlighters = mutableListOf<RangeHighlighter>()
         val diffOffsets = mutableListOf<Pair<Int, Int>>()
