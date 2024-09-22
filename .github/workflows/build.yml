@@ -91,14 +91,6 @@ jobs:
       - name: Build plugin
         run: ./gradlew buildPlugin
 
-      # Upload Proguard mapping file
-      - name: Upload Proguard Mapping
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: proguard-mapping
-          path: ${{ github.workspace }}/build/obfuscated/output/proguard-mapping.txt
-
       # Prepare plugin archive content for creating artifact
       - name: Prepare Plugin Artifact
         id: artifact
