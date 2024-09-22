@@ -117,6 +117,10 @@ class DeepgramClient(
             pingThread.interrupt()
             pingThread.join()
         }
+        if (::writeThread.isInitialized) {
+            writeThread.interrupt()
+            writeThread.join()
+        }
         audioQueue.clear()
 
         try {
@@ -266,8 +270,16 @@ class DeepgramClient(
                         break
                     }
 
-                    runBlocking {
-                        session.send(Frame.Binary(true, buffer))
+                    if (buffer === SharedAudioCapture.EMPTY_BUFFER) {
+                        log.debug("No speech detected, closing stream")
+                        runBlocking {
+                            session.send(Frame.Text("{ \"type\": \"CloseStream\" }"))
+                        }
+                        break
+                    } else {
+                        runBlocking {
+                            session.send(Frame.Binary(true, buffer))
+                        }
                     }
                 }
             } catch (_: InterruptedException) {
@@ -390,10 +402,7 @@ class DeepgramClient(
         } else if (capturing && !detection.speechDetected.get()) {
             capturing = false
             restartOnClose = true
-            project.scope.launch {
-                log.debug("No speech detected, closing stream")
-                session.send(Frame.Text("{ \"type\": \"CloseStream\" }"))
-            }
+            audioQueue.put(SharedAudioCapture.EMPTY_BUFFER)
         }
     }
 
