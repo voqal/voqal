@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.11.4] - 2024-09-23
+
 ### Added
 
 - Cerebras language model provider
@@ -583,7 +585,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.3...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.4...HEAD
+[2024.11.4]: https://github.com/voqal/voqal/compare/v2024.11.3...v2024.11.4
 [2024.11.3]: https://github.com/voqal/voqal/compare/v2024.11.2...v2024.11.3
 [2024.11.2]: https://github.com/voqal/voqal/compare/v2024.11.1...v2024.11.2
 [2024.11.1]: https://github.com/voqal/voqal/compare/v2024.11.0...v2024.11.1
