@@ -52,8 +52,8 @@ class VoqalSearchService(private val project: Project) {
     private val levenshteinDistance = LevenshteinDistance()
 
     fun getActiveProblems(editor: Editor): List<HighlightInfo> {
-        return DocumentMarkupModel.forDocument(editor.document, project, false)
-            .allHighlighters.toList()
+        val markupModel = DocumentMarkupModel.forDocument(editor.document, project, false) ?: return emptyList()
+        return markupModel.allHighlighters.toList()
             .filterIsInstance<RangeMarkerImpl>()
             .mapNotNull {
                 Reflect.on(it).field("myErrorStripeTooltip").get() as? HighlightInfo

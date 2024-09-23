@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- NPE getting active problems with no editor open
+
 ## [2024.11.4] - 2024-09-23
 
 ### Added
