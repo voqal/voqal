@@ -169,6 +169,10 @@ intellijPlatform {
     }
 
     pluginVerification {
+        freeArgs = listOf(
+            "-mute",
+            "ReleaseVersionAndPluginVersionMismatch"
+        )
         ides {
             recommended()
         }
