@@ -7,6 +7,7 @@
 ### Fixed
 
 - NPE getting active problems with no editor open
+- Ollama streaming completions in `Edit Mode`
 
 ## [2024.11.4] - 2024-09-23
 

@@ -1,6 +1,8 @@
 package dev.voqal.provider.clients.ollama
 
 import com.aallam.openai.api.chat.*
+import com.aallam.openai.api.core.Role
+import com.aallam.openai.api.core.Usage
 import com.aallam.openai.api.exception.InvalidRequestException
 import com.aallam.openai.api.exception.OpenAIError
 import com.aallam.openai.api.exception.OpenAIErrorDetails
@@ -15,9 +17,13 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.*
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import java.util.*
 
@@ -34,81 +40,128 @@ class OllamaClient(
             "llama3:8b",
             "llama3:instruct",
             "llama3:70b-instruct"
-        )
+        ) //todo: get from ollama list
     }
 
     private val log = project.getVoqalLogger(this::class)
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val client = HttpClient {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+        install(ContentNegotiation) { json(jsonDecoder) }
         install(HttpTimeout) { requestTimeoutMillis = 30_000 }
     }
 
     override suspend fun chatCompletion(request: ChatCompletionRequest, directive: VoqalDirective?): ChatCompletion {
+        val requestJson = toRequestJson(request).put("stream", false)
+
+        val response = try {
+            client.post(providerUrl) {
+                header("Content-Type", "application/json")
+                setBody(requestJson.encode())
+            }
+        } catch (e: HttpRequestTimeoutException) {
+            throw OpenAITimeoutException(e)
+        }
+        val roundTripTime = response.responseTime.timestamp - response.requestTime.timestamp
+        log.debug("Ollama response status: ${response.status} in $roundTripTime ms")
+
+        throwIfError(response)
+
+        val fullResponse = response.bodyAsText()
+        val error = try {
+            JsonObject(fullResponse).getString("error")
+        } catch (_: Exception) {
+            null
+        }
+        if (error != null) {
+            var statusCode = 500
+            if (error.contains("not found")) {
+                statusCode = 404
+            }
+            throw InvalidRequestException(
+                statusCode,
+                OpenAIError(OpenAIErrorDetails(message = error)),
+                IllegalStateException(fullResponse)
+            )
+        }
+
+        val choice = ChatChoice(
+            index = 0,
+            ChatMessage(
+                ChatRole.Assistant,
+                TextContent(JsonObject(fullResponse).getString("response"))
+            )
+        )
+        val completion = ChatCompletion(
+            id = UUID.randomUUID().toString(),
+            created = System.currentTimeMillis(),
+            model = ModelId(request.model.id),
+            choices = listOf(choice)
+        )
+        return completion
+    }
+
+    override suspend fun streamChatCompletion(
+        request: ChatCompletionRequest,
+        directive: VoqalDirective?
+    ): Flow<ChatCompletionChunk> = flow {
+        val requestJson = toRequestJson(request)
+
         try {
-            val startTime = System.currentTimeMillis()
-            val jsonObject = JsonObject()
-                .put("model", request.model.id)
-                .put("prompt", request.messages.first().content) //todo: not using history
-            val fullResponse = StringBuilder()
-            val infillSource = StringBuilder()
-            var status = 200 //todo: this
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
-                setBody(jsonObject.toString())
-            }.execute { httpResponse ->
-                val channel: ByteReadChannel = httpResponse.body()
+                setBody(requestJson.encode())
+            }.execute { response ->
+                throwIfError(response)
+
+                val channel: ByteReadChannel = response.body()
                 while (!channel.isClosedForRead) {
                     val line = channel.readUTF8Line()?.takeUnless { it.isEmpty() } ?: continue
-                    val json = JsonObject(line)
-                    fullResponse.append(json)
-                    val responseCode = json.getString("response")
-                    infillSource.append(responseCode)
-                }
-            }
-            val roundTripTime = System.currentTimeMillis() - startTime
-            log.debug("Ollama response status: $status in $roundTripTime ms")
 
-            if (status == 200) {
-                val error = try {
-                    JsonObject(fullResponse.toString()).getString("error")
-                } catch (_: Exception) {
-                    null
-                }
-                if (error != null) {
-                    var statusCode = 500
-                    if (error.contains("not found")) {
-                        statusCode = 404
-                    }
-                    throw InvalidRequestException(
-                        statusCode,
-                        OpenAIError(OpenAIErrorDetails(message = error)),
-                        IllegalStateException(fullResponse.toString())
+                    val latestData = JsonObject(line)
+                    emit(
+                        ChatCompletionChunk(
+                            id = UUID.randomUUID().toString(),
+                            created = 0, //todo: System.currentTimeMillis(),
+                            model = ModelId(request.model.id),
+                            choices = listOf(
+                                ChatChunk(
+                                    index = 0,
+                                    delta = ChatDelta(
+                                        role = Role.Assistant,
+                                        content = latestData.getString("response")
+                                    )
+                                )
+                            ),
+                            usage = Usage(0, 0, 0)
+                        )
                     )
                 }
-
-                val choice = ChatChoice(
-                    index = 0,
-                    ChatMessage(
-                        ChatRole.Assistant,
-                        TextContent(infillSource.toString())
-                    )
-                )
-                val completion = ChatCompletion(
-                    id = UUID.randomUUID().toString(),
-                    created = System.currentTimeMillis(),
-                    model = ModelId(request.model.id),
-                    choices = listOf(choice)
-                )
-                return completion
-            } else {
-                log.error("Ollama completion failed: $status")
-                throw Exception("Ollama completion failed: $status")
             }
         } catch (e: HttpRequestTimeoutException) {
             throw OpenAITimeoutException(e)
         }
     }
 
+    private fun toRequestJson(request: ChatCompletionRequest): JsonObject {
+        val requestJson = JsonObject()
+            .put("model", request.model.id)
+            .put("prompt", request.messages.first().content) //todo: not using history
+        return requestJson
+    }
+
+    private suspend fun throwIfError(response: HttpResponse) {
+        if (response.status.isSuccess()) return
+
+        val responseBody = response.bodyAsText()
+        val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
+        throw InvalidRequestException(
+            response.status.value,
+            OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
+            ClientRequestException(response, responseBody)
+        )
+    }
+
+    override fun isStreamable() = true
     override fun getAvailableModelNames() = MODELS
     override fun dispose() = client.close()
 }
