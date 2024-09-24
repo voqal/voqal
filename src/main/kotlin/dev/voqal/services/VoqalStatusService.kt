@@ -5,11 +5,13 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Inlay
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.concurrency.ThreadingAssertions
 import dev.voqal.assistant.VoqalResponse
 import dev.voqal.config.settings.TextToSpeechSettings
+import dev.voqal.ide.actions.ShowQuickEditAction
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.status.VoqalStatus
 import dev.voqal.status.VoqalStatus.*
@@ -137,5 +139,24 @@ class VoqalStatusService(private val project: Project) {
         }
         ThreadingAssertions.assertBackgroundThread()
         project.service<ChatToolWindowContentManager>().addErrorMessage(input)
+
+        if (project.service<VoqalStatusService>().getStatus() == EDITING) {
+            val inlay = project.service<VoqalMemoryService>().getUserData("voqal.edit.inlay") as Inlay<*>?
+            if (inlay != null) {
+                val errorInlay = project.service<VoqalMemoryService>()
+                    .getUserData("voqal.edit.inlay.error") as Inlay<*>?
+                if (errorInlay == null) {
+                    project.invokeLater {
+                        ShowQuickEditAction.showErrorInlay(project, inlay.editor, inlay.offset, input, inlay)
+                    }
+                } else {
+                    val errorRenderer = errorInlay.renderer as ShowQuickEditAction.ErrorInlayRenderer
+                    errorRenderer.text = input
+                    project.invokeLater {
+                        errorInlay.update()
+                    }
+                }
+            }
+        }
     }
 }

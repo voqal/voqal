@@ -6,7 +6,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorCustomElementRenderer
 import com.intellij.openapi.editor.Inlay
+import com.intellij.openapi.editor.colors.CodeInsightColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager
 import com.intellij.openapi.editor.impl.EditorImpl
@@ -30,9 +34,7 @@ import dev.voqal.status.VoqalStatus
 import io.vertx.core.json.JsonObject
 import kotlinx.coroutines.launch
 import org.joor.Reflect
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.Font
+import java.awt.*
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.KeyAdapter
@@ -52,6 +54,15 @@ import kotlin.math.min
 class ShowQuickEditAction : AnAction() {
 
     companion object {
+        fun showErrorInlay(project: Project, editor: Editor, offset: Int, text: String, inlay: Inlay<*>) {
+            val renderer = ErrorInlayRenderer(text)
+            val errorInlay = editor.inlayModel.addBlockElement(
+                offset, true, true, 1336,
+                renderer
+            ) ?: return
+            project.service<VoqalMemoryService>().putUserData("voqal.edit.inlay.error", errorInlay)
+            Disposer.register(inlay, errorInlay)
+        }
 
         fun setEditRangeHighlighter(project: Project, editor: Editor, editRange: TextRange) {
             val textAttributes = TextAttributes().apply {
@@ -157,7 +168,7 @@ class ShowQuickEditAction : AnAction() {
                     null,
                     true,
                     true,
-                    0,
+                    1337,
                     caretPosition
                 )
             )?.also {
@@ -309,6 +320,27 @@ class ShowQuickEditAction : AnAction() {
                 (editorWidthWatcher.editorTextWidth * scale).toInt(),
                 (component.preferredSize.height * scale).toInt()
             )
+        }
+    }
+
+    class ErrorInlayRenderer(var text: String) : EditorCustomElementRenderer {
+        private val errorColor = EditorColorsManager.getInstance().globalScheme
+            .getAttributes(CodeInsightColors.ERRORS_ATTRIBUTES).errorStripeColor
+
+        override fun calcWidthInPixels(inlay: Inlay<*>): Int {
+            val editor = inlay.editor
+            return editor.contentComponent.getFontMetrics(getFont(editor)).stringWidth("Error: $text")
+        }
+
+        override fun paint(inlay: Inlay<*>, g: Graphics, r: Rectangle, textAttributes: TextAttributes) {
+            val editor = inlay.editor
+            g.color = errorColor
+            g.font = getFont(editor)
+            g.drawString("Error: $text", r.x, r.y + editor.ascent)
+        }
+
+        private fun getFont(editor: Editor): Font {
+            return editor.colorsScheme.getFont(EditorFontType.PLAIN)
         }
     }
 }
