@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.11.5] - 2024-09-24
+
 ### Fixed
 
 - NPE getting active problems with no editor open
@@ -590,7 +592,8 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.4...HEAD
+[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.5...HEAD
+[2024.11.5]: https://github.com/voqal/voqal/compare/v2024.11.4...v2024.11.5
 [2024.11.4]: https://github.com/voqal/voqal/compare/v2024.11.3...v2024.11.4
 [2024.11.3]: https://github.com/voqal/voqal/compare/v2024.11.2...v2024.11.3
 [2024.11.2]: https://github.com/voqal/voqal/compare/v2024.11.1...v2024.11.2
