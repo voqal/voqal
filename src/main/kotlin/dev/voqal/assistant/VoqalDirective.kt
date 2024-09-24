@@ -28,11 +28,13 @@ data class VoqalDirective(
     val requestId by lazy { assistant.memorySlice.id }
     val directiveId by lazy { assistant.parentDirective?.assistant?.memorySlice?.id ?: assistant.memorySlice.id }
     val project = ide.project
+    private var promptCache: String? = null
 
     /**
      * Creates the final prompt which will be sent to LLM.
      */
-    fun toMarkdown(): String {
+    fun toMarkdown(useCache: Boolean = false): String {
+        if (useCache) return promptCache!!
         val promptSettings = assistant.promptSettings ?: throw IllegalStateException("Prompt settings not found")
         val promptTemplate = ide.project.service<VoqalConfigService>().getPromptTemplate(promptSettings)
         val compiledTemplate = VoqalTemplateEngine.getTemplate(promptTemplate)
@@ -86,7 +88,9 @@ data class VoqalDirective(
                 }
             }
         }
-        return finalPrompt.toString()
+        val promptMarkdown = finalPrompt.toString()
+        promptCache = promptMarkdown
+        return promptMarkdown
     }
 
     fun toJson(): JsonObject {

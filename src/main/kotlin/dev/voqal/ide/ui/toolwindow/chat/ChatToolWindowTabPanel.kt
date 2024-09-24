@@ -194,7 +194,7 @@ class ChatToolWindowTabPanel(
 
     private fun viewPrompt(voqalResponse: VoqalResponse) {
         project.scope.launch {
-            val requestMarkdown = voqalResponse.directive.toMarkdown()
+            val requestMarkdown = voqalResponse.directive.toMarkdown(true)
             var llmResponseJson = voqalResponse.backingResponse?.let { Json.encodePrettily(it) }
                 ?: JsonObject().put("error", voqalResponse.exception?.message ?: "Unknown error").encodePrettily()
             if (llmResponseJson == "{ }" && voqalResponse.backingResponse != null) {
