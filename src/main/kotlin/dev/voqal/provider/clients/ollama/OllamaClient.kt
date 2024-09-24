@@ -36,10 +36,10 @@ class OllamaClient(
     companion object {
         @JvmStatic
         val MODELS = listOf(
-            "llama3:latest",
-            "llama3:8b",
-            "llama3:instruct",
-            "llama3:70b-instruct"
+            "llama3.1:latest",
+            "llama3.1:8b",
+            "llama3.1:instruct",
+            "llama3.1:70b-instruct"
         ) //todo: get from ollama list
     }
 
