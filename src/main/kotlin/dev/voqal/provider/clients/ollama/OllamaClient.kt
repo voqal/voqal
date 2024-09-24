@@ -65,30 +65,12 @@ class OllamaClient(
         log.debug("Ollama response status: ${response.status} in $roundTripTime ms")
 
         throwIfError(response)
-
-        val fullResponse = response.bodyAsText()
-        val error = try {
-            JsonObject(fullResponse).getString("error")
-        } catch (_: Exception) {
-            null
-        }
-        if (error != null) {
-            var statusCode = 500
-            if (error.contains("not found")) {
-                statusCode = 404
-            }
-            throw InvalidRequestException(
-                statusCode,
-                OpenAIError(OpenAIErrorDetails(message = error)),
-                IllegalStateException(fullResponse)
-            )
-        }
-
+        val responseBody = response.bodyAsText()
         val choice = ChatChoice(
             index = 0,
             ChatMessage(
                 ChatRole.Assistant,
-                TextContent(JsonObject(fullResponse).getString("response"))
+                TextContent(JsonObject(responseBody).getString("response"))
             )
         )
         val completion = ChatCompletion(
@@ -153,11 +135,15 @@ class OllamaClient(
         if (response.status.isSuccess()) return
 
         val responseBody = response.bodyAsText()
-        val error = jsonDecoder.decodeFromString<OpenAIError>(responseBody)
+        val error = JsonObject(responseBody).getString("error")
+        var statusCode = 500
+        if (error.contains("not found")) {
+            statusCode = 404
+        }
         throw InvalidRequestException(
-            response.status.value,
-            OpenAIError(OpenAIErrorDetails(message = error.detail?.message)),
-            ClientRequestException(response, responseBody)
+            statusCode,
+            OpenAIError(OpenAIErrorDetails(message = error)),
+            IllegalStateException(responseBody)
         )
     }
 
