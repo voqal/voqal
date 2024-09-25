@@ -243,6 +243,19 @@ class VoqalDirectiveService(private val project: Project) {
         val promptSettings = configService.getPromptSettings(promptName)
         val languageModelSettings = configService.getLanguageModelSettings(promptSettings)
 
+        val caretOffset = ReadAction.compute(ThrowableComputable {
+            val caretModel = selectedTextEditor?.caretModel
+            caretModel?.offset
+        })
+        val caretLine = ReadAction.compute(ThrowableComputable {
+            val caretModel = selectedTextEditor?.caretModel
+            caretModel?.logicalPosition?.line
+        })
+        val caretColumn = ReadAction.compute(ThrowableComputable {
+            val caretModel = selectedTextEditor?.caretModel
+            caretModel?.logicalPosition?.column
+        })
+
         val activeBreakpoints = XDebuggerManager.getInstance(project).breakpointManager.allBreakpoints
             .filterIsInstance<XLineBreakpoint<*>>()
             .filter { it.fileUrl == selectedTextEditor?.virtualFile?.url }
@@ -278,6 +291,10 @@ class VoqalDirectiveService(private val project: Project) {
                         code = currentCode,
                         language = languageOfFile?.id?.lowercase() ?: "",
                         filename = selectedTextEditor?.virtualFile?.name,
+                        caret = selectedTextEditor?.caretModel?.currentCaret,
+                        caretOffset = caretOffset,
+                        caretLine = caretLine,
+                        caretColumn = caretColumn,
                         problems = viewingCodeProblems ?: emptyList()
                     )
                 },
