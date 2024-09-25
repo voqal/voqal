@@ -87,7 +87,7 @@ class ToggleEditModeTool : VoqalTool() {
 
             if (prompt != null) {
                 log.debug("Entering edit mode with directive: $prompt")
-                val editDirective = project.service<VoqalDirectiveService>().asDirective(
+                val editDirective = project.service<VoqalDirectiveService>().createDirective(
                     transcription = SpokenTranscript(prompt, directive.assistant.speechId),
                     textOnly = directive.developer.textOnly,
                     usingAudioModality = directive.assistant.usingAudioModality,

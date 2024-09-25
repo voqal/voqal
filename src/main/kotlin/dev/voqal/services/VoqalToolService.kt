@@ -142,7 +142,7 @@ class VoqalToolService(private val project: Project) {
 
     private suspend fun executeIntent(args: Map<String, Any>, intentAction: VoqalTool) {
         val directive = project.service<VoqalDirectiveService>()
-            .asDirective(SpokenTranscript("", null), true) //todo: memory/speech id
+            .createDirective(SpokenTranscript("", null), true) //todo: memory/speech id
         intentAction.actionPerformed(JsonObject.mapFrom(args), directive)
     }
 
@@ -244,7 +244,7 @@ class VoqalToolService(private val project: Project) {
             val canShortcutDirective = isDirective && action.canShortcut(project, functionCall)
             if (isDirective && !canShortcutDirective) {
                 var childDirective = project.service<VoqalDirectiveService>()
-                    .asDirective(SpokenTranscript(args.getString("directive"), null), true)
+                    .createDirective(SpokenTranscript(args.getString("directive"), null), true)
                 childDirective = childDirective.copy(
                     assistant = childDirective.assistant.copy(
                         directiveMode = false,

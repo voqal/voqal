@@ -165,7 +165,7 @@ class VoqalDirectiveService(private val project: Project) {
         //send transcription to LLM
         val currentStatus = project.service<VoqalStatusService>().getStatus()
         if (currentStatus == IDLE) {
-            val directive = asDirective(
+            val directive = createDirective(
                 transcription = spokenTranscript,
                 textOnly = textOnly,
                 usingAudioModality = usingAudioModality,
@@ -174,7 +174,7 @@ class VoqalDirectiveService(private val project: Project) {
             )
             executeDirective(directive)
         } else if (currentStatus == EDITING) {
-            val directive = asDirective(
+            val directive = createDirective(
                 transcription = spokenTranscript,
                 textOnly = textOnly,
                 usingAudioModality = usingAudioModality,
@@ -183,7 +183,7 @@ class VoqalDirectiveService(private val project: Project) {
             )
             executeDirective(directive)
         } else if (currentStatus == SEARCHING) {
-            val directive = asDirective(
+            val directive = createDirective(
                 transcription = spokenTranscript,
                 textOnly = textOnly,
                 usingAudioModality = usingAudioModality,
@@ -218,7 +218,7 @@ class VoqalDirectiveService(private val project: Project) {
         return activeDirectives.isNotEmpty()
     }
 
-    fun asDirective(
+    fun createDirective(
         transcription: SpokenTranscript,
         textOnly: Boolean = false,
         usingAudioModality: Boolean = false,

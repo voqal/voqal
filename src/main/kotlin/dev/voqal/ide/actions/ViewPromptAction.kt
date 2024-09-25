@@ -21,7 +21,7 @@ class ViewPromptAction : AnAction() {
             val toolService = project.service<VoqalToolService>()
             val promptName = configService.getCurrentPromptMode()
             var nopDirective = project.service<VoqalDirectiveService>()
-                .asDirective(SpokenTranscript("n/a", null), promptName = promptName)
+                .createDirective(SpokenTranscript("n/a", null), promptName = promptName)
             nopDirective = nopDirective.copy(
                 assistant = nopDirective.assistant.copy(
                     availableActions = toolService.getAvailableTools().values

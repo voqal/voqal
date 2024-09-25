@@ -58,7 +58,7 @@ class MoveClassToolTest : JBTest() {
         val directiveService = project.service<VoqalDirectiveService>()
         val transcription = "move class com.example.Test to com.test2"
         project.scope.launch {
-            val directive = directiveService.asDirective(
+            val directive = directiveService.createDirective(
                 SpokenTranscript(transcription, null),
                 textOnly = true
             )
