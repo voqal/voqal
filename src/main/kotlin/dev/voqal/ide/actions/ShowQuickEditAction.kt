@@ -54,11 +54,13 @@ import kotlin.math.min
 class ShowQuickEditAction : AnAction() {
 
     companion object {
+        private const val ERROR_INLAY_PRIORITY = 6097
+        private const val QUICK_EDIT_INLAY_PRIORITY = 6098
+
         fun showErrorInlay(project: Project, editor: Editor, offset: Int, text: String, inlay: Inlay<*>) {
             val renderer = ErrorInlayRenderer(text)
             val errorInlay = editor.inlayModel.addBlockElement(
-                offset, true, true, 1336,
-                renderer
+                offset, true, true, ERROR_INLAY_PRIORITY, renderer
             ) ?: return
             project.service<VoqalMemoryService>().putUserData("voqal.edit.inlay.error", errorInlay)
             Disposer.register(inlay, errorInlay)
@@ -165,11 +167,7 @@ class ShowQuickEditAction : AnAction() {
                 editor, wrappedComponent,
                 EditorEmbeddedComponentManager.Properties(
                     EditorEmbeddedComponentManager.ResizePolicy.any(),
-                    null,
-                    true,
-                    true,
-                    1337,
-                    caretPosition
+                    null, true, true, QUICK_EDIT_INLAY_PRIORITY, caretPosition
                 )
             )?.also {
                 it.putUserData(USER_DIRECTIVE_TEXT_AREA, userDirectiveTextArea)
