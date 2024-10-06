@@ -26,6 +26,7 @@ import dev.voqal.provider.AiProvider
 import dev.voqal.provider.clients.AiProvidersClient
 import dev.voqal.provider.clients.anthropic.AnthropicClient
 import dev.voqal.provider.clients.assemblyai.AssemblyAiClient
+import dev.voqal.provider.clients.azure.AzureClient
 import dev.voqal.provider.clients.cerebras.CerebrasClient
 import dev.voqal.provider.clients.deepgram.DeepgramClient
 import dev.voqal.provider.clients.deepseek.DeepSeekClient
@@ -253,7 +254,7 @@ class VoqalConfigService(private val project: Project) {
             TextToSpeechSettings.TTSProvider.DEEPGRAM -> {
                 log.debug("Using Deepgram text-to-speech provider")
                 if (voqalConfig.speechToTextSettings.provider == SpeechToTextSettings.STTProvider.DEEPGRAM) {
-                    log.debug("Reusing Deepgram client for speech-to-text")
+                    log.debug("Reusing Deepgram client for text-to-speech")
                     val deepgramClient = asSttProvider() as DeepgramClient
                     addTtsProvider(deepgramClient)
                 } else if (voqalConfig.textToSpeechSettings.providerKey.isNotEmpty()) {
@@ -327,7 +328,17 @@ class VoqalConfigService(private val project: Project) {
                         logging = LoggingConfig(LogLevel.None),
                         engine = JavaHttpEngine(JavaHttpConfig())
                     )
-                    val openAI = OpenAiClient(modelSettings.name, project, openAiConfig)
+                    val openAI = OpenAiClient(
+                        name = modelSettings.name,
+                        project = project,
+                        openAiConfig = openAiConfig,
+                        providerKey = modelSettings.providerKey,
+                        audioModality = modelSettings.audioModality,
+                        modelName = modelSettings.modelName
+                    )
+                    if (modelSettings.audioModality) {
+                        addStmProvider(openAI)
+                    }
                     addLlmProvider(openAI)
                     addAssistantProvider(openAI)
                 } else {
@@ -526,6 +537,26 @@ class VoqalConfigService(private val project: Project) {
                 }
             }
 
+            LMProvider.AZURE -> {
+                log.debug("Using Azure language model provider")
+                if (modelSettings.providerKey.isNotEmpty()) {
+                    val azureClient = AzureClient(
+                        modelSettings.name,
+                        project,
+                        providerUrl = modelSettings.apiUrl,
+                        providerKey = modelSettings.providerKey,
+                        deployment = modelSettings.modelName,
+                        audioModality = modelSettings.audioModality
+                    )
+                    if (modelSettings.audioModality) {
+                        addStmProvider(azureClient)
+                    }
+                    addLlmProvider(azureClient)
+                } else {
+                    log.warnChat("Missing language model provider key")
+                }
+            }
+
             LMProvider.NONE -> Unit //nop
         }
     }
@@ -690,6 +721,10 @@ class VoqalConfigService(private val project: Project) {
             else -> "Idle Mode"
         }
         return configService.getPromptSettings(promptName)
+    }
+
+    fun getCurrentLanguageModelSettings(): LanguageModelSettings {
+        return getLanguageModelSettings(getCurrentPromptSettings())
     }
 
     fun getLanguageModelSettings(promptSettings: PromptSettings): LanguageModelSettings {

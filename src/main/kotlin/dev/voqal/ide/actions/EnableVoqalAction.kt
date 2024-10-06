@@ -18,7 +18,6 @@ class EnableVoqalAction : AnAction() {
         configService.updateConfig(config.pluginSettings.copy(enabled = true))
 
         project.scope.launch {
-            project.service<VoqalConfigService>().resetAiProvider()
             project.service<VoqalConfigService>().getAiProvider()
             project.service<VoqalStatusService>().update(VoqalStatus.IDLE)
         }

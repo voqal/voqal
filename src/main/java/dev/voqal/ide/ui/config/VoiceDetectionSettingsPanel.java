@@ -146,6 +146,11 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
     }
 
     @Override
+    public float sampleRate() {
+        return 16000f;
+    }
+
+    @Override
     public boolean isTestListener() {
         return true;
     }

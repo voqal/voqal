@@ -117,6 +117,11 @@ class AiProvidersClient(private val project: Project) : AiProvider {
             .first { it.isStmProvider() }.asStmProvider()
     }
 
+    override fun findProvider(name: String): AiProvider? {
+        return llmProviders.find { it.name == name }
+            ?: stmProviders.find { it.name == name }
+    }
+
     fun hasNecessaryProviders(): Boolean {
         return llmProviders.isNotEmpty() ||
                 sttProviders.isNotEmpty() ||

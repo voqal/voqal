@@ -3,6 +3,7 @@ package dev.voqal.config.settings
 import dev.voqal.config.ConfigurableSettings
 import dev.voqal.ide.VoqalIcons
 import dev.voqal.provider.clients.anthropic.AnthropicClient
+import dev.voqal.provider.clients.azure.AzureClient
 import dev.voqal.provider.clients.cerebras.CerebrasClient
 import dev.voqal.provider.clients.deepseek.DeepSeekClient
 import dev.voqal.provider.clients.fireworks.FireworksClient
@@ -55,6 +56,7 @@ data class LanguageModelSettings(
                 LMProvider.VERTEX_AI -> LanguageModelSettings(provider, modelName = VertexAiClient.DEFAULT_MODEL)
                 LMProvider.SAMBANOVA -> LanguageModelSettings(provider, modelName = SambaNovaClient.DEFAULT_MODEL)
                 LMProvider.CEREBRAS -> LanguageModelSettings(provider, modelName = CerebrasClient.DEFAULT_MODEL)
+                LMProvider.AZURE -> LanguageModelSettings(provider, modelName = AzureClient.DEFAULT_MODEL)
 
                 LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
@@ -131,6 +133,7 @@ data class LanguageModelSettings(
 
     enum class LMProvider(val displayName: String) {
         NONE("None"),
+        AZURE("Azure"),
         OPENAI("OpenAI"),
         GOOGLE_API("Google API"),
         SAMBANOVA("SambaNova"),
@@ -161,6 +164,7 @@ data class LanguageModelSettings(
                 this == FIREWORKS_AI -> VoqalIcons.Compute.fireworks
                 this == SAMBANOVA -> VoqalIcons.Compute.sambanova
                 this == CEREBRAS -> VoqalIcons.Compute.cerebras
+                this == AZURE -> VoqalIcons.Compute.azure
                 else -> null
             }
         }
@@ -179,7 +183,7 @@ data class LanguageModelSettings(
                 GROQ, OLLAMA, CUSTOM,
                 VERTEX_AI, GOOGLE_API, ANTHROPIC,
                 DEEPSEEK, FIREWORKS_AI, SAMBANOVA,
-                CEREBRAS
+                CEREBRAS, AZURE
             )
         }
 
@@ -188,7 +192,7 @@ data class LanguageModelSettings(
         }
 
         fun isApiUrlRequired(): Boolean {
-            return this in setOf(HUGGING_FACE, OLLAMA, CUSTOM)
+            return this in setOf(HUGGING_FACE, OLLAMA, CUSTOM, AZURE)
         }
 
         fun isProjectIdRequired(): Boolean {
@@ -200,7 +204,7 @@ data class LanguageModelSettings(
         }
 
         fun isAudioModalityAvailable(): Boolean {
-            return this in setOf(VERTEX_AI, GOOGLE_API) //todo: actually per model name
+            return this in setOf(VERTEX_AI, GOOGLE_API, OPENAI, AZURE) //todo: actually per model name
         }
 
         companion object {

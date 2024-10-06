@@ -25,12 +25,15 @@ import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.provider.*
 import dev.voqal.services.VoqalConfigService
+import dev.voqal.services.audioCapture
 import dev.voqal.services.getVoqalLogger
 import dev.voqal.services.scope
 import dev.voqal.utils.Iso639Language
+import dev.voqal.utils.SharedAudioCapture
 import io.ktor.utils.io.*
 import io.vertx.core.Future
 import io.vertx.core.Promise
@@ -44,8 +47,11 @@ import java.nio.ByteBuffer
 open class OpenAiClient(
     override val name: String,
     private val project: Project,
-    openAiConfig: OpenAIConfig
-) : LlmProvider, SttProvider, TtsProvider, AssistantProvider, StmProvider {
+    openAiConfig: OpenAIConfig,
+    providerKey: String? = null,
+    audioModality: Boolean = false,
+    modelName: String? = null
+) : StmProvider, LlmProvider, SttProvider, TtsProvider, AssistantProvider, SharedAudioCapture.AudioDataListener {
 
     companion object {
         const val DEFAULT_MODEL = "gpt-4o-mini"
@@ -58,7 +64,8 @@ open class OpenAiClient(
             "gpt-4o-mini",
             "gpt-4o",
             "gpt-4",
-            "gpt-4-turbo"
+            "gpt-4-turbo",
+            "gpt-4o-realtime-preview"
         )
 
         @JvmStatic
@@ -109,6 +116,21 @@ open class OpenAiClient(
 
     private val log = project.getVoqalLogger(this::class)
     private val openAI = OpenAI(openAiConfig)
+    private val realtimeSession: RealtimeSession?
+
+    init {
+        realtimeSession = if (audioModality) {
+            project.audioCapture.registerListener(this)
+            RealtimeSession(
+                project = project,
+                wssProviderUrl = "wss://api.openai.com/v1/realtime?model=$modelName",
+                wssHeaders = mapOf(
+                    "Authorization" to "Bearer $providerKey",
+                    "OpenAI-Beta" to "realtime=v1"
+                )
+            ).apply { Disposer.register(this@OpenAiClient, this) }
+        } else null
+    }
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
         log.info("Sending speech to TTS provider: openai")
@@ -232,7 +254,16 @@ open class OpenAiClient(
         return openAI.delete(id)
     }
 
+    override fun onAudioData(data: ByteArray, detection: SharedAudioCapture.AudioDetection) {
+        realtimeSession?.onAudioData(data, detection)
+    }
+
+    override fun sampleRate() = realtimeSession?.sampleRate() ?: super.sampleRate()
+    override fun isLiveDataListener() = realtimeSession != null
     override fun isStreamable() = true
     override fun getAvailableModelNames() = MODELS
-    override fun dispose() = openAI.close()
+    override fun dispose() {
+        project.audioCapture.removeListener(this)
+        openAI.close()
+    }
 }

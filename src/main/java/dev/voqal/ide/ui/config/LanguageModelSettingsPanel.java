@@ -8,6 +8,7 @@ import dev.voqal.config.settings.LanguageModelSettings;
 import dev.voqal.config.settings.LanguageModelSettings.LMProvider;
 import dev.voqal.config.settings.LanguageModelSettings.OProvider;
 import dev.voqal.provider.clients.anthropic.AnthropicClient;
+import dev.voqal.provider.clients.azure.AzureClient;
 import dev.voqal.provider.clients.cerebras.CerebrasClient;
 import dev.voqal.provider.clients.deepseek.DeepSeekClient;
 import dev.voqal.provider.clients.fireworks.FireworksClient;
@@ -254,6 +255,10 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(
                     CerebrasClient.getMODELS().toArray(new String[0]))
             );
+        } else if (lmProvider == LMProvider.AZURE) {
+            modelNameComboBox.setModel(new DefaultComboBoxModel<>(
+                    AzureClient.getMODELS().toArray(new String[0]))
+            );
         } else {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {""}));
         }
@@ -269,7 +274,9 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             temperatureSpinner.setValue(config.getTemperature());
         }
 
-        if (config.getProvider() == LMProvider.OLLAMA) {
+        if (config.getProvider() == LMProvider.AZURE) {
+            apiUrlTextField.getEmptyText().setText("https://example.openai.azure.com/");
+        } else if (config.getProvider() == LMProvider.OLLAMA) {
             apiUrlTextField.getEmptyText().setText("http://localhost:11434/api/generate");
         } else {
             apiUrlTextField.getEmptyText().setText("https://api.openai.com/v1/");
@@ -365,6 +372,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             return SambaNovaClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
         } else if (lmProvider == LMProvider.CEREBRAS) {
             return CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.AZURE) {
+            return AzureClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
         } else {
             return -1;
         }
