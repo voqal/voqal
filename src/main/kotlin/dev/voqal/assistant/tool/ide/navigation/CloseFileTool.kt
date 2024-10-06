@@ -77,12 +77,12 @@ class CloseFileTool : NavigateFileTool(NavigateOperation.CLOSE) {
         parameters = Parameters.fromJsonString(JsonObject().apply {
             put("type", "object")
             put("properties", JsonObject().apply {
-                put("filename", JsonObject().apply {
+                put("name", JsonObject().apply {
                     put("type", "string")
                     put("description", "The name/path of the file to close")
                 })
             })
-            put("required", JsonArray().add("filename"))
+            put("required", JsonArray().add("name"))
         }.toString())
     )
 }
