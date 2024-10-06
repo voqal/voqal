@@ -111,7 +111,7 @@ class VoqalContextService(private val project: Project) {
     fun getSelectedTextEditor(): Editor? {
         var selectedTextEditor = FileEditorManager.getInstance(project).selectedTextEditor
         if (selectedTextEditor == null) {
-            val virtualFile = FileEditorManager.getInstance(project).selectedEditor?.file
+            val virtualFile = FileEditorManager.getInstance(project).selectedEditor?.file ?: return null
             selectedTextEditor = EditorFactory.getInstance().allEditors.find { it.virtualFile == virtualFile }
         }
         if (selectedTextEditor?.virtualFile?.name?.contains("voqal-response") == true) {
