@@ -29,7 +29,7 @@ import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.psi.*
 import com.intellij.refactoring.rename.RenameProcessor
 import dev.voqal.assistant.VoqalDirective
-import dev.voqal.assistant.processing.TextSearcher
+import dev.voqal.assistant.processing.TextUtils
 import dev.voqal.assistant.template.ChunkTextExtension
 import dev.voqal.assistant.tool.VoqalTool
 import dev.voqal.assistant.tool.system.CancelTool
@@ -83,13 +83,13 @@ class EditTextTool : VoqalTool() {
 
         //check for vui interactions
         val streaming = args.getBoolean("streaming") ?: false
-        if (TextSearcher.checkForVuiInteraction("cancel", editText)) {
+        if (TextUtils.checkForVuiInteraction("cancel", editText)) {
             if (!streaming) {
                 log.debug("Cancelling editing")
                 project.service<VoqalToolService>().blindExecute(CancelTool())
             }
             return
-        } else if (TextSearcher.checkForVuiInteraction("accept", editText)) {
+        } else if (TextUtils.checkForVuiInteraction("accept", editText)) {
             if (!streaming) {
                 log.debug("Accepting editing")
                 project.service<VoqalToolService>().blindExecute(LooksGoodTool())

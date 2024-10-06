@@ -4,7 +4,7 @@ import com.intellij.openapi.util.TextRange
 import io.vertx.core.json.JsonObject
 import java.util.regex.Pattern
 
-object TextSearcher {
+object TextUtils {
 
     fun checkForVuiInteraction(type: String, responseCode: String): Boolean {
         try {
