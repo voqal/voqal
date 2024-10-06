@@ -29,7 +29,7 @@ class AssemblyAiClient(
     private suspend fun upload(request: ByteArray): String {
         try {
             val response: HttpResponse = client.post("$providerUrl/upload") {
-                header("Authorization", "Bearer $providerKey")
+                header("Authorization", providerKey)
                 header("Content-Type", "application/octet-stream")
                 setBody(request)
             }
@@ -66,8 +66,8 @@ class AssemblyAiClient(
             val getBodyAsJsonObject = JsonObject(getResponse.bodyAsText())
             val status = getBodyAsJsonObject.getString("status")
             log.debug("Transcript status: $status")
-            if (status == "processing") {
-                delay(1000)
+            if (status == "processing" || status == "queued") {
+                delay(500)
                 getResponse = client.get("$url/$transcriptId") {
                     header("Authorization", providerKey)
                     header("Content-Type", "application/json")
