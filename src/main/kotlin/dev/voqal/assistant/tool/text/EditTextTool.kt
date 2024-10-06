@@ -1,13 +1,8 @@
 package dev.voqal.assistant.tool.text
 
 import com.intellij.codeInsight.CodeSmellInfo
-import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.fragments.DiffFragmentImpl
-import com.intellij.diff.fragments.LineFragmentImpl
-import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.diff.tools.simple.SimpleDiffChange
-import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
-import com.intellij.diff.util.DiffUtil
 import com.intellij.lang.Language
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.ApplicationManager
@@ -21,10 +16,12 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.*
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.ProperTextRange
+import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.openapi.vcs.CodeSmellDetector
 import com.intellij.psi.*
 import com.intellij.refactoring.rename.RenameProcessor
@@ -41,7 +38,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.Pair
 import kotlin.math.abs
 
 /**
@@ -273,7 +269,7 @@ class EditTextTool : VoqalTool() {
                 origText = editRange.substring(editor.document.text)
             }
         }
-        val simpleDiffs = getSimpleDiffChanges(origText, fullTextWithEdits, project)
+        val simpleDiffs = TextUtils.getSimpleDiffChanges(origText, fullTextWithEdits, project)
         val lastDiff = simpleDiffs.lastOrNull()
         val textRange = lastDiff?.fragment?.let { TextRange(it.startOffset2, it.endOffset2) }
 
@@ -721,7 +717,7 @@ class EditTextTool : VoqalTool() {
     }
 
     private fun getTextDiff(project: Project, oldText: String, newText: String): Diff {
-        val changes = getSimpleDiffChanges(oldText, newText, project)
+        val changes = TextUtils.getSimpleDiffChanges(oldText, newText, project)
         val fragments = changes.map { Pair(it, it.fragment.innerFragments) }
             .flatMap { pair ->
                 pair.second?.map {
@@ -742,27 +738,6 @@ class EditTextTool : VoqalTool() {
             }.toMutableList()
 
         return Diff(fragments, oldText, newText, "full")
-    }
-
-    private fun getSimpleDiffChanges(oldText: String, newText: String, project: Project): List<SimpleDiffChange> {
-        if (oldText.isEmpty()) {
-            val singleFragment = LineFragmentImpl(0, 1, 0, newText.lines().count(), 0, 0, 0, newText.length)
-            return listOf(SimpleDiffChange(0, singleFragment))
-        }
-
-        val disposable = Disposer.newDisposable()
-        val oldContent = DiffContentFactory.getInstance().create(oldText)
-        val newContent = DiffContentFactory.getInstance().create(newText)
-        val provider = DiffUtil.createTextDiffProvider(
-            project, SimpleDiffRequest("Voqal Diff", oldContent, newContent, "Old", "New"),
-            TextDiffSettingsHolder.TextDiffSettings(), {}, disposable
-        )
-        val fragments = provider.compare(oldText, newText, EmptyProgressIndicator())
-        Disposer.dispose(disposable)
-
-        return fragments?.mapIndexed { index, fragment ->
-            SimpleDiffChange(index, fragment)
-        } ?: emptyList()
     }
 
     /**
