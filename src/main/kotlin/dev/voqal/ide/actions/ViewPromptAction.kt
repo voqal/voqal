@@ -32,7 +32,7 @@ class ViewPromptAction : AnAction() {
             val scratchFile = WriteCommandAction.runWriteCommandAction(project, ThrowableComputable {
                 ScratchRootType.getInstance().createScratchFile(
                     project,
-                    "generated-prompt.md", null, prompt
+                    "voqal-prompt.md", null, prompt
                 )
             })
             if (scratchFile != null) {

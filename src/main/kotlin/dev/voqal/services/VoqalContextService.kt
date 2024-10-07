@@ -55,7 +55,8 @@ class VoqalContextService(private val project: Project) {
     fun getOpenFiles(selectedTextEditor: Editor?): MutableList<ViewingCode> {
         val openVirtualFiles = ReadAction.compute(ThrowableComputable {
             FileEditorManager.getInstance(project).openFiles.filter {
-                !it.name.contains("voqal-response") && //ignore voqal responses
+                !it.name.contains("voqal-prompt") && //ignore voqal prompts
+                        !it.name.contains("voqal-response") && //ignore voqal responses
                         !it.path.contains(".voqal") && //ignore voqal files
                         !ChangeListManager.getInstance(project).isIgnoredFile(it) //ignore VCS ignored files
             }
@@ -114,7 +115,9 @@ class VoqalContextService(private val project: Project) {
             val virtualFile = FileEditorManager.getInstance(project).selectedEditor?.file ?: return null
             selectedTextEditor = EditorFactory.getInstance().allEditors.find { it.virtualFile == virtualFile }
         }
-        if (selectedTextEditor?.virtualFile?.name?.contains("voqal-response") == true) {
+        if (selectedTextEditor?.virtualFile?.name?.contains("voqal-prompt") == true) {
+            selectedTextEditor = null
+        } else if (selectedTextEditor?.virtualFile?.name?.contains("voqal-response") == true) {
             selectedTextEditor = null
         } else if (selectedTextEditor?.virtualFile?.path?.contains(".voqal") == true) {
             selectedTextEditor = null
