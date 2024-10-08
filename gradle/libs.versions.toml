@@ -1,6 +1,6 @@
 [versions]
 # libraries
-annotations = "25.0.0"
+annotations = "26.0.0"
 ktor = "2.3.12"
 vertx = "4.5.10"
 openai-client = "3.8.2"
