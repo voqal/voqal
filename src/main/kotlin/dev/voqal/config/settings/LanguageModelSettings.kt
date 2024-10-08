@@ -14,6 +14,7 @@ import dev.voqal.provider.clients.openai.OpenAiClient
 import dev.voqal.provider.clients.sambanova.SambaNovaClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
+import dev.voqal.provider.clients.voqal.VoqalProClient
 import io.vertx.core.json.JsonObject
 import javax.swing.Icon
 
@@ -57,6 +58,7 @@ data class LanguageModelSettings(
                 LMProvider.SAMBANOVA -> LanguageModelSettings(provider, modelName = SambaNovaClient.DEFAULT_MODEL)
                 LMProvider.CEREBRAS -> LanguageModelSettings(provider, modelName = CerebrasClient.DEFAULT_MODEL)
                 LMProvider.AZURE -> LanguageModelSettings(provider, modelName = AzureClient.DEFAULT_MODEL)
+                LMProvider.VOQAL_PRO -> LanguageModelSettings(provider, modelName = VoqalProClient.DEFAULT_MODEL)
 
                 LMProvider.OLLAMA -> LanguageModelSettings(provider, modelName = "")
                 LMProvider.HUGGING_FACE -> LanguageModelSettings(provider, modelName = "")
@@ -133,6 +135,7 @@ data class LanguageModelSettings(
 
     enum class LMProvider(val displayName: String) {
         NONE("None"),
+        VOQAL_PRO("Voqal (Pro)"),
         AZURE("Azure"),
         OPENAI("OpenAI"),
         GOOGLE_API("Google API"),
@@ -165,12 +168,13 @@ data class LanguageModelSettings(
                 this == SAMBANOVA -> VoqalIcons.Compute.sambanova
                 this == CEREBRAS -> VoqalIcons.Compute.cerebras
                 this == AZURE -> VoqalIcons.Compute.azure
+                this == VOQAL_PRO -> VoqalIcons.Compute.voqal
                 else -> null
             }
         }
 
         fun isKeyRequired(): Boolean {
-            return this !in setOf(OLLAMA, VERTEX_AI)
+            return this !in setOf(OLLAMA, VERTEX_AI, VOQAL_PRO)
         }
 
         fun isOrgIdAvailable(): Boolean {
@@ -183,7 +187,7 @@ data class LanguageModelSettings(
                 GROQ, OLLAMA, CUSTOM,
                 VERTEX_AI, GOOGLE_API, ANTHROPIC,
                 DEEPSEEK, FIREWORKS_AI, SAMBANOVA,
-                CEREBRAS, AZURE
+                CEREBRAS, AZURE, VOQAL_PRO
             )
         }
 
@@ -204,7 +208,7 @@ data class LanguageModelSettings(
         }
 
         fun isAudioModalityAvailable(): Boolean {
-            return this in setOf(VERTEX_AI, GOOGLE_API, OPENAI, AZURE) //todo: actually per model name
+            return this in setOf(VERTEX_AI, GOOGLE_API, OPENAI, AZURE, VOQAL_PRO) //todo: actually per model name
         }
 
         companion object {

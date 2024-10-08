@@ -63,12 +63,13 @@ data class TextToSpeechSettings(
 
     enum class TTSProvider(val displayName: String) {
         NONE("None"),
+        VOQAL_PRO("Voqal (Pro)"),
         OPENAI("OpenAI"),
         DEEPGRAM("Deepgram"),
         PICOVOICE("Picovoice");
 
         fun isKeyRequired(): Boolean {
-            return this !in setOf(NONE)
+            return this !in setOf(NONE, VOQAL_PRO)
         }
 
         fun isOrgIdAvailable(): Boolean {
@@ -80,7 +81,7 @@ data class TextToSpeechSettings(
         }
 
         fun isVoiceNameRequired(): Boolean {
-            return this in setOf(OPENAI, DEEPGRAM, PICOVOICE)
+            return this in setOf(OPENAI, DEEPGRAM, PICOVOICE, VOQAL_PRO)
         }
 
         fun isSonicSupported(): Boolean {
@@ -90,7 +91,9 @@ data class TextToSpeechSettings(
         companion object {
             @JvmStatic
             fun lenientValueOf(str: String): TTSProvider {
-                return TTSProvider.valueOf(str.uppercase())
+                return TTSProvider.valueOf(str
+                    .replace("(", "").replace(")", "")
+                    .replace(" ", "_").uppercase())
             }
         }
     }

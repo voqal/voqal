@@ -137,11 +137,11 @@ class SharedAudioCapture(private val project: Project) {
         var vadProvider = configService.getConfig().voiceDetectionSettings.provider
         configService.onConfigChange {
             val newVadProvider = it.voiceDetectionSettings.provider
-            if (vadProvider == VoiceDetectionProvider.None && newVadProvider != VoiceDetectionProvider.None) {
+            if (vadProvider == VoiceDetectionProvider.NONE && newVadProvider != VoiceDetectionProvider.NONE) {
                 log.info("Voice detection enabled")
                 vadProvider = newVadProvider
                 restart()
-            } else if (vadProvider != VoiceDetectionProvider.None && newVadProvider == VoiceDetectionProvider.None) {
+            } else if (vadProvider != VoiceDetectionProvider.NONE && newVadProvider == VoiceDetectionProvider.NONE) {
                 log.info("Voice detection disabled")
                 vadProvider = newVadProvider
                 restart()
@@ -215,7 +215,7 @@ class SharedAudioCapture(private val project: Project) {
         try {
             val testMode = listeners.any { it.isTestListener() }
             val configService = project.service<VoqalConfigService>()
-            if (!testMode && configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.None) {
+            if (!testMode && configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.NONE) {
                 log.warn("No voice detection provider available")
                 return
             }//todo: server VAD

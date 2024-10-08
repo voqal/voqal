@@ -15,6 +15,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.LicensingFacade
 import com.intellij.util.concurrency.ThreadingAssertions
 import com.jetbrains.rd.util.Callable
 import dev.voqal.config.ConfigurableSettings
@@ -47,6 +48,7 @@ import dev.voqal.provider.clients.picovoice.error.PicovoiceError
 import dev.voqal.provider.clients.sambanova.SambaNovaClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
+import dev.voqal.provider.clients.voqal.VoqalProClient
 import dev.voqal.provider.clients.voqal.VoqalVadClient
 import dev.voqal.provider.clients.whisper.WhisperClient
 import dev.voqal.status.VoqalStatus
@@ -283,6 +285,22 @@ class VoqalConfigService(private val project: Project) {
                 } else {
                     log.warnChat("Missing text-to-speech provider key")
                 }
+            }
+
+            TextToSpeechSettings.TTSProvider.VOQAL_PRO -> {
+                log.debug("Using Voqal (Pro) text-to-speech provider")
+                val openAiConfig = OpenAIConfig(
+                    host = OpenAIHost("https://voqal-proxy.voqaldev.workers.dev/"),
+                    token = voqalConfig.textToSpeechSettings.providerKey,
+                    logging = LoggingConfig(LogLevel.None),
+                    engine = JavaHttpEngine(JavaHttpConfig()),
+                    headers = mapOf(
+                        "voqal-service" to "tts",
+                        "api-key" to (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: "")
+                    ),
+                )
+                val openAI = OpenAiClient("", project, openAiConfig)
+                addTtsProvider(openAI)
             }
         }
     }
@@ -557,6 +575,21 @@ class VoqalConfigService(private val project: Project) {
                 }
             }
 
+            LMProvider.VOQAL_PRO -> {
+                log.debug("Using Voqal (Pro) language model provider")
+                val voqalProClient = VoqalProClient(
+                    name = modelSettings.name,
+                    project = project,
+                    providerKey = (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: ""),
+                    deployment = modelSettings.modelName,
+                    audioModality = modelSettings.audioModality
+                )
+                if (modelSettings.audioModality) {
+                    addStmProvider(voqalProClient)
+                }
+                addLlmProvider(voqalProClient)
+            }
+
             LMProvider.NONE -> Unit //nop
         }
     }
@@ -660,8 +693,8 @@ class VoqalConfigService(private val project: Project) {
 
     private fun AiProvidersClient.setupVoiceActivityProvider(voqalConfig: VoqalConfig) {
         when (voqalConfig.voiceDetectionSettings.provider) {
-            VoiceDetectionSettings.VoiceDetectionProvider.Voqal -> {
-                log.debug("Using Voqal voice activity detection provider")
+            VoiceDetectionSettings.VoiceDetectionProvider.VOQAL -> {
+                log.debug("Using Voqal (Community) voice activity detection provider")
                 addVadProvider(
                     VoqalVadClient(
                         project,
@@ -673,7 +706,7 @@ class VoqalConfigService(private val project: Project) {
                 )
             }
 
-            VoiceDetectionSettings.VoiceDetectionProvider.Picovoice -> {
+            VoiceDetectionSettings.VoiceDetectionProvider.PICOVOICE -> {
                 log.debug("Using Picovoice voice activity detection provider")
                 if (voqalConfig.voiceDetectionSettings.providerKey.isNotEmpty()) {
                     try {
@@ -695,7 +728,7 @@ class VoqalConfigService(private val project: Project) {
                 }
             }
 
-            VoiceDetectionSettings.VoiceDetectionProvider.None -> Unit //nop
+            VoiceDetectionSettings.VoiceDetectionProvider.NONE -> Unit //nop
         }
     }
 

@@ -31,13 +31,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 
-class AzureClient(
+open class AzureClient(
     override val name: String,
     private val project: Project,
     private val providerUrl: String,
     private val providerKey: String,
-    deployment: String,
-    private val audioModality: Boolean = false
+    private val deployment: String,
+    private val audioModality: Boolean = false,
+    wssHeaders: Map<String, String> = emptyMap()
 ) : LlmProvider, StmProvider, SharedAudioCapture.AudioDataListener {
 
     companion object {
@@ -80,7 +81,8 @@ class AzureClient(
             RealtimeSession(
                 project = project,
                 wssProviderUrl = "wss://$host/openai/realtime$params",
-                azureHost = true
+                azureHost = true,
+                wssHeaders = wssHeaders
             ).apply { Disposer.register(this@AzureClient, this) }
         } else null
     }
@@ -94,7 +96,7 @@ class AzureClient(
         val tokenLimit = project.service<VoqalConfigService>().getCurrentLanguageModelSettings().tokenLimit
         if (tokenLimit != -1) {
             val reqTokenCount = project.service<VoqalContextService>().getTokenCount(requestJson.toString())
-            requestJson.put("max_tokens", tokenLimit - reqTokenCount)
+            requestJson.put("max_tokens", Math.min(4096, tokenLimit - reqTokenCount)) //todo: not hardcode 4096
         }
 
         val response = try {
@@ -102,6 +104,7 @@ class AzureClient(
                 header("Content-Type", "application/json")
                 header("api-key", providerKey) //Azure OpenAI Connection
                 header("Authorization", providerKey) //Serverless
+                header("voqal-model-name", deployment)
                 setBody(requestJson.encode())
             }
         } catch (e: HttpRequestTimeoutException) {
@@ -126,6 +129,7 @@ class AzureClient(
                 header("Content-Type", "application/json")
                 header("api-key", providerKey) //Azure OpenAI Connection
                 header("Authorization", providerKey) //Serverless
+                header("voqal-model-name", deployment)
                 setBody(requestJson.encode())
             }.execute { response ->
                 throwIfError(response)

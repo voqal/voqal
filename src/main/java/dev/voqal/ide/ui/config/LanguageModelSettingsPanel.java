@@ -20,6 +20,7 @@ import dev.voqal.provider.clients.openai.OpenAiClient;
 import dev.voqal.provider.clients.sambanova.SambaNovaClient;
 import dev.voqal.provider.clients.togetherai.TogetherAiClient;
 import dev.voqal.provider.clients.vertexai.VertexAiClient;
+import dev.voqal.provider.clients.voqal.VoqalProClient;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -259,6 +260,10 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(
                     AzureClient.getMODELS().toArray(new String[0]))
             );
+        } else if (lmProvider == LMProvider.VOQAL_PRO) {
+            modelNameComboBox.setModel(new DefaultComboBoxModel<>(
+                    VoqalProClient.getMODELS().toArray(new String[0]))
+            );
         } else {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[] {""}));
         }
@@ -374,6 +379,8 @@ public class LanguageModelSettingsPanel extends JBPanel<LanguageModelSettingsPan
             return CerebrasClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
         } else if (lmProvider == LMProvider.AZURE) {
             return AzureClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
+        } else if (lmProvider == LMProvider.VOQAL_PRO) {
+            return VoqalProClient.getTokenLimit(modelNameComboBox.getSelectedItem().toString());
         } else {
             return -1;
         }
