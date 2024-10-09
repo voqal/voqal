@@ -289,7 +289,7 @@ class VoqalConfigService(private val project: Project) {
 
             TextToSpeechSettings.TTSProvider.VOQAL_PRO -> {
                 log.debug("Using Voqal (Pro) text-to-speech provider")
-                val openAiConfig = OpenAIConfig(
+                val voqalProConfig = OpenAIConfig(
                     host = OpenAIHost("https://voqal-proxy.voqaldev.workers.dev/"),
                     token = voqalConfig.textToSpeechSettings.providerKey,
                     logging = LoggingConfig(LogLevel.None),
@@ -297,10 +297,10 @@ class VoqalConfigService(private val project: Project) {
                     headers = mapOf(
                         "voqal-service" to "tts",
                         "api-key" to (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: "")
-                    ),
+                    )
                 )
-                val openAI = OpenAiClient("", project, openAiConfig)
-                addTtsProvider(openAI)
+                val voqalProClient = OpenAiClient("", project, voqalProConfig)
+                addTtsProvider(voqalProClient)
             }
         }
     }
@@ -687,6 +687,22 @@ class VoqalConfigService(private val project: Project) {
                     providerKey = voqalConfig.speechToTextSettings.providerKey
                 )
                 addSttProvider(groqWhisperClient)
+            }
+
+            SpeechToTextSettings.STTProvider.VOQAL_PRO -> {
+                log.debug("Using Voqal (Pro) speech-to-text provider")
+                val voqalProConfig = OpenAIConfig(
+                    host = OpenAIHost("https://voqal-proxy.voqaldev.workers.dev/"),
+                    token = voqalConfig.textToSpeechSettings.providerKey,
+                    logging = LoggingConfig(LogLevel.None),
+                    engine = JavaHttpEngine(JavaHttpConfig()),
+                    headers = mapOf(
+                        "voqal-service" to "stt",
+                        "api-key" to (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: "")
+                    )
+                )
+                val voqalProClient = OpenAiClient("", project, voqalProConfig)
+                addSttProvider(voqalProClient)
             }
         }
     }

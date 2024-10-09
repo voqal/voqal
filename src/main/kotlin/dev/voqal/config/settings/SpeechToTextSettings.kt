@@ -58,6 +58,7 @@ data class SpeechToTextSettings(
 
     enum class STTProvider(val displayName: String) {
         NONE("None"),
+        VOQAL_PRO("Voqal (Pro)"),
         DEEPGRAM("Deepgram"),
         GROQ("Groq"),
         OPENAI("OpenAI"),
@@ -66,7 +67,7 @@ data class SpeechToTextSettings(
         WHISPER_ASR("Whisper ASR");
 
         fun isKeyRequired(): Boolean {
-            return this !in setOf(NONE, WHISPER_ASR)
+            return this !in setOf(NONE, WHISPER_ASR, VOQAL_PRO)
         }
 
         fun isOrgIdAvailable(): Boolean {
@@ -86,7 +87,7 @@ data class SpeechToTextSettings(
         }
 
         fun isLanguageCodeSupported(): Boolean {
-            return this in setOf(OPENAI, GROQ, DEEPGRAM)
+            return this in setOf(OPENAI, GROQ, DEEPGRAM, VOQAL_PRO)
         }
 
         fun isStreamAudioSupported(): Boolean {
@@ -96,7 +97,9 @@ data class SpeechToTextSettings(
         companion object {
             @JvmStatic
             fun lenientValueOf(str: String): STTProvider {
-                return STTProvider.valueOf(str.uppercase().replace(" ", "_"))
+                return STTProvider.valueOf(str
+                    .replace("(", "").replace(")", "")
+                    .replace(" ", "_").uppercase())
             }
         }
     }
