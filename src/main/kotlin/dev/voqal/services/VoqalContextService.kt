@@ -140,7 +140,7 @@ class VoqalContextService(private val project: Project) {
         //count tokens
         var tokenLimit = fullDirective.assistant.languageModelSettings.tokenLimit
         if (tokenLimit == -1) {
-            log.warn("Token limit not set. Using no limit")
+            log.trace("Token limit not set. Using no limit")
             tokenLimit = Integer.MAX_VALUE
         }
         val commandPrompt = croppedCommand.toMarkdown()
@@ -241,7 +241,7 @@ class VoqalContextService(private val project: Project) {
                 )
             }
         }
-        log.debug("Command prompt tokens: $promptTokens")
+        log.trace("Command prompt tokens: $promptTokens")
         return croppedCommand
     }
 

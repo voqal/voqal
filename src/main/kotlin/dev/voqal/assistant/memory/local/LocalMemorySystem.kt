@@ -14,7 +14,7 @@ class LocalMemorySystem(private val project: Project) : MemorySystem {
 
     override fun getMemorySlice(): MemorySlice {
         val memorySlice = LocalMemorySlice(project)
-        log.debug("Created memory slice id: ${memorySlice.id}")
+        log.trace("Created memory slice id: ${memorySlice.id}")
         return memorySlice
     }
 }
