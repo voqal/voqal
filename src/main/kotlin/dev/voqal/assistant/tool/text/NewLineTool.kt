@@ -70,8 +70,6 @@ class NewLineTool : VoqalTool() {
         }
     }
 
-    override fun isVisible(directive: VoqalDirective): Boolean = false
-
     override fun asTool(directive: VoqalDirective) = Tool.function(
         name = NAME,
         description = "Press the new line key.",
