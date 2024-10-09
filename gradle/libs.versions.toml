@@ -1,7 +1,7 @@
 [versions]
 # libraries
 annotations = "26.0.0"
-ktor = "2.3.12"
+ktor = "3.0.0"
 vertx = "4.5.10"
 openai-client = "3.8.2"
 jlayer = "1.0.1"
