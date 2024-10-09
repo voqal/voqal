@@ -120,11 +120,11 @@ If the developer says looks good, respond with `{"accept": true}`.
 
 {% endif %}
 
+{% if assistant.usingAudioModality == false %}
+
 ## Developer Transcription
 
 > What the developer is asking you to do to the visible text.
-
-{% if assistant.usingAudioModality == false %}
 
 {{ developer.transcription }}
 

@@ -1,6 +1,7 @@
 package dev.voqal.ide.ui.config;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.LicensingFacade;
 import com.intellij.ui.components.*;
 import com.intellij.uiDesigner.core.*;
 import dev.voqal.config.settings.TextToSpeechSettings;
@@ -12,6 +13,8 @@ import dev.voqal.services.VoqalVoiceService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel> {
@@ -62,6 +65,8 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
                 voiceComboBox.setModel(new DefaultComboBoxModel<>(DeepgramClient.getVOICES()));
             } else if (ttsProvider == TTSProvider.PICOVOICE) {
                 voiceComboBox.setModel(new DefaultComboBoxModel<>(PicovoiceOrcaClient.getVOICES()));
+            } else if (ttsProvider == TTSProvider.VOQAL_PRO) {
+                voiceComboBox.setModel(new DefaultComboBoxModel<>(OpenAiClient.getVOICES()));
             } else {
                 voiceComboBox.setModel(new DefaultComboBoxModel<>(new String[]{""}));
             }
@@ -180,6 +185,8 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
             voiceComboBox.setModel(new DefaultComboBoxModel<>(DeepgramClient.getVOICES()));
         } else if (ttsProvider == TTSProvider.PICOVOICE) {
             voiceComboBox.setModel(new DefaultComboBoxModel<>(PicovoiceOrcaClient.getVOICES()));
+        } else if (ttsProvider == TTSProvider.VOQAL_PRO) {
+            voiceComboBox.setModel(new DefaultComboBoxModel<>(OpenAiClient.getVOICES()));
         } else {
             voiceComboBox.setModel(new DefaultComboBoxModel<>(new String[]{""}));
         }
@@ -199,6 +206,15 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
         volumeSlider.setVisible(ttsProvider.isSonicSupported());
         resetButton.setVisible(ttsProvider.isSonicSupported());
         listenButton.setVisible(ttsProvider.isSonicSupported());
+    }
+
+    private static Collection<TTSProvider> getTtsProviders() {
+        var ttsProviders = new ArrayList<>(TTSProvider.getEntries().stream().toList());
+        LicensingFacade licensingFacade = LicensingFacade.getInstance();
+        if (licensingFacade != null && licensingFacade.getConfirmationStamp("PVOQAL") == null) {
+            ttsProviders.remove(TTSProvider.VOQAL_PRO);
+        }
+        return ttsProviders;
     }
 
     private void initComponents() {
@@ -241,7 +257,7 @@ public class TextToSpeechSettingsPanel extends JBPanel<TextToSpeechSettingsPanel
             null, null, null));
 
         //---- providerComboBox ----
-        providerComboBox.setModel(new DefaultComboBoxModel<>(TTSProvider.getEntries()
+        providerComboBox.setModel(new DefaultComboBoxModel<>(getTtsProviders()
                 .stream().map(TTSProvider::getDisplayName).toArray(String[]::new)));
         add(providerComboBox, new GridConstraints(0, 1, 1, 2,
             GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,

@@ -29,10 +29,10 @@ class AnswerQuestionTool : VoqalTool() {
             project.service<VoqalStatusService>().updateText("Ignoring null answer")
             return
         }
-        project.service<VoqalDirectiveService>().handleResponse(
-            answer,
-            isTextOnly = directive.assistant.parentDirective?.developer?.textOnly ?: directive.developer.textOnly
-        )
+
+        val textOnly = (directive.assistant.parentDirective?.developer?.textOnly
+            ?: directive.developer.textOnly) || args.getBoolean("audioModality") == true
+        project.service<VoqalDirectiveService>().handleResponse(answer, isTextOnly = textOnly)
     }
 
     override fun supportsDirectiveMode(): Boolean {

@@ -29,4 +29,7 @@ interface AiProvider : Disposable {
 
     fun isStmProvider(): Boolean = false
     fun asStmProvider(): StmProvider = this as StmProvider
+
+    fun findProvider(name: String): AiProvider? =
+        throw NotImplementedError("findProvider(name: String) is not implemented")
 }

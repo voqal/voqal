@@ -15,6 +15,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.LicensingFacade
 import com.intellij.util.concurrency.ThreadingAssertions
 import com.jetbrains.rd.util.Callable
 import dev.voqal.config.ConfigurableSettings
@@ -26,6 +27,7 @@ import dev.voqal.provider.AiProvider
 import dev.voqal.provider.clients.AiProvidersClient
 import dev.voqal.provider.clients.anthropic.AnthropicClient
 import dev.voqal.provider.clients.assemblyai.AssemblyAiClient
+import dev.voqal.provider.clients.azure.AzureClient
 import dev.voqal.provider.clients.cerebras.CerebrasClient
 import dev.voqal.provider.clients.deepgram.DeepgramClient
 import dev.voqal.provider.clients.deepseek.DeepSeekClient
@@ -46,6 +48,7 @@ import dev.voqal.provider.clients.picovoice.error.PicovoiceError
 import dev.voqal.provider.clients.sambanova.SambaNovaClient
 import dev.voqal.provider.clients.togetherai.TogetherAiClient
 import dev.voqal.provider.clients.vertexai.VertexAiClient
+import dev.voqal.provider.clients.voqal.VoqalProClient
 import dev.voqal.provider.clients.voqal.VoqalVadClient
 import dev.voqal.provider.clients.whisper.WhisperClient
 import dev.voqal.status.VoqalStatus
@@ -253,7 +256,7 @@ class VoqalConfigService(private val project: Project) {
             TextToSpeechSettings.TTSProvider.DEEPGRAM -> {
                 log.debug("Using Deepgram text-to-speech provider")
                 if (voqalConfig.speechToTextSettings.provider == SpeechToTextSettings.STTProvider.DEEPGRAM) {
-                    log.debug("Reusing Deepgram client for speech-to-text")
+                    log.debug("Reusing Deepgram client for text-to-speech")
                     val deepgramClient = asSttProvider() as DeepgramClient
                     addTtsProvider(deepgramClient)
                 } else if (voqalConfig.textToSpeechSettings.providerKey.isNotEmpty()) {
@@ -282,6 +285,22 @@ class VoqalConfigService(private val project: Project) {
                 } else {
                     log.warnChat("Missing text-to-speech provider key")
                 }
+            }
+
+            TextToSpeechSettings.TTSProvider.VOQAL_PRO -> {
+                log.debug("Using Voqal (Pro) text-to-speech provider")
+                val openAiConfig = OpenAIConfig(
+                    host = OpenAIHost("https://voqal-proxy.voqaldev.workers.dev/"),
+                    token = voqalConfig.textToSpeechSettings.providerKey,
+                    logging = LoggingConfig(LogLevel.None),
+                    engine = JavaHttpEngine(JavaHttpConfig()),
+                    headers = mapOf(
+                        "voqal-service" to "tts",
+                        "api-key" to (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: "")
+                    ),
+                )
+                val openAI = OpenAiClient("", project, openAiConfig)
+                addTtsProvider(openAI)
             }
         }
     }
@@ -327,7 +346,17 @@ class VoqalConfigService(private val project: Project) {
                         logging = LoggingConfig(LogLevel.None),
                         engine = JavaHttpEngine(JavaHttpConfig())
                     )
-                    val openAI = OpenAiClient(modelSettings.name, project, openAiConfig)
+                    val openAI = OpenAiClient(
+                        name = modelSettings.name,
+                        project = project,
+                        openAiConfig = openAiConfig,
+                        providerKey = modelSettings.providerKey,
+                        audioModality = modelSettings.audioModality,
+                        modelName = modelSettings.modelName
+                    )
+                    if (modelSettings.audioModality) {
+                        addStmProvider(openAI)
+                    }
                     addLlmProvider(openAI)
                     addAssistantProvider(openAI)
                 } else {
@@ -526,6 +555,41 @@ class VoqalConfigService(private val project: Project) {
                 }
             }
 
+            LMProvider.AZURE -> {
+                log.debug("Using Azure language model provider")
+                if (modelSettings.providerKey.isNotEmpty()) {
+                    val azureClient = AzureClient(
+                        modelSettings.name,
+                        project,
+                        providerUrl = modelSettings.apiUrl,
+                        providerKey = modelSettings.providerKey,
+                        deployment = modelSettings.modelName,
+                        audioModality = modelSettings.audioModality
+                    )
+                    if (modelSettings.audioModality) {
+                        addStmProvider(azureClient)
+                    }
+                    addLlmProvider(azureClient)
+                } else {
+                    log.warnChat("Missing language model provider key")
+                }
+            }
+
+            LMProvider.VOQAL_PRO -> {
+                log.debug("Using Voqal (Pro) language model provider")
+                val voqalProClient = VoqalProClient(
+                    name = modelSettings.name,
+                    project = project,
+                    providerKey = (LicensingFacade.getInstance()?.getConfirmationStamp("PVOQAL") ?: ""),
+                    deployment = modelSettings.modelName,
+                    audioModality = modelSettings.audioModality
+                )
+                if (modelSettings.audioModality) {
+                    addStmProvider(voqalProClient)
+                }
+                addLlmProvider(voqalProClient)
+            }
+
             LMProvider.NONE -> Unit //nop
         }
     }
@@ -629,8 +693,8 @@ class VoqalConfigService(private val project: Project) {
 
     private fun AiProvidersClient.setupVoiceActivityProvider(voqalConfig: VoqalConfig) {
         when (voqalConfig.voiceDetectionSettings.provider) {
-            VoiceDetectionSettings.VoiceDetectionProvider.Voqal -> {
-                log.debug("Using Voqal voice activity detection provider")
+            VoiceDetectionSettings.VoiceDetectionProvider.VOQAL -> {
+                log.debug("Using Voqal (Community) voice activity detection provider")
                 addVadProvider(
                     VoqalVadClient(
                         project,
@@ -642,7 +706,7 @@ class VoqalConfigService(private val project: Project) {
                 )
             }
 
-            VoiceDetectionSettings.VoiceDetectionProvider.Picovoice -> {
+            VoiceDetectionSettings.VoiceDetectionProvider.PICOVOICE -> {
                 log.debug("Using Picovoice voice activity detection provider")
                 if (voqalConfig.voiceDetectionSettings.providerKey.isNotEmpty()) {
                     try {
@@ -664,7 +728,7 @@ class VoqalConfigService(private val project: Project) {
                 }
             }
 
-            VoiceDetectionSettings.VoiceDetectionProvider.None -> Unit //nop
+            VoiceDetectionSettings.VoiceDetectionProvider.NONE -> Unit //nop
         }
     }
 
@@ -690,6 +754,10 @@ class VoqalConfigService(private val project: Project) {
             else -> "Idle Mode"
         }
         return configService.getPromptSettings(promptName)
+    }
+
+    fun getCurrentLanguageModelSettings(): LanguageModelSettings {
+        return getLanguageModelSettings(getCurrentPromptSettings())
     }
 
     fun getLanguageModelSettings(promptSettings: PromptSettings): LanguageModelSettings {

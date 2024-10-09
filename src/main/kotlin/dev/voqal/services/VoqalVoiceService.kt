@@ -10,6 +10,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import dev.voqal.config.settings.TextToSpeechSettings
 import dev.voqal.provider.TtsProvider
+import dev.voqal.utils.SharedAudioCapture
+import dev.voqal.utils.SharedAudioCapture.Companion.FORMAT
 import dev.voqal.utils.SonicSpeechModifier
 import io.ktor.util.*
 import io.ktor.utils.io.*
@@ -236,6 +238,50 @@ class VoqalVoiceService(private val project: Project) {
             AudioSystem.getAudioInputStream(ByteArrayInputStream(buffer))
         }
         playAudio(stream, tts)
+    }
+
+    fun playStreamingWavFile(inputStream: InputStream) {
+        val targetFormat = AudioFormat(
+            FORMAT.encoding,
+            24000.0f,
+            FORMAT.sampleSizeInBits,
+            FORMAT.channels,
+            FORMAT.frameSize,
+            24000.0f,
+            FORMAT.isBigEndian
+        )
+
+        val bufferSize = SharedAudioCapture.BUFFER_SIZE
+        val buffer = ByteArray(bufferSize)
+        val audioInputStream = AudioInputStream(inputStream, targetFormat, AudioSystem.NOT_SPECIFIED.toLong())
+        val format = audioInputStream.format
+        val info = DataLine.Info(SourceDataLine::class.java, format)
+
+        try {
+            val line = AudioSystem.getLine(info) as SourceDataLine
+            line.open(format)
+            line.start()
+
+            var totalDataRead = 0
+            var bytesRead: Int
+            while (true) {
+                bytesRead = audioInputStream.read(buffer)
+                if (buffer.contentEquals(SharedAudioCapture.EMPTY_BUFFER)) {
+                    break
+                }
+                if (bytesRead > 0) {
+                    totalDataRead += bytesRead
+                    line.write(buffer, 0, bytesRead)
+                }
+            }
+            log.debug("Total data played: $totalDataRead")
+
+            line.drain()
+            line.stop()
+            line.close()
+        } catch (e: Exception) {
+            log.debug("Failed to stream and play audio")
+        }
     }
 
     private fun md5(input: String): String {

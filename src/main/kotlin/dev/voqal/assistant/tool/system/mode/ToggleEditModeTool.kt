@@ -61,7 +61,7 @@ class ToggleEditModeTool : VoqalTool() {
                 "Unable to toggle edit mode. Language model ${lmSettings.name} requires speech-to-text provider"
             )
             return
-        } else if (!aiProvider.isLlmProvider()) {
+        } else if (!aiProvider.isLlmProvider() && !aiProvider.isStmProvider()) {
             log.warnChat("No language model provider available")
             return
         }

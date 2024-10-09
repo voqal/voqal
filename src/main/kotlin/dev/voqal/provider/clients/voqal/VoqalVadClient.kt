@@ -5,7 +5,6 @@ import dev.voqal.provider.VadProvider
 import dev.voqal.services.audioCapture
 import dev.voqal.services.getVoqalLogger
 import dev.voqal.utils.SharedAudioCapture
-import dev.voqal.utils.SharedAudioCapture.Companion.SAMPLE_RATE
 import dev.voqal.utils.SharedAudioCapture.Companion.convertBytesToShorts
 import io.github.givimad.libfvadjni.VoiceActivityDetector
 
@@ -20,6 +19,8 @@ class VoqalVadClient(
 ) : VadProvider(project) {
 
     companion object {
+        private const val SAMPLE_RATE = 16000
+
         //todo: can't be static because multiple projects can be open
         @JvmStatic
         val vad: VoiceActivityDetector? by lazy {

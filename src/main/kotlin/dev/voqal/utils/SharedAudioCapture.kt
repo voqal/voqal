@@ -6,6 +6,8 @@ import com.intellij.openapi.project.Project
 import dev.voqal.assistant.focus.SpokenTranscript
 import dev.voqal.config.settings.VoiceDetectionSettings.VoiceDetectionProvider
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
+import dev.voqal.provider.AiProvider
+import dev.voqal.provider.StmProvider
 import dev.voqal.provider.clients.picovoice.NativesExtractor
 import dev.voqal.services.*
 import dev.voqal.status.VoqalStatus
@@ -13,6 +15,7 @@ import dev.voqal.utils.SharedAudioCapture.AudioDetection.Companion.PRE_SPEECH_BU
 import dev.voqal.utils.SharedAudioSystem.SharedAudioLine
 import kotlinx.coroutines.*
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
@@ -26,8 +29,8 @@ import javax.sound.sampled.*
 class SharedAudioCapture(private val project: Project) {
 
     companion object {
-        const val BUFFER_SIZE = 1024
-        const val SAMPLE_RATE = 16000
+        const val BUFFER_SIZE = 1532 //24khz -> 16khz = 512 samples
+        const val SAMPLE_RATE = 24000
         val FORMAT = AudioFormat(SAMPLE_RATE.toFloat(), 16, 1, true, false)
         val EMPTY_BUFFER = ByteArray(BUFFER_SIZE)
 
@@ -39,6 +42,30 @@ class SharedAudioCapture(private val project: Project) {
             }
             return audioData
         }
+
+        fun to16khz(byteArray: ByteArray): ByteArray {
+            val sourceFrameLength = byteArray.size / FORMAT.frameSize
+            val sourceStream = AudioInputStream(ByteArrayInputStream(byteArray), FORMAT, sourceFrameLength.toLong())
+
+            val targetFormat = AudioFormat(
+                16000f,
+                FORMAT.sampleSizeInBits,
+                FORMAT.channels,
+                FORMAT.encoding == AudioFormat.Encoding.PCM_SIGNED,
+                FORMAT.isBigEndian
+            )
+            val targetStream = AudioSystem.getAudioInputStream(targetFormat, sourceStream)
+            val outputStream = ByteArrayOutputStream()
+            val buffer = ByteArray(1024)
+            var bytesRead: Int
+            while (targetStream.read(buffer).also { bytesRead = it } != -1) {
+                outputStream.write(buffer, 0, bytesRead)
+            }
+            sourceStream.close()
+            targetStream.close()
+
+            return outputStream.toByteArray()
+        }
     }
 
     private val log = project.getVoqalLogger(this::class)
@@ -48,6 +75,8 @@ class SharedAudioCapture(private val project: Project) {
     private var thread: Thread? = null
     private var microphoneName: String = ""
     private var line: SharedAudioLine? = null
+    private val modeProviders = mutableMapOf<String, AiProvider>()
+    private var currentMode: String = "Idle Mode"
 
     data class AudioDetection(
         val voiceCaptured: AtomicBoolean = AtomicBoolean(false),
@@ -64,6 +93,7 @@ class SharedAudioCapture(private val project: Project) {
         fun onAudioData(data: ByteArray, detection: AudioDetection)
         fun isTestListener(): Boolean = false
         fun isLiveDataListener(): Boolean = false
+        fun sampleRate(): Float = 16000f
     }
 
     init {
@@ -96,19 +126,37 @@ class SharedAudioCapture(private val project: Project) {
                 enabled = false
                 cancel()
             }
+
+            if (it == VoqalStatus.EDITING) {
+                currentMode = "Edit Mode"
+            } else {
+                currentMode = "Idle Mode"
+            }
         }
 
         var vadProvider = configService.getConfig().voiceDetectionSettings.provider
         configService.onConfigChange {
             val newVadProvider = it.voiceDetectionSettings.provider
-            if (vadProvider == VoiceDetectionProvider.None && newVadProvider != VoiceDetectionProvider.None) {
+            if (vadProvider == VoiceDetectionProvider.NONE && newVadProvider != VoiceDetectionProvider.NONE) {
                 log.info("Voice detection enabled")
                 vadProvider = newVadProvider
                 restart()
-            } else if (vadProvider != VoiceDetectionProvider.None && newVadProvider == VoiceDetectionProvider.None) {
+            } else if (vadProvider != VoiceDetectionProvider.NONE && newVadProvider == VoiceDetectionProvider.NONE) {
                 log.info("Voice detection disabled")
                 vadProvider = newVadProvider
                 restart()
+            }
+
+            project.scope.launch {
+                val aiProvider = configService.getAiProvider()
+                configService.getConfig().promptLibrarySettings.prompts.forEach {
+                    val provider = aiProvider.findProvider(it.languageModel)
+                    if (provider == null) {
+                        log.warn("Unable to find provider: " + it.languageModel)
+                    } else {
+                        modeProviders[it.promptName] = provider
+                    }
+                }
             }
         }
     }
@@ -167,10 +215,10 @@ class SharedAudioCapture(private val project: Project) {
         try {
             val testMode = listeners.any { it.isTestListener() }
             val configService = project.service<VoqalConfigService>()
-            if (!testMode && configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.None) {
+            if (!testMode && configService.getConfig().voiceDetectionSettings.provider == VoiceDetectionProvider.NONE) {
                 log.warn("No voice detection provider available")
                 return
-            }
+            }//todo: server VAD
             val availableMicrophones = getAvailableMicrophones()
             if (availableMicrophones.isEmpty()) {
                 log.warn("No microphone available")
@@ -208,20 +256,40 @@ class SharedAudioCapture(private val project: Project) {
             var voiceCaptured = false
             var speechDetected = false
             var readyForMicrophoneAudio = false
-            var capturedWhilePaused = false
             val capturedVoice = LinkedList<Frame>()
             val audioDetection = AudioDetection()
+            val aiProvider = configService.getAiProvider()
+            configService.getConfig().promptLibrarySettings.prompts.forEach {
+                val provider = aiProvider.findProvider(it.languageModel)
+                if (provider == null) {
+                    log.warn("Unable to find provider: " + it.languageModel)
+                } else {
+                    modeProviders[it.promptName] = provider
+                }
+            }
 
             val processJob = CoroutineScope(Dispatchers.Default).launch {
                 while (active) {
                     val audioData = audioQueue.take()
                     val liveDataListeners = listeners.filter { it.isLiveDataListener() }
+                    val modeProvider = modeProviders[currentMode]
+                    if (!testMode && paused) continue
 
                     for (listener in liveDataListeners) {
                         val updateListener = (testMode && listener.isTestListener()) ||
                                 (!testMode && !listener.isTestListener())
                         if (updateListener) {
-                            listener.onAudioData(audioData.data, audioDetection)
+                            if (listener !== modeProvider && listener is StmProvider) {
+                                continue //ignore audio, another provider is handling
+                            }
+
+                            if (listener.sampleRate() == 24000f) {
+                                listener.onAudioData(audioData.data, audioDetection)
+                            } else if (listener.sampleRate() == 16000f) {
+                                listener.onAudioData(to16khz(audioData.data), audioDetection)
+                            } else {
+                                throw UnsupportedOperationException("Sample rate must be 16khz or 24khz")
+                            }
                         }
                     }
 
@@ -244,10 +312,6 @@ class SharedAudioCapture(private val project: Project) {
                             audioDetection.framesBeforeVoiceDetected.clear()
                         }
                         capturedVoice.add(audioData)
-
-                        if (paused) {
-                            capturedWhilePaused = true
-                        }
                     } else if (speechDetected && !audioDetection.speechDetected.get()) {
                         log.info("Developer stopped talking. Frame: ${audioData.index}")
                         capturedVoice.add(audioData)
@@ -271,8 +335,7 @@ class SharedAudioCapture(private val project: Project) {
                         capturedVoice.clear()
                         speechDetected = false
                         voiceCaptured = false
-                        if (capturedWhilePaused) {
-                            capturedWhilePaused = false
+                        if (testMode) {
                             continue //skip process test audio to transcript (currently no test mode STT)
                         }
 
@@ -281,7 +344,6 @@ class SharedAudioCapture(private val project: Project) {
 
                         val speechDir = File(NativesExtractor.workingDirectory, "speech")
                         speechDir.mkdirs()
-                        val aiProvider = configService.getAiProvider()
                         val speechId = aiProvider.asVadProvider().speechId
                         val speechFile = File(speechDir, "developer-$speechId.wav")
                         convertToWavFormat(mergedAudio, speechFile)
@@ -306,7 +368,11 @@ class SharedAudioCapture(private val project: Project) {
                                 val errorMessage = e.message ?: "An unknown error occurred"
                                 log.errorChat(errorMessage, e)
                             }
-                        } else if (aiProvider.isStmProvider()) {
+                        } else if (modeProvider?.isStmProvider() == true) {
+                            if ((modeProvider as? AudioDataListener)?.isLiveDataListener() == true) {
+                                continue //already sent data
+                            }
+
                             val audioInputStream = AudioSystem.getAudioInputStream(speechFile)
                             val audioLengthSeconds = (audioInputStream.frameLength / audioInputStream.format.frameRate)
                                 .toDouble()

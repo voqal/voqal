@@ -1,10 +1,40 @@
 package dev.voqal.assistant.processing
 
+import com.intellij.diff.DiffContentFactory
+import com.intellij.diff.fragments.LineFragmentImpl
+import com.intellij.diff.requests.SimpleDiffRequest
+import com.intellij.diff.tools.simple.SimpleDiffChange
+import com.intellij.diff.tools.util.base.TextDiffSettingsHolder
+import com.intellij.diff.util.DiffUtil
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.TextRange
 import io.vertx.core.json.JsonObject
 import java.util.regex.Pattern
 
-object TextSearcher {
+object TextUtils {
+
+    fun getSimpleDiffChanges(oldText: String, newText: String, project: Project): List<SimpleDiffChange> {
+        if (oldText.isEmpty()) {
+            val singleFragment = LineFragmentImpl(0, 1, 0, newText.lines().count(), 0, 0, 0, newText.length)
+            return listOf(SimpleDiffChange(0, singleFragment))
+        }
+
+        val disposable = Disposer.newDisposable()
+        val oldContent = DiffContentFactory.getInstance().create(oldText)
+        val newContent = DiffContentFactory.getInstance().create(newText)
+        val provider = DiffUtil.createTextDiffProvider(
+            project, SimpleDiffRequest("Voqal Diff", oldContent, newContent, "Old", "New"),
+            TextDiffSettingsHolder.TextDiffSettings(), {}, disposable
+        )
+        val fragments = provider.compare(oldText, newText, EmptyProgressIndicator())
+        Disposer.dispose(disposable)
+
+        return fragments?.mapIndexed { index, fragment ->
+            SimpleDiffChange(index, fragment)
+        } ?: emptyList()
+    }
 
     fun checkForVuiInteraction(type: String, responseCode: String): Boolean {
         try {

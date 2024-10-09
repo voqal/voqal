@@ -8,7 +8,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.wm.WindowManager
 import dev.voqal.config.settings.PromptLibrarySettings
-import dev.voqal.services.*
+import dev.voqal.services.VoqalConfigService
+import dev.voqal.services.VoqalStatusService
+import dev.voqal.services.audioCapture
+import dev.voqal.services.getVoqalLogger
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
 import javax.swing.SwingUtilities

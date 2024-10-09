@@ -50,9 +50,8 @@ data class VoqalResponse(
             "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo-vLLM" to mapOf(0 to 0.005, 1 to 0.005),
             "codestral-2405" to mapOf(0 to 0.001, 1 to 0.003),
             "codestral-latest" to mapOf(0 to 0.001, 1 to 0.003),
-            "gemini-1.5-flash-latest" to mapOf(0 to 0.00035, 1 to 0.00105), //todo: increases after 1 million tokens
-            "gemini-1.5-pro-latest" to mapOf(0 to 0.0035, 1 to 0.0105), //todo: increases after 1 million tokens
-            "gemini-1.5-pro-exp-0801" to mapOf(0 to 0.0035, 1 to 0.0105), //todo: increases after 1 million tokens
+            "gemini-1.5-flash-latest" to mapOf(0 to 0.000075, 1 to 0.0003), //todo: increases after 1 million tokens
+            "gemini-1.5-pro-latest" to mapOf(0 to 0.00125, 1 to 0.005), //todo: increases after 1 million tokens
             "claude-3-sonnet-20240229" to mapOf(0 to 0.003, 1 to 0.015),
             "claude-3-5-sonnet-20240620" to mapOf(0 to 0.003, 1 to 0.015),
             "mistral-small-latest" to mapOf(0 to 0.001, 1 to 0.003),

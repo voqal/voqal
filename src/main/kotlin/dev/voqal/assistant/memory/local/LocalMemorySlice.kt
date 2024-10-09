@@ -139,8 +139,8 @@ class LocalMemorySlice(
                     if (deltaRole == null) {
                         deltaRole = it.choices[0].delta?.role
                     }
-                    fullText.append(it.choices[0].delta?.content ?: "")
-                    if (it.choices[0].delta?.content?.contains("\n") == false) {
+                    fullText.append(it.choices.firstOrNull()?.delta?.content ?: "")
+                    if (it.choices.firstOrNull()?.delta?.content?.contains("\n") in setOf(null, false)) {
                         return@collect //wait till new line to progress streaming edit
                     }
 
@@ -244,7 +244,7 @@ class LocalMemorySlice(
             id = chunk.id,
             created = chunk.created.toLong(),
             model = chunk.model,
-            choices = chunk.choices.map {
+            choices = listOf(
                 ChatChoice(
                     index = 0,
                     message = ChatMessage(
@@ -252,7 +252,7 @@ class LocalMemorySlice(
                         messageContent = TextContent(fullText)
                     )
                 )
-            },
+            ),
             usage = chunk.usage,
             systemFingerprint = chunk.systemFingerprint
         )

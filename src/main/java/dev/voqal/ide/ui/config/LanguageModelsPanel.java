@@ -51,7 +51,12 @@ public class LanguageModelsPanel {
     myLanguageModelsPanel.setMinimumSize(new Dimension(-1, 100));
 
     final List<AnAction> createActions = new ArrayList<>();
-    for (final LanguageModelSettings.LMProvider provider : LanguageModelSettings.LMProvider.getEntries()) {
+      var lmProviders = new ArrayList<>(LanguageModelSettings.LMProvider.getEntries().stream().toList());
+      LicensingFacade licensingFacade = LicensingFacade.getInstance();
+      if (licensingFacade != null && licensingFacade.getConfirmationStamp("PVOQAL") == null) {
+          lmProviders.remove(LanguageModelSettings.LMProvider.VOQAL_PRO);
+      }
+      for (final LanguageModelSettings.LMProvider provider : lmProviders) {
       if (provider == LanguageModelSettings.LMProvider.NONE) continue;
       createActions.add(new AddLanguageModelAction(provider) {
         @Override

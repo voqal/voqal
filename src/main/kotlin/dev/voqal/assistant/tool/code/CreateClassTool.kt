@@ -75,7 +75,12 @@ class CreateClassTool : VoqalTool() {
 
                 //start edit mode
                 if (fileEditors.first() is TextEditor) {
-                    project.service<VoqalToolService>().blindExecute(ToggleEditModeTool())
+                    project.service<VoqalToolService>().blindExecute(
+                        ToggleEditModeTool(),
+                        JsonObject().apply {
+                            put("chatMessage", directive.developer.chatMessage)
+                        }
+                    )
                 }
             } catch (ex: IncorrectOperationException) {
                 project.service<VoqalDirectiveService>().handleResponse(

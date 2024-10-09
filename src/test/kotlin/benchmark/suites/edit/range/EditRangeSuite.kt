@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.isFile
 import com.intellij.psi.PsiFile
 import dev.voqal.assistant.context.VoqalContext
 import dev.voqal.assistant.context.code.ViewingCode
+import dev.voqal.assistant.processing.TextUtils
 import dev.voqal.config.settings.PromptSettings
 import dev.voqal.services.getFunctions
 import dev.voqal.status.VoqalStatus
@@ -61,11 +62,17 @@ class EditRangeSuite : BenchmarkSuite {
             checkTextContains("x * a + b", psiFile.virtualFile, it)
 
             //ensure no extra changes
-            val codeBeforeFunc = psiFile.text.substringBefore("public int calculate")
-            if (codeBeforeFunc == originalCode.substringBefore("public int calculate")) {
-                it.success("No extra changes")
+            val diffs = TextUtils.getSimpleDiffChanges(originalCode, psiFile.text, project)
+            if (diffs.size == 1) {
+                it.success("Single change")
             } else {
-                it.fail("Extra change: $codeBeforeFunc")
+                it.fail("Multiple changes: " + diffs.size)
+            }
+            val diff = diffs.first()
+            if (diff.fragment.startOffset1 == diff.fragment.startOffset2) {
+                it.success("Same start offset")
+            } else {
+                it.fail("Different start offsets. ${diff.fragment.startOffset1} != ${diff.fragment.startOffset2}")
             }
 
             //clean up

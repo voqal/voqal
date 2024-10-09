@@ -142,6 +142,7 @@ class DeepgramClient(
                             log.warn("Failed to connect to Deepgram. Retrying...")
                         }
                     }
+                    if (session != null) break
                 }
                 session!!
             }
@@ -389,6 +390,7 @@ class DeepgramClient(
             project.audioCapture.removeListener(this)
             if (::readThread.isInitialized) readThread.interrupt()
             if (::pingThread.isInitialized) pingThread.interrupt()
+            if (::writeThread.isInitialized) writeThread.interrupt()
         }
     }
 

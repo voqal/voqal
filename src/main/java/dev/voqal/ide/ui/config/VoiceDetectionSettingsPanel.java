@@ -54,7 +54,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 providerPasswordField.setVisible(false);
             }
 
-            if (provider == VoiceDetectionProvider.None) {
+            if (provider == VoiceDetectionProvider.NONE) {
                 label3.setVisible(false);
                 label5.setVisible(false);
                 label6.setVisible(false);
@@ -63,7 +63,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 speechSilenceSpinner.setVisible(false);
                 sustainDurationSpinner.setVisible(false);
                 sensitivitySpinner.setVisible(false);
-            } else if (provider == VoiceDetectionProvider.Voqal) {
+            } else if (provider == VoiceDetectionProvider.VOQAL) {
                 label3.setVisible(true);
                 label5.setVisible(true);
                 label6.setVisible(true);
@@ -75,7 +75,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 sensitivitySpinner.setModel(new SpinnerListModel(VoiceActivityDetector.Mode.values()));
                 sensitivitySpinner.setValue(VoiceActivityDetector.Mode.values()[0]);
                 ((JSpinner.DefaultEditor) sensitivitySpinner.getEditor()).getTextField().setEditable(false);
-            } else if (provider == VoiceDetectionProvider.Picovoice) {
+            } else if (provider == VoiceDetectionProvider.PICOVOICE) {
                 label3.setVisible(true);
                 label5.setVisible(true);
                 label6.setVisible(true);
@@ -143,6 +143,11 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         });
 
         restartReadThread();
+    }
+
+    @Override
+    public float sampleRate() {
+        return 16000f;
     }
 
     @Override
@@ -243,7 +248,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
 
         log.debug("Updating VAD provider");
         var provider = VoiceDetectionProvider.lenientValueOf(providerComboBox.getSelectedItem().toString());
-        if (provider == VoiceDetectionProvider.None) {
+        if (provider == VoiceDetectionProvider.NONE) {
             if (readThread != null) {
                 readThread.interrupt();
                 readThread = null;
@@ -251,7 +256,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
             SwingUtilities.invokeLater(() -> {
                 label4.setText("<html><font color='#ff6464'>No voice detection provider available</font></html>");
             });
-        } else if (provider == VoiceDetectionProvider.Voqal) {
+        } else if (provider == VoiceDetectionProvider.VOQAL) {
             label3.setText("Mode:");
             var sensitivity = ((VoiceActivityDetector.Mode) sensitivitySpinner.getValue()).ordinal();
             var vad = VoqalVadClient.getVad();
@@ -301,7 +306,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
                 );
                 restartReadThread();
             }
-        } else if (provider == VoiceDetectionProvider.Picovoice) {
+        } else if (provider == VoiceDetectionProvider.PICOVOICE) {
             label3.setText("Probability (%):");
             if (vadProvider instanceof PicovoiceCobraClient picovoice) {
                 //update
@@ -364,7 +369,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
     }
 
     public boolean isModified(VoiceDetectionSettings config) {
-        if (!Objects.equals(config.getProvider().name(), providerComboBox.getSelectedItem())) {
+        if (!Objects.equals(config.getProvider().getDisplayName(), providerComboBox.getSelectedItem())) {
             return true;
         }
         if (VoiceDetectionProvider.lenientValueOf(providerComboBox.getSelectedItem().toString()).isKeyRequired()) {
@@ -427,7 +432,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         sb.append("<font color='#ff6464'>Speech Detected: N</font>");
         sb.append("</html>");
         label4.setText(sb.toString());
-        providerComboBox.setSelectedItem(config.getProvider().name());
+        providerComboBox.setSelectedItem(config.getProvider().getDisplayName());
         providerPasswordField.setText(config.getProviderKey());
         voiceSilenceSpinner.setValue(config.getVoiceSilenceThreshold());
         speechSilenceSpinner.setValue(config.getSpeechSilenceThreshold());
@@ -442,11 +447,11 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
             providerPasswordField.setVisible(false);
         }
 
-        if (provider == VoiceDetectionProvider.Voqal) {
+        if (provider == VoiceDetectionProvider.VOQAL) {
             sensitivitySpinner.setModel(new SpinnerListModel(VoiceActivityDetector.Mode.values()));
             sensitivitySpinner.setValue(VoiceActivityDetector.Mode.values()[config.getSensitivity()]);
             ((JSpinner.DefaultEditor) sensitivitySpinner.getEditor()).getTextField().setEditable(false);
-        } else if (provider == VoiceDetectionProvider.Picovoice) {
+        } else if (provider == VoiceDetectionProvider.PICOVOICE) {
             sensitivitySpinner.setModel(new SpinnerNumberModel(20, 0, 100, 1));
             sensitivitySpinner.setValue(config.getSensitivity());
             ((JSpinner.DefaultEditor) sensitivitySpinner.getEditor()).getTextField().setEditable(true);
@@ -454,7 +459,7 @@ public class VoiceDetectionSettingsPanel extends JBPanel<VoiceDetectionSettingsP
         setupMode = false;
 
         try {
-            if (provider == VoiceDetectionProvider.Voqal) {
+            if (provider == VoiceDetectionProvider.VOQAL) {
                 var vad = VoqalVadClient.getVad();
                 if (vad != null) {
                     vad.setMode(VoiceActivityDetector.Mode.values()[config.getSensitivity()]);

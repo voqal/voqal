@@ -55,7 +55,8 @@ class VoqalContextService(private val project: Project) {
     fun getOpenFiles(selectedTextEditor: Editor?): MutableList<ViewingCode> {
         val openVirtualFiles = ReadAction.compute(ThrowableComputable {
             FileEditorManager.getInstance(project).openFiles.filter {
-                !it.name.contains("voqal-response") && //ignore voqal responses
+                !it.name.contains("voqal-prompt") && //ignore voqal prompts
+                        !it.name.contains("voqal-response") && //ignore voqal responses
                         !it.path.contains(".voqal") && //ignore voqal files
                         !ChangeListManager.getInstance(project).isIgnoredFile(it) //ignore VCS ignored files
             }
@@ -111,10 +112,12 @@ class VoqalContextService(private val project: Project) {
     fun getSelectedTextEditor(): Editor? {
         var selectedTextEditor = FileEditorManager.getInstance(project).selectedTextEditor
         if (selectedTextEditor == null) {
-            val virtualFile = FileEditorManager.getInstance(project).selectedEditor?.file
+            val virtualFile = FileEditorManager.getInstance(project).selectedEditor?.file ?: return null
             selectedTextEditor = EditorFactory.getInstance().allEditors.find { it.virtualFile == virtualFile }
         }
-        if (selectedTextEditor?.virtualFile?.name?.contains("voqal-response") == true) {
+        if (selectedTextEditor?.virtualFile?.name?.contains("voqal-prompt") == true) {
+            selectedTextEditor = null
+        } else if (selectedTextEditor?.virtualFile?.name?.contains("voqal-response") == true) {
             selectedTextEditor = null
         } else if (selectedTextEditor?.virtualFile?.path?.contains(".voqal") == true) {
             selectedTextEditor = null
@@ -137,7 +140,7 @@ class VoqalContextService(private val project: Project) {
         //count tokens
         var tokenLimit = fullDirective.assistant.languageModelSettings.tokenLimit
         if (tokenLimit == -1) {
-            log.warn("Token limit not set. Using no limit")
+            log.trace("Token limit not set. Using no limit")
             tokenLimit = Integer.MAX_VALUE
         }
         val commandPrompt = croppedCommand.toMarkdown()
@@ -238,7 +241,7 @@ class VoqalContextService(private val project: Project) {
                 )
             }
         }
-        log.debug("Command prompt tokens: $promptTokens")
+        log.trace("Command prompt tokens: $promptTokens")
         return croppedCommand
     }
 

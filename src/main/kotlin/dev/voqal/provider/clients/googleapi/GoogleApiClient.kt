@@ -41,9 +41,9 @@ class GoogleApiClient(
 
         @JvmStatic
         fun getTokenLimit(modelName: String): Int {
-            return when (modelName) {
-                "gemini-1.5-flash-latest" -> 1048576
-                "gemini-1.5-pro-latest" -> 2097152
+            return when {
+                modelName.startsWith("gemini-1.5-flash") -> 1048576
+                modelName.startsWith("gemini-1.5-pro") -> 2097152
                 else -> -1
             }
         }
@@ -51,7 +51,12 @@ class GoogleApiClient(
         @JvmStatic
         val MODELS = listOf(
             "gemini-1.5-flash-latest",
-            "gemini-1.5-pro-latest"
+            "gemini-1.5-pro-latest",
+            "gemini-1.5-flash-002",
+            "gemini-1.5-pro-002",
+            "gemini-1.5-flash-001",
+            "gemini-1.5-pro-001",
+            "gemini-1.5-flash-8b",
         )
     }
 
