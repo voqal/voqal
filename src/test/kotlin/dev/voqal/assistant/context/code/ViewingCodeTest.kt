@@ -17,8 +17,8 @@ class ViewingCodeTest {
             includedLines = listOf(IntRange(0, 4), IntRange(7, 8))
         )
         val json = omittedCode.toJson()
-        assertFalse(json.toString().contains("public int calculate(int x)"))
-        assertTrue(json.toString().contains("6|    ...omitted..."))
-        assertTrue(json.toString().contains("7|    ...omitted..."))
+        assertFalse(json.getString("codeWithLineNumbers").contains("public int calculate(int x)"))
+        assertTrue(json.getString("codeWithLineNumbers").toString().contains("6|    ...omitted..."))
+        assertTrue(json.getString("codeWithLineNumbers").toString().contains("7|    ...omitted..."))
     }
 }
