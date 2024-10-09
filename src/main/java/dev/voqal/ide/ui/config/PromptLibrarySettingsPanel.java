@@ -60,7 +60,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             prompt.getEditFormat(),
-                            prompt.getStreamCompletions()
+                            prompt.getStreamCompletions(),
+                            prompt.getFunctionCalling()
                     )
             );
 
@@ -89,7 +90,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
                 selectedPromptChanged(project);
@@ -113,7 +115,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
                 selectedPromptChanged(project);
@@ -137,7 +140,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             prompt.getEditFormat(),
-                            prompt.getStreamCompletions()
+                            prompt.getStreamCompletions(),
+                            prompt.getFunctionCalling()
                     )
             );
         });
@@ -158,7 +162,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             prompt.getEditFormat(),
-                            prompt.getStreamCompletions()
+                            prompt.getStreamCompletions(),
+                            prompt.getFunctionCalling()
                     )
             );
         });
@@ -179,7 +184,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             prompt.getEditFormat(),
-                            streamCompletionsCheckBox.isSelected()
+                            streamCompletionsCheckBox.isSelected(),
+                            prompt.getFunctionCalling()
                     )
             );
         });
@@ -200,7 +206,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             prompt.getEditFormat(),
-                            prompt.getStreamCompletions()
+                            prompt.getStreamCompletions(),
+                            prompt.getFunctionCalling()
                     )
             );
         });
@@ -223,7 +230,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
             }
@@ -246,7 +254,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 assistantIdTextField.getText(),
                                 prompt.getAssistantThreadId(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
             }
@@ -269,7 +278,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getAssistantId(),
                                 assistantThreadIdTextField.getText(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
             }
@@ -292,7 +302,31 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             prompt.getAssistantId(),
                             prompt.getAssistantThreadId(),
                             editFormat,
-                            prompt.getStreamCompletions()
+                            prompt.getStreamCompletions(),
+                            prompt.getFunctionCalling()
+                    )
+            );
+        });
+
+        functionCallingComboBox.addActionListener(e -> {
+            var promptName = list1.getSelectedValue();
+            var functionCalling = PromptSettings.FunctionCalling.lenientValueOf(functionCallingComboBox.getSelectedItem().toString());
+            promptLibrary.computeIfPresent(promptName, (k, prompt) -> prompt.copy(
+                            prompt.getProvider(),
+                            prompt.getPromptName(),
+                            prompt.getPromptFile(),
+                            prompt.getPromptText(),
+                            prompt.getPromptUrl(),
+                            prompt.getLanguageModel(),
+                            prompt.getShowPartialResults(),
+                            prompt.getDecomposeDirectives(),
+                            prompt.getCodeSmellCorrection(),
+                            prompt.getVectorStoreId(),
+                            prompt.getAssistantId(),
+                            prompt.getAssistantThreadId(),
+                            prompt.getEditFormat(),
+                            prompt.getStreamCompletions(),
+                            functionCalling
                     )
             );
         });
@@ -327,6 +361,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
         assistantIdTextField.setText(prompt.getAssistantId());
         assistantThreadIdTextField.setText(prompt.getAssistantThreadId());
         editFormatComboBox.setSelectedItem(prompt.getEditFormat().getDisplayName());
+        functionCallingComboBox.setSelectedItem(prompt.getFunctionCalling().getDisplayName());
 
         if (prompt.getPromptName().equals("Idle Mode")) {
             decompCheckBox.setVisible(true);
@@ -398,7 +433,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
                             p.getEditFormat(),
-                            p.getStreamCompletions()
+                            p.getStreamCompletions(),
+                            p.getFunctionCalling()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_TEXT) {
@@ -416,7 +452,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
                             p.getEditFormat(),
-                            p.getStreamCompletions()
+                            p.getStreamCompletions(),
+                            p.getFunctionCalling()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_FILE) {
@@ -434,7 +471,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
                             p.getEditFormat(),
-                            p.getStreamCompletions()
+                            p.getStreamCompletions(),
+                            p.getFunctionCalling()
                     )
             );
         } else if (promptProvider == PProvider.CUSTOM_URL) {
@@ -452,7 +490,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                             p.getAssistantId(),
                             p.getAssistantThreadId(),
                             p.getEditFormat(),
-                            p.getStreamCompletions()
+                            p.getStreamCompletions(),
+                            p.getFunctionCalling()
                     )
             );
         } else {
@@ -522,7 +561,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                                 prompt.getAssistantId(),
                                 prompt.getAssistantThreadId(),
                                 prompt.getEditFormat(),
-                                prompt.getStreamCompletions()
+                                prompt.getStreamCompletions(),
+                                prompt.getFunctionCalling()
                         )
                 );
             }
@@ -603,15 +643,17 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         // Generated using JFormDesigner Evaluation license - unknown
-        panel1 = new JBPanel();
+        panel1 = new JBPanel<>();
         promptComboBox = new JComboBox<>();
         label9 = new JBLabel();
         promptFileLabel = new JBLabel();
         promptFileTextField = new JBTextField();
         urlLabel = new JBLabel();
         urlTextField = new JBTextField();
-        languageModelComboBox = new JComboBox();
+        languageModelComboBox = new JComboBox<>();
         label5 = new JBLabel();
+        label6 = new JBLabel();
+        functionCallingComboBox = new JComboBox<>();
         label4 = new JBLabel();
         editFormatComboBox = new JComboBox<>();
         label3 = new JBLabel();
@@ -639,7 +681,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
         //======== panel1 ========
         {
-            panel1.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), 5, -1));
+            panel1.setLayout(new GridLayoutManager(12, 2, new Insets(0, 0, 0, 0), 5, -1));
 
             //---- promptComboBox ----
             promptComboBox.setModel(new DefaultComboBoxModel<>(PromptSettings.PProvider.getEntries()
@@ -699,9 +741,26 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 null, null, null));
 
+            //---- label6 ----
+            label6.setText("Function Calling:");
+            panel1.add(label6, new GridConstraints(4, 0, 1, 1,
+                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+
+            //---- functionCallingComboBox ----
+            functionCallingComboBox.setModel(new DefaultComboBoxModel<>(PromptSettings.FunctionCalling.getEntries()
+                    .stream().map(PromptSettings.FunctionCalling::getDisplayName).toArray(String[]::new)));
+            panel1.add(functionCallingComboBox, new GridConstraints(4, 1, 1, 1,
+                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                null, null, null));
+
             //---- label4 ----
             label4.setText("Edit Format:");
-            panel1.add(label4, new GridConstraints(4, 0, 1, 1,
+            panel1.add(label4, new GridConstraints(5, 0, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -712,7 +771,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
                 "Full Text",
                 "Diff"
             }));
-            panel1.add(editFormatComboBox, new GridConstraints(4, 1, 1, 1,
+            panel1.add(editFormatComboBox, new GridConstraints(5, 1, 1, 1,
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -720,12 +779,12 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
             //---- label3 ----
             label3.setText("Vector Store Id:");
-            panel1.add(label3, new GridConstraints(5, 0, 1, 1,
+            panel1.add(label3, new GridConstraints(6, 0, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 null, null, null));
-            panel1.add(vectorStoreIdTextField, new GridConstraints(5, 1, 1, 1,
+            panel1.add(vectorStoreIdTextField, new GridConstraints(6, 1, 1, 1,
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -733,12 +792,12 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
             //---- label1 ----
             label1.setText("Assistant Id:");
-            panel1.add(label1, new GridConstraints(6, 0, 1, 1,
+            panel1.add(label1, new GridConstraints(7, 0, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 null, null, null));
-            panel1.add(assistantIdTextField, new GridConstraints(6, 1, 1, 1,
+            panel1.add(assistantIdTextField, new GridConstraints(7, 1, 1, 1,
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -746,12 +805,12 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
 
             //---- label2 ----
             label2.setText("Assistant Thread Id:");
-            panel1.add(label2, new GridConstraints(7, 0, 1, 1,
+            panel1.add(label2, new GridConstraints(8, 0, 1, 1,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 null, null, null));
-            panel1.add(assistantThreadIdTextField, new GridConstraints(7, 1, 1, 1,
+            panel1.add(assistantThreadIdTextField, new GridConstraints(8, 1, 1, 1,
                 GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -760,7 +819,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             //---- decompCheckBox ----
             decompCheckBox.setText("Enable Directive Decomposition");
             decompCheckBox.setSelected(true);
-            panel1.add(decompCheckBox, new GridConstraints(8, 0, 1, 2,
+            panel1.add(decompCheckBox, new GridConstraints(9, 0, 1, 2,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -769,7 +828,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             //---- streamCompletionsCheckBox ----
             streamCompletionsCheckBox.setText("Enable Streaming Completions");
             streamCompletionsCheckBox.setSelected(true);
-            panel1.add(streamCompletionsCheckBox, new GridConstraints(9, 0, 1, 2,
+            panel1.add(streamCompletionsCheckBox, new GridConstraints(10, 0, 1, 2,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -778,7 +837,7 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
             //---- codeSmellCheckBox ----
             codeSmellCheckBox.setText("Enable Code Smell Correction");
             codeSmellCheckBox.setSelected(true);
-            panel1.add(codeSmellCheckBox, new GridConstraints(10, 0, 1, 2,
+            panel1.add(codeSmellCheckBox, new GridConstraints(11, 0, 1, 2,
                 GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -820,6 +879,8 @@ public class PromptLibrarySettingsPanel extends JBPanel<PromptLibrarySettingsPan
     private JBTextField urlTextField;
     private JComboBox languageModelComboBox;
     private JBLabel label5;
+    private JBLabel label6;
+    private JComboBox<String> functionCallingComboBox;
     private JBLabel label4;
     private JComboBox<String> editFormatComboBox;
     private JBLabel label3;

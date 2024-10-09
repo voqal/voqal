@@ -1,6 +1,7 @@
 package dev.voqal.config.settings
 
 import dev.voqal.config.ConfigurableSettings
+import dev.voqal.config.settings.PromptSettings.FunctionCalling
 import io.vertx.core.json.JsonObject
 
 data class PromptLibrarySettings(
@@ -35,8 +36,17 @@ data class PromptLibrarySettings(
     companion object {
         @JvmStatic
         val DEFAULT_PROMPTS = listOf(
-            PromptSettings(promptName = "Edit Mode", codeSmellCorrection = true, streamCompletions = true),
-            PromptSettings(promptName = "Idle Mode", decomposeDirectives = true),
+            PromptSettings(
+                promptName = "Edit Mode",
+                codeSmellCorrection = true,
+                streamCompletions = true,
+                functionCalling = FunctionCalling.MARKDOWN
+            ),
+            PromptSettings(
+                promptName = "Idle Mode",
+                decomposeDirectives = true,
+                functionCalling = FunctionCalling.MARKDOWN
+            ),
             PromptSettings(promptName = "Search Mode")
         )
     }

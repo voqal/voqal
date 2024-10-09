@@ -8,6 +8,7 @@ import com.aallam.openai.api.model.ModelId
 import com.intellij.openapi.project.Project
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.memory.local.asDirectiveTool
+import dev.voqal.config.settings.PromptSettings.FunctionCalling
 import dev.voqal.provider.LlmProvider
 import dev.voqal.provider.StmProvider
 import dev.voqal.provider.clients.picovoice.NativesExtractor
@@ -153,7 +154,7 @@ class GoogleApiClient(
     private fun toRequestJson(request: ChatCompletionRequest, directive: VoqalDirective?): JsonObject {
         val requestJson = JsonObject().put("contents", JsonArray(request.messages.map { it.toJson() }))
 
-        if (directive?.assistant?.includeToolsInMarkdown == false) {
+        if (directive?.assistant?.promptSettings?.functionCalling == FunctionCalling.NATIVE) {
             requestJson.put("tools", JsonArray().apply {
                 val toolsArray = JsonArray(request.tools?.map { it.asDirectiveTool() }
                     ?.map { JsonObject(Json.encodeToString(it)) })

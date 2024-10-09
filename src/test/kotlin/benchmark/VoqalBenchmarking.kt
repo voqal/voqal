@@ -226,7 +226,8 @@ class VoqalBenchmarking : JBTest() {
                                 editFormat = EditFormat.valueOf(System.getenv("VQL_EDIT_FORMAT") ?: "FULL_TEXT")
                             ),
                             languageModelSettings = TEST_CONFIG.languageModelsSettings.models.first(),
-                            includeToolsInMarkdown = System.getenv("VQL_MARKDOWN_TOOLS") != "false"
+//                            functionCalling = System.getenv("VQL_FUNCTION_CALLING")
+//                                ?.let { FunctionCalling.lenientValueOf(it) } ?: FunctionCalling.MARKDOWN
                         ),
                         ide = IdeContext(
                             project = project,

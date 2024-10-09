@@ -37,8 +37,8 @@ jobs:
           - "go"
           - "JavaScript"
 #        markdownTools:
-#          - "true"
-#          - "false"
+#          - "NATIVE"
+#          - "MARKDOWN"
 
     steps:
 
@@ -103,7 +103,7 @@ jobs:
           VQL_OBSERVABILITY_KEY: ${{ secrets.HELICONE_API_KEY }}
           VQL_OBSERVABILITY_USER_ID: benchmark
           VQL_EDIT_FORMAT: FULL_TEXT
-#          VQL_MARKDOWN_TOOLS: ${{ matrix.markdownTools }}
+#          VQL_FUNCTION_CALLING: ${{ matrix.markdownTools }}
 
       - name: Output log
         run: cat /tmp/voqal-test.log

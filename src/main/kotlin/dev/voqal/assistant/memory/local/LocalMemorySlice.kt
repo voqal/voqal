@@ -13,6 +13,7 @@ import dev.voqal.assistant.VoqalResponse
 import dev.voqal.assistant.memory.MemorySlice
 import dev.voqal.assistant.processing.ResponseParser
 import dev.voqal.assistant.tool.text.EditTextTool
+import dev.voqal.config.settings.PromptSettings.FunctionCalling
 import dev.voqal.services.*
 import io.vertx.core.json.JsonObject
 import org.jetbrains.annotations.VisibleForTesting
@@ -60,7 +61,7 @@ class LocalMemorySlice(
         if (promptSettings.promptName == "Edit Mode") {
             project.service<VoqalStatusService>().updateText("Querying AI provider: ${lmSettings.name}")
         }
-        var includeToolsInMarkdown = directive.assistant.includeToolsInMarkdown
+        var includeToolsInMarkdown = promptSettings.functionCalling == FunctionCalling.MARKDOWN
         if (promptSettings.promptName == "Edit Mode") {
             includeToolsInMarkdown = true //todo: edit mode doesn't support function calls
         }

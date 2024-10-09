@@ -17,7 +17,8 @@ data class PromptSettings(
     val assistantId: String = "",
     val assistantThreadId: String = "",
     val editFormat: EditFormat = EditFormat.FULL_TEXT,
-    val streamCompletions: Boolean = false
+    val streamCompletions: Boolean = false,
+    val functionCalling: FunctionCalling = FunctionCalling.MARKDOWN
 ) : ConfigurableSettings {
 
     /**
@@ -37,7 +38,8 @@ data class PromptSettings(
         assistantId = json.getString("assistantId", ""),
         assistantThreadId = json.getString("assistantThreadId", ""),
         editFormat = EditFormat.valueOf(json.getString("editFormat", EditFormat.FULL_TEXT.name)),
-        streamCompletions = json.getBoolean("streamCompletions", false)
+        streamCompletions = json.getBoolean("streamCompletions", false),
+        functionCalling = FunctionCalling.lenientValueOf(json.getString("functionCalling", FunctionCalling.MARKDOWN.name))
     )
 
     override fun toJson(): JsonObject {
@@ -56,6 +58,7 @@ data class PromptSettings(
             put("assistantThreadId", assistantThreadId)
             put("editFormat", editFormat.name)
             put("streamCompletions", streamCompletions)
+            put("functionCalling", functionCalling.name)
         }
     }
 
@@ -97,6 +100,20 @@ data class PromptSettings(
             @JvmStatic
             fun lenientValueOf(str: String): EditFormat {
                 return EditFormat.valueOf(str.replace(" ", "_").uppercase())
+            }
+        }
+    }
+
+    enum class FunctionCalling {
+        NATIVE,
+        MARKDOWN;
+
+        val displayName = name.replace("_", " ").lowercase().capitalize()
+
+        companion object {
+            @JvmStatic
+            fun lenientValueOf(str: String): FunctionCalling {
+                return FunctionCalling.valueOf(str.replace(" ", "_").uppercase())
             }
         }
     }

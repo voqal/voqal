@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.concurrency.ThreadingAssertions
 import dev.voqal.assistant.VoqalDirective
 import dev.voqal.assistant.focus.SpokenTranscript
+import dev.voqal.config.settings.PromptSettings.FunctionCalling
 import dev.voqal.ide.ui.toolwindow.chat.ChatToolWindowContentManager
 import dev.voqal.services.*
 import dev.voqal.utils.SharedAudioCapture
@@ -130,7 +131,9 @@ class RealtimeSession(
         nopDirective = nopDirective.copy(
             assistant = nopDirective.assistant.copy(
                 availableActions = toolService.getAvailableTools().values,
-                includeToolsInMarkdown = false
+                promptSettings = nopDirective.assistant.promptSettings?.copy(
+                    functionCalling = FunctionCalling.NATIVE
+                )
             )
         )
         val prompt = nopDirective.toMarkdown()

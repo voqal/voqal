@@ -19,7 +19,6 @@ import java.io.StringWriter
 data class AssistantContext(
     val memorySlice: MemorySlice,
     val availableActions: Collection<VoqalTool>,
-    val includeToolsInMarkdown: Boolean = true,
     val languageModelSettings: LanguageModelSettings,
     val promptSettings: PromptSettings? = null,
     val speechId: String? = null,
@@ -32,7 +31,7 @@ data class AssistantContext(
 
     fun toJson(directive: VoqalDirective): JsonObject {
         return JsonObject().apply {
-            put("includeToolsInMarkdown", includeToolsInMarkdown)
+            put("includeToolsInMarkdown", promptSettings?.functionCalling == PromptSettings.FunctionCalling.MARKDOWN)
             put("availableTools", getVisibleTools(directive, availableActions))
             put("speechId", speechId)
             put("usingAudioModality", usingAudioModality)

@@ -1,4 +1,4 @@
-JFDML JFormDesigner: "8.2.1.0.348" Java: "21.0.3" encoding: "UTF-8"
+JFDML JFormDesigner: "8.2.4.0.393" Java: "21.0.4" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
@@ -11,7 +11,7 @@ new FormModel {
 			name: "this"
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
 				"$columnCount": 2
-				"$rowCount": 11
+				"$rowCount": 12
 				"hGap": 5
 			} ) {
 				name: "panel1"
@@ -79,10 +79,30 @@ new FormModel {
 					"hSizePolicy": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
+					name: "label6"
+					"text": "Function Calling:"
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"row": 4
+					"anchor": 8
+					"hSizePolicy": 1
+				} )
+				add( new FormComponent( "javax.swing.JComboBox" ) {
+					name: "functionCallingComboBox"
+					"model": new javax.swing.DefaultComboBoxModel {
+						selectedItem: "Native"
+						addElement( "Native" )
+						addElement( "Markdown" )
+					}
+				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+					"column": 1
+					"row": 4
+					"fill": 1
+				} )
+				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label4"
 					"text": "Edit Format:"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 4
+					"row": 5
 					"anchor": 8
 					"hSizePolicy": 1
 				} )
@@ -95,14 +115,14 @@ new FormModel {
 					}
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"column": 1
-					"row": 4
+					"row": 5
 					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label3"
 					"text": "Vector Store Id:"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 5
+					"row": 6
 					"anchor": 8
 					"hSizePolicy": 1
 				} )
@@ -110,14 +130,14 @@ new FormModel {
 					name: "vectorStoreIdTextField"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"column": 1
-					"row": 5
+					"row": 6
 					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label1"
 					"text": "Assistant Id:"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 6
+					"row": 7
 					"anchor": 8
 					"hSizePolicy": 1
 				} )
@@ -125,14 +145,14 @@ new FormModel {
 					name: "assistantIdTextField"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"column": 1
-					"row": 6
+					"row": 7
 					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JLabel" ) {
 					name: "label2"
 					"text": "Assistant Thread Id:"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 7
+					"row": 8
 					"anchor": 8
 					"hSizePolicy": 1
 				} )
@@ -140,7 +160,7 @@ new FormModel {
 					name: "assistantThreadIdTextField"
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 					"column": 1
-					"row": 7
+					"row": 8
 					"fill": 1
 				} )
 				add( new FormComponent( "javax.swing.JCheckBox" ) {
@@ -148,7 +168,7 @@ new FormModel {
 					"text": "Enable Directive Decomposition"
 					"selected": true
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 8
+					"row": 9
 					"colSpan": 2
 					"anchor": 8
 				} )
@@ -157,7 +177,7 @@ new FormModel {
 					"text": "Enable Streaming Completions"
 					"selected": true
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 9
+					"row": 10
 					"colSpan": 2
 					"anchor": 8
 				} )
@@ -166,7 +186,7 @@ new FormModel {
 					"text": "Enable Code Smell Correction"
 					"selected": true
 				}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
-					"row": 10
+					"row": 11
 					"colSpan": 2
 					"anchor": 8
 				} )
