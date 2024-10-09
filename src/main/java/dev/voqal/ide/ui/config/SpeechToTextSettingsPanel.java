@@ -55,6 +55,7 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
                 }));
             } else if (provider == STTProvider.GROQ) {
                 modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                        "whisper-large-v3-turbo",
                         "whisper-large-v3",
                         "distil-whisper-large-v3-en" //todo: disable lang combobox
                 }));
@@ -173,6 +174,7 @@ public class SpeechToTextSettingsPanel extends JBPanel<SpeechToTextSettingsPanel
             }));
         } else if (provider == STTProvider.GROQ) {
             modelNameComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                    "whisper-large-v3-turbo",
                     "whisper-large-v3",
                     "distil-whisper-large-v3-en" //todo: disable lang combobox
             }));
