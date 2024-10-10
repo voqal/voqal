@@ -4,6 +4,7 @@ import com.aallam.openai.api.chat.Tool
 import com.aallam.openai.api.core.Parameters
 import com.intellij.history.Label
 import com.intellij.history.LocalHistoryAction
+import com.intellij.history.LocalHistoryException
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.Inlay
@@ -62,9 +63,15 @@ class CancelTool : VoqalTool() {
 
             //todo: info diff size
             action?.finish()
-            editor?.virtualFile?.let { label?.revert(project, it) }
-            (affectedFiles as? List<*>)?.let { it.forEach { f -> label?.revert(project, (f as PsiFile).virtualFile) } }
-            log.debug("Reverted changes to: ${memory.id}")
+            try {
+                editor?.virtualFile?.let { label?.revert(project, it) }
+                (affectedFiles as? List<*>)?.let {
+                    it.forEach { f -> label?.revert(project, (f as PsiFile).virtualFile) }
+                }
+                log.debug("Reverted changes to: ${memory.id}")
+            } catch (e: LocalHistoryException) {
+                log.warnChat("Failed to revert changes to: ${memory.id}", e)
+            }
         } else {
             log.warn("Invalid status: ${statusService.getStatus()}")
         }
