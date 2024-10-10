@@ -14,6 +14,7 @@ free to ask." Just repeat the previous code output or a new code output if the d
 
 If you are unsure what to do, return the visible text with no changes.
 Your response must always start with and end with triple backticks (```).
+Your response must include sequential line numbers (no skips).
 
 {% else %}
 

@@ -20,10 +20,6 @@ import java.util.regex.Pattern
  */
 object ResponseParser {
 
-    //1|public class Test {
-    //2|}
-    private val lineNumberRegex = Regex("^\\d+\\|")
-
     fun parseEditMode(
         chunk: ChatCompletionChunk,
         directive: VoqalDirective
@@ -36,7 +32,7 @@ object ResponseParser {
                 choices = chunk.choices.map { it.toChatChoice() },
                 usage = chunk.usage,
                 systemFingerprint = chunk.systemFingerprint
-            ), directive, true
+            ), directive
         )
     }
 
@@ -52,8 +48,7 @@ object ResponseParser {
 
     fun parseEditMode(
         completion: ChatCompletion,
-        directive: VoqalDirective,
-        streaming: Boolean = false
+        directive: VoqalDirective
     ): VoqalResponse {
         val messageContent = completion.choices.firstOrNull()?.message?.messageContent
         val textContent = if (messageContent is TextContent) {
@@ -63,24 +58,13 @@ object ResponseParser {
         }
         val codeBlock = CodeExtractor.extractCodeBlock(textContent, false)
 
-        //remove line numbers (if present)
-        val hasLineNumbers = codeBlock.lines().let {
-            //check without last line when streaming as we may have partial result
-            if (streaming) it.dropLast(1) else it
-        }.all { lineNumberRegex.containsMatchIn(it) }
-        val codeBlockWithoutLineNumbers = if (hasLineNumbers) {
-            codeBlock.lines().joinToString("\n") { it.replaceFirst(lineNumberRegex, "") }
-        } else {
-            codeBlock
-        }
-
         return VoqalResponse(
             directive, listOf(
                 ToolCall.Function(
                     id = ToolId(EditTextTool.NAME),
                     function = FunctionCall(
                         nameOrNull = EditTextTool.NAME,
-                        argumentsOrNull = JsonObject().put("text", codeBlockWithoutLineNumbers).toString()
+                        argumentsOrNull = JsonObject().put("text", codeBlock).toString()
                     )
                 )
             ), completion

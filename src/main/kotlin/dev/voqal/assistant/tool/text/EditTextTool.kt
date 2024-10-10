@@ -50,6 +50,10 @@ class EditTextTool : VoqalTool() {
 
         val VOQAL_HIGHLIGHTERS = Key.create<List<RangeHighlighter>>("VOQAL_HIGHLIGHTERS")
 
+        //1|public class Test {
+        //2|}
+        private val lineNumberRegex = Regex("^\\d+\\|")
+
         //diff edit format, each line must start with -num| or +num| where num is the line number
         private val diffRegex = Regex("^([\\s-+])?(\\d+)\\|(.*)$")
 
@@ -179,7 +183,19 @@ class EditTextTool : VoqalTool() {
         editor: Editor,
         streaming: Boolean = false
     ): List<RangeHighlighter> {
-        var replacementText = removeDiffHeaderIfPresent(editText)
+        //remove line numbers (if present)
+        val hasLineNumbers = editText.lines().let {
+            //check without last line when streaming as we may have partial result
+            if (streaming) it.dropLast(1) else it
+        }.all { lineNumberRegex.containsMatchIn(it) }
+        val codeBlockWithoutLineNumbers = if (hasLineNumbers) {
+            //todo: if custom startLine is added, need to handle case where refactor removes import causing line changes
+            //startLine = editText.lines().first { lineNumberRegex.containsMatchIn(it) }.substringBefore("|").toInt()
+            editText.lines().joinToString("\n") { it.replaceFirst(lineNumberRegex, "") }
+        } else {
+            editText
+        }
+        var replacementText = removeDiffHeaderIfPresent(codeBlockWithoutLineNumbers)
 
         //remove existing stream indicator (if present)
         val streamIndicators = mutableListOf<RangeHighlighter>()
