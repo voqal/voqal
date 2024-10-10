@@ -123,7 +123,8 @@ open class AzureClient(
         request: ChatCompletionRequest,
         directive: VoqalDirective?
     ): Flow<ChatCompletionChunk> = flow {
-        val requestJson = JsonObject(Json.encodeToJsonElement(request).toString()).put("stream", true)
+        val requestJson = JsonObject(Json.encodeToJsonElement(request).toString())
+            .put("stream", true).put("stream_options", JsonObject().put("include_usage", true))
         try {
             client.preparePost(providerUrl) {
                 header("Content-Type", "application/json")
@@ -208,7 +209,7 @@ open class AzureClient(
     override fun isLiveDataListener() = audioModality
     override fun isStreamable(): Boolean {
         //todo: support chat completion streaming in realtime api
-        return audioModality
+        return !audioModality
     }
 
     override fun dispose() {
