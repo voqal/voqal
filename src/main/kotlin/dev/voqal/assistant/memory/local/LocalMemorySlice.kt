@@ -16,6 +16,10 @@ import dev.voqal.assistant.tool.text.EditTextTool
 import dev.voqal.config.settings.PromptSettings.FunctionCalling
 import dev.voqal.services.*
 import io.vertx.core.json.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.*
 
@@ -135,6 +139,34 @@ class LocalMemorySlice(
                 val chunks = mutableListOf<ChatCompletionChunk>()
                 var deltaRole: Role? = null
                 val fullText = StringBuilder()
+
+                val chunkProcessingChannel = Channel<ChatCompletionChunk>(capacity = Channel.UNLIMITED)
+                val processingJob = CoroutineScope(Dispatchers.Default).launch {
+                    for (chunk in chunkProcessingChannel) {
+                        try {
+                            val updatedChunk = chunk.copy(
+                                choices = chunk.choices.map {
+                                    it.copy(
+                                        delta = it.delta!!.copy(
+                                            role = deltaRole,
+                                            content = fullText.toString()
+                                        )
+                                    )
+                                }
+                            )
+                            val response = ResponseParser.parseEditMode(updatedChunk, directive)
+                            val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
+                            project.service<VoqalToolService>().blindExecute(
+                                tool = EditTextTool(),
+                                args = JsonObject(argsString).put("streaming", true),
+                                memoryId = directive.assistant.memorySlice.id
+                            )
+                        } catch (e: Throwable) {
+                            continue
+                        }
+                    }
+                }
+
                 llmProvider.streamChatCompletion(request, directive).collect {
                     chunks.add(it)
                     if (deltaRole == null) {
@@ -145,28 +177,12 @@ class LocalMemorySlice(
                         return@collect //wait till new line to progress streaming edit
                     }
 
-                    try {
-                        val chunk = it.copy(
-                            choices = it.choices.map {
-                                it.copy(
-                                    delta = it.delta!!.copy(
-                                        role = deltaRole,
-                                        content = fullText.toString()
-                                    )
-                                )
-                            }
-                        )
-                        val response = ResponseParser.parseEditMode(chunk, directive)
-                        val argsString = (response.toolCalls.first() as ToolCall.Function).function.arguments
-                        project.service<VoqalToolService>().blindExecute(
-                            tool = EditTextTool(),
-                            args = JsonObject(argsString).put("streaming", true),
-                            memoryId = directive.assistant.memorySlice.id
-                        )
-                    } catch (e: Throwable) {
-                        return@collect
-                    }
+                    chunkProcessingChannel.send(it)
                 }
+
+                chunkProcessingChannel.close()
+                processingJob.join()
+
                 completion = toChatCompletion(chunks, fullText.toString())
             } else {
                 completion = llmProvider.chatCompletion(request, directive)
