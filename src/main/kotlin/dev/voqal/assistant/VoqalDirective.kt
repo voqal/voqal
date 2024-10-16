@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 import java.io.StringWriter
 
 /**
- * Represents a processable command for the Voqal Assistant.
+ * Represents a processable command for the Voqal Coder.
  *
  * @property assistant Holds the current configuration of the assistant.
  * @property ide Holds the current state of the IDE.

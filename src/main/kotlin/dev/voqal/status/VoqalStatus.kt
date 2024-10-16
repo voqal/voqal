@@ -4,7 +4,7 @@ import dev.voqal.ide.VoqalIcons
 import javax.swing.Icon
 
 /**
- * Represents the current status of the Voqal Assistant.
+ * Represents the current status of the Voqal Coder.
  */
 enum class VoqalStatus {
     ERROR,

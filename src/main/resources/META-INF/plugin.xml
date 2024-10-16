@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>dev.voqal</id>
-    <name>Voqal Assistant</name>
+    <name>Voqal Coder</name>
     <vendor>voqal.dev</vendor>
     <product-descriptor code="PVOQAL" release-date="20240911" release-version="202411"/>
 

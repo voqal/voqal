@@ -14,7 +14,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.StringWriter
 
 /**
- * Represents the internal context of the Voqal Assistant.
+ * Represents the internal context of the Voqal Coder.
  */
 data class AssistantContext(
     val memorySlice: MemorySlice,

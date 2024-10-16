@@ -48,7 +48,7 @@ The following benchmarks were produced via these [suites](./src/test/kotlin/benc
 
 ### Commentary
 
-The benchmarks show that the Voqal Assistant works best with `Meta-Llama-3.1-405B-Instruct-Turbo` in Edit Mode
+The benchmarks show that the Voqal Coder works best with `Meta-Llama-3.1-405B-Instruct-Turbo` in Edit Mode
 and `gemini-1.5-flash-latest` in Idle Mode. Further work also needs to be done to improve the performance
 of the unified diff format-based editing as diff-based editing enables faster and more cost-effective editing.
 Diff-based editing is currently disabled as it is not yet production-ready.
