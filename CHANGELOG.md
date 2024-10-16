@@ -566,7 +566,7 @@
 
 ### Fixed
 
-- Issue booting Picovoice SST provider
+- Issue booting Picovoice STT provider
 
 ## [2023.1.10] - 2023-11-17
 
@@ -579,7 +579,7 @@
 ### Changed
 
 - Increased support for macOS
-- Use Picovoice as default SST provider
+- Use Picovoice as default STT provider
 
 ### Fixed
 
