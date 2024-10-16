@@ -2,7 +2,7 @@
     <id>dev.voqal</id>
     <name>Voqal Coder</name>
     <vendor>voqal.dev</vendor>
-    <product-descriptor code="PVOQAL" release-date="20240911" release-version="202411"/>
+    <product-descriptor code="PVOQAL" release-date="20241017" release-version="202412"/>
 
     <depends>com.intellij.modules.platform</depends>
 
