@@ -693,7 +693,7 @@ class VoqalConfigService(private val project: Project) {
                 log.debug("Using Voqal (Pro) speech-to-text provider")
                 val voqalProConfig = OpenAIConfig(
                     host = OpenAIHost("https://voqal-proxy.voqaldev.workers.dev/"),
-                    token = voqalConfig.textToSpeechSettings.providerKey,
+                    token = voqalConfig.speechToTextSettings.providerKey,
                     logging = LoggingConfig(LogLevel.None),
                     engine = JavaHttpEngine(JavaHttpConfig()),
                     headers = mapOf(

@@ -30,7 +30,7 @@ class GroqWhisperClient(
     private val providerUrl = "https://api.groq.com/openai/v1/audio/transcriptions"
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        log.info("Sending speech to TTS provider: groq")
+        log.info("Sending speech to STT provider: groq")
 
         val durationInSeconds = getAudioDuration(speechFile)
         if (durationInSeconds < 0.1) {

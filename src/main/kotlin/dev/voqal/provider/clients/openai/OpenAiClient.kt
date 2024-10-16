@@ -133,7 +133,7 @@ open class OpenAiClient(
     }
 
     override suspend fun transcribe(speechFile: File, modelName: String): String {
-        log.info("Sending speech to TTS provider: openai")
+        log.info("Sending speech to STT provider: openai")
 
         val durationInSeconds = getAudioDuration(speechFile)
         if (durationInSeconds < 0.1) {
