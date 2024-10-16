@@ -216,3 +216,13 @@ To use a tool respond in the following format:
 {% endfor %}
 
 {% endif %}
+
+{% if assistant.usingAudioModality == false %}
+
+## Developer Transcription
+
+> What the developer is asking you (the LLM/Assistant) to do. This is your primary objective.
+
+{{ developer.transcription }}
+
+{% endif %}

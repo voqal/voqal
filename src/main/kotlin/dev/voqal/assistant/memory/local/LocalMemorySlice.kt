@@ -78,7 +78,6 @@ class LocalMemorySlice(
         val request = if (messageList.isEmpty()) {
             if (addMessage) {
                 messageList.add(ChatMessage(ChatRole.System, systemPrompt))
-                messageList.add(ChatMessage(ChatRole.User, directive.developer.transcription))
             } else {
                 log.debug("No message added")
             }
