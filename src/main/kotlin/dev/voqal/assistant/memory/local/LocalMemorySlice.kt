@@ -69,6 +69,12 @@ class LocalMemorySlice(
         if (promptSettings.promptName == "Edit Mode") {
             includeToolsInMarkdown = true //todo: edit mode doesn't support function calls
         }
+
+        val aiProvider = configService.getAiProvider()
+        val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
+        val streamingEnabled = promptSettings.promptName == "Edit Mode"
+                && promptSettings.streamCompletions && llmProvider.isStreamable()
+
         val request = if (messageList.isEmpty()) {
             if (addMessage) {
                 messageList.add(ChatMessage(ChatRole.System, systemPrompt))
@@ -82,7 +88,10 @@ class LocalMemorySlice(
                     messages = getMessages(),
                     responseFormat = ChatResponseFormat.Text,
                     seed = lmSettings.seed,
-                    temperature = lmSettings.temperature
+                    temperature = lmSettings.temperature,
+                    streamOptions = if (streamingEnabled) {
+                        StreamOptions(includeUsage = true)
+                    } else null
                 )
             } else {
                 ChatCompletionRequest(
@@ -99,7 +108,10 @@ class LocalMemorySlice(
                         },
                     //responseFormat = ChatResponseFormat.JsonObject, //todo: config JsonFormat, non-markdown tools
                     seed = lmSettings.seed,
-                    temperature = lmSettings.temperature
+                    temperature = lmSettings.temperature,
+                    streamOptions = if (streamingEnabled) {
+                        StreamOptions(includeUsage = true)
+                    } else null
                 )
             }
         } else {
@@ -114,7 +126,10 @@ class LocalMemorySlice(
                     messages = getMessages(),
                     responseFormat = ChatResponseFormat.Text,
                     seed = lmSettings.seed,
-                    temperature = lmSettings.temperature
+                    temperature = lmSettings.temperature,
+                    streamOptions = if (streamingEnabled) {
+                        StreamOptions(includeUsage = true)
+                    } else null
                 )
             } else {
                 ChatCompletionRequest(
@@ -125,18 +140,19 @@ class LocalMemorySlice(
                         .map { it.asTool(directive) },
                     //responseFormat = ChatResponseFormat.JsonObject, //todo: config JsonFormat, non-markdown tools
                     seed = lmSettings.seed,
-                    temperature = lmSettings.temperature
+                    temperature = lmSettings.temperature,
+                    streamOptions = if (streamingEnabled) {
+                        StreamOptions(includeUsage = true)
+                    } else null
                 )
             }
         }
         if (log.isTraceEnabled) log.trace("Chat completion request: ${request.messages.last()}")
 
-        val aiProvider = configService.getAiProvider()
         val requestTime = System.currentTimeMillis()
         var completion: ChatCompletion? = null
         try {
-            val llmProvider = aiProvider.asLlmProvider(lmSettings.name)
-            if (promptSettings.promptName == "Edit Mode" && promptSettings.streamCompletions && llmProvider.isStreamable()) {
+            if (streamingEnabled) {
                 val chunks = mutableListOf<ChatCompletionChunk>()
                 var deltaRole: Role? = null
                 val fullText = StringBuilder()
