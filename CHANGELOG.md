@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for OpenAI Realtime API
+- Ability to configure function calling format
+- Azure Language Model provider
+- Voqal (Pro) STT/LM/TTS providers
+- Error label to quick edit inlay
+
+### Changed
+
+- Renamed Voqal Assistant to Voqal Coder
+
+### Fixed
+
+- Invalid authentication error in AssemblyAI STT provider
+- Early termination error in AssemblyAI STT provider
+- Editor disposed error when trying to view debug prompt
+
 ## [2024.11.5] - 2024-09-24
 
 ### Fixed
