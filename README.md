@@ -1,7 +1,7 @@
 <img src='.github/media/logo-horizontal-text.svg' width='275'>
 
-[![Version](https://img.shields.io/jetbrains/plugin/v/23086-voqal-assistant.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-assistant)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal-assistant.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-assistant)
+[![Version](https://img.shields.io/jetbrains/plugin/v/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
 [![Discord](https://img.shields.io/discord/1171831108313301034)](https://discord.gg/KgTkR5Rffz)
 
 ## Introduction
