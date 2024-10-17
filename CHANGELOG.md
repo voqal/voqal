@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [2024.12.0] - 2024-10-17
+
 ### Added
 
 - Support for OpenAI Realtime API
@@ -610,45 +612,46 @@
 
 - Initial release
 
-[Unreleased]: https://github.com/voqal/voqal/compare/v2024.11.5...HEAD
-[2024.11.5]: https://github.com/voqal/voqal/compare/v2024.11.4...v2024.11.5
-[2024.11.4]: https://github.com/voqal/voqal/compare/v2024.11.3...v2024.11.4
-[2024.11.3]: https://github.com/voqal/voqal/compare/v2024.11.2...v2024.11.3
-[2024.11.2]: https://github.com/voqal/voqal/compare/v2024.11.1...v2024.11.2
-[2024.11.1]: https://github.com/voqal/voqal/compare/v2024.11.0...v2024.11.1
-[2024.11.0]: https://github.com/voqal/voqal/compare/v2024.10.3...v2024.11.0
-[2024.10.3]: https://github.com/voqal/voqal/compare/v2024.10.2...v2024.10.3
-[2024.10.2]: https://github.com/voqal/voqal/compare/v2024.10.1...v2024.10.2
-[2024.10.1]: https://github.com/voqal/voqal/compare/v2024.10.0...v2024.10.1
-[2024.10.0]: https://github.com/voqal/voqal/compare/v2024.9.1...v2024.10.0
-[2024.9.1]: https://github.com/voqal/voqal/compare/v2024.9.0...v2024.9.1
-[2024.9.0]: https://github.com/voqal/voqal/compare/v2024.8.4...v2024.9.0
-[2024.8.4]: https://github.com/voqal/voqal/compare/v2024.8.3...v2024.8.4
-[2024.8.3]: https://github.com/voqal/voqal/compare/v2024.8.2...v2024.8.3
-[2024.8.2]: https://github.com/voqal/voqal/compare/v2024.8.1...v2024.8.2
-[2024.8.1]: https://github.com/voqal/voqal/compare/v2024.8.0...v2024.8.1
-[2024.8.0]: https://github.com/voqal/voqal/compare/v2024.7.0...v2024.8.0
-[2024.7.0]: https://github.com/voqal/voqal/compare/v2024.6.3...v2024.7.0
-[2024.6.3]: https://github.com/voqal/voqal/compare/v2024.6.2...v2024.6.3
-[2024.6.2]: https://github.com/voqal/voqal/compare/v2024.6.1...v2024.6.2
-[2024.6.1]: https://github.com/voqal/voqal/compare/v2024.6.0...v2024.6.1
-[2024.6.0]: https://github.com/voqal/voqal/compare/v2024.5.0...v2024.6.0
-[2024.5.0]: https://github.com/voqal/voqal/compare/v2024.4.1...v2024.5.0
-[2024.4.1]: https://github.com/voqal/voqal/compare/v2024.4.0...v2024.4.1
-[2024.4.0]: https://github.com/voqal/voqal/compare/v2024.3.0...v2024.4.0
-[2024.3.0]: https://github.com/voqal/voqal/compare/v2024.2.4...v2024.3.0
-[2024.2.4]: https://github.com/voqal/voqal/compare/v2024.2.3...v2024.2.4
-[2024.2.3]: https://github.com/voqal/voqal/compare/v2024.2.2...v2024.2.3
-[2024.2.2]: https://github.com/voqal/voqal/compare/v2024.2.1...v2024.2.2
-[2024.2.1]: https://github.com/voqal/voqal/compare/v2024.2.0...v2024.2.1
-[2024.2.0]: https://github.com/voqal/voqal/compare/v2024.1.0...v2024.2.0
-[2024.1.0]: https://github.com/voqal/voqal/compare/v2023.3.1...v2024.1.0
-[2023.3.1]: https://github.com/voqal/voqal/compare/v2023.3.0...v2023.3.1
-[2023.3.0]: https://github.com/voqal/voqal/compare/v2023.2.2...v2023.3.0
-[2023.2.2]: https://github.com/voqal/voqal/compare/v2023.2.1...v2023.2.2
-[2023.2.1]: https://github.com/voqal/voqal/compare/v2023.2.0...v2023.2.1
-[2023.2.0]: https://github.com/voqal/voqal/compare/v2023.1.11...v2023.2.0
-[2023.1.11]: https://github.com/voqal/voqal/compare/v2023.1.10...v2023.1.11
-[2023.1.10]: https://github.com/voqal/voqal/compare/v2023.1.9...v2023.1.10
-[2023.1.9]: https://github.com/voqal/voqal/compare/v2023.1.8...v2023.1.9
-[2023.1.8]: https://github.com/voqal/voqal/commits/v2023.1.8
+[Unreleased]: https://github.com/voqal/coder/compare/v2024.12.0...HEAD
+[2024.12.0]: https://github.com/voqal/coder/compare/v2024.11.5...v2024.12.0
+[2024.11.5]: https://github.com/voqal/coder/compare/v2024.11.4...v2024.11.5
+[2024.11.4]: https://github.com/voqal/coder/compare/v2024.11.3...v2024.11.4
+[2024.11.3]: https://github.com/voqal/coder/compare/v2024.11.2...v2024.11.3
+[2024.11.2]: https://github.com/voqal/coder/compare/v2024.11.1...v2024.11.2
+[2024.11.1]: https://github.com/voqal/coder/compare/v2024.11.0...v2024.11.1
+[2024.11.0]: https://github.com/voqal/coder/compare/v2024.10.3...v2024.11.0
+[2024.10.3]: https://github.com/voqal/coder/compare/v2024.10.2...v2024.10.3
+[2024.10.2]: https://github.com/voqal/coder/compare/v2024.10.1...v2024.10.2
+[2024.10.1]: https://github.com/voqal/coder/compare/v2024.10.0...v2024.10.1
+[2024.10.0]: https://github.com/voqal/coder/compare/v2024.9.1...v2024.10.0
+[2024.9.1]: https://github.com/voqal/coder/compare/v2024.9.0...v2024.9.1
+[2024.9.0]: https://github.com/voqal/coder/compare/v2024.8.4...v2024.9.0
+[2024.8.4]: https://github.com/voqal/coder/compare/v2024.8.3...v2024.8.4
+[2024.8.3]: https://github.com/voqal/coder/compare/v2024.8.2...v2024.8.3
+[2024.8.2]: https://github.com/voqal/coder/compare/v2024.8.1...v2024.8.2
+[2024.8.1]: https://github.com/voqal/coder/compare/v2024.8.0...v2024.8.1
+[2024.8.0]: https://github.com/voqal/coder/compare/v2024.7.0...v2024.8.0
+[2024.7.0]: https://github.com/voqal/coder/compare/v2024.6.3...v2024.7.0
+[2024.6.3]: https://github.com/voqal/coder/compare/v2024.6.2...v2024.6.3
+[2024.6.2]: https://github.com/voqal/coder/compare/v2024.6.1...v2024.6.2
+[2024.6.1]: https://github.com/voqal/coder/compare/v2024.6.0...v2024.6.1
+[2024.6.0]: https://github.com/voqal/coder/compare/v2024.5.0...v2024.6.0
+[2024.5.0]: https://github.com/voqal/coder/compare/v2024.4.1...v2024.5.0
+[2024.4.1]: https://github.com/voqal/coder/compare/v2024.4.0...v2024.4.1
+[2024.4.0]: https://github.com/voqal/coder/compare/v2024.3.0...v2024.4.0
+[2024.3.0]: https://github.com/voqal/coder/compare/v2024.2.4...v2024.3.0
+[2024.2.4]: https://github.com/voqal/coder/compare/v2024.2.3...v2024.2.4
+[2024.2.3]: https://github.com/voqal/coder/compare/v2024.2.2...v2024.2.3
+[2024.2.2]: https://github.com/voqal/coder/compare/v2024.2.1...v2024.2.2
+[2024.2.1]: https://github.com/voqal/coder/compare/v2024.2.0...v2024.2.1
+[2024.2.0]: https://github.com/voqal/coder/compare/v2024.1.0...v2024.2.0
+[2024.1.0]: https://github.com/voqal/coder/compare/v2023.3.1...v2024.1.0
+[2023.3.1]: https://github.com/voqal/coder/compare/v2023.3.0...v2023.3.1
+[2023.3.0]: https://github.com/voqal/coder/compare/v2023.2.2...v2023.3.0
+[2023.2.2]: https://github.com/voqal/coder/compare/v2023.2.1...v2023.2.2
+[2023.2.1]: https://github.com/voqal/coder/compare/v2023.2.0...v2023.2.1
+[2023.2.0]: https://github.com/voqal/coder/compare/v2023.1.11...v2023.2.0
+[2023.1.11]: https://github.com/voqal/coder/compare/v2023.1.10...v2023.1.11
+[2023.1.10]: https://github.com/voqal/coder/compare/v2023.1.9...v2023.1.10
+[2023.1.9]: https://github.com/voqal/coder/compare/v2023.1.8...v2023.1.9
+[2023.1.8]: https://github.com/voqal/coder/commits/v2023.1.8
