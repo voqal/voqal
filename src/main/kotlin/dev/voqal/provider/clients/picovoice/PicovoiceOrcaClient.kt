@@ -11,13 +11,14 @@ import dev.voqal.provider.clients.picovoice.natives.OrcaNative
 import dev.voqal.provider.clients.picovoice.natives.PicovoiceNative
 import dev.voqal.services.VoqalConfigService
 import dev.voqal.services.getVoqalLogger
+import dev.voqal.services.scope
 import io.ktor.utils.io.*
+import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 import java.io.File
-import java.nio.ByteBuffer
 
 class PicovoiceOrcaClient(
-    project: Project,
+    private val project: Project,
     picovoiceKey: String
 ) : TtsProvider {
 
@@ -99,14 +100,30 @@ class PicovoiceOrcaClient(
 
         val pcm = pcmRef.value
         val numSamples = sampleRateRef.value
-        val pcmBytes = pcm.getByteArray(0, numSamples * 2)
-        native.pv_orca_pcm_delete(pcm)
-        native.pv_orca_word_alignments_delete(numAlignmentsRef.value, alignmentsRef.value)
+        val chunkSize = 1024
+        var offset = 0
+        val channel = ByteChannel()
+
+        project.scope.launch {
+            try {
+                while (offset < numSamples * 2) {
+                    val bytesToWrite = minOf(chunkSize, (numSamples * 2) - offset)
+                    val pcmChunk = pcm.getByteArray(offset.toLong(), bytesToWrite)
+                    offset += bytesToWrite
+                    channel.writeFully(pcmChunk, 0, pcmChunk.size)
+                }
+            } finally {
+                native.pv_orca_pcm_delete(pcm)
+                native.pv_orca_word_alignments_delete(numAlignmentsRef.value, alignmentsRef.value)
+                channel.close()
+            }
+        }
+
         return TtsProvider.RawAudio(
-            ByteReadChannel(ByteBuffer.wrap(pcmBytes)),
-            22050f,
-            16,
-            1
+            audio = channel,
+            sampleRate = 22050f,
+            bitsPerSample = 16,
+            channels = 1
         )
     }
 
