@@ -1,0 +1,20 @@
+integration: vscode
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Code.exe
+type: function
+function:
+  name: close_file
+  description: Close the specified file.
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name/path of the file to close
+    required:
+      - name
+  exec:
+    language: javascript

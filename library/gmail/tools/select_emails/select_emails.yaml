@@ -1,0 +1,30 @@
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: mail.google.com
+  library:
+    gmail:
+      is_inside_email: false
+type: function
+function:
+  name: select_emails
+  description: Selects the specified emails by their ids. All other emails are deselected.
+  parameters:
+    type: object
+    properties:
+      inputs:
+        type: array
+        description: The list of emails to select.
+        items:
+          type: object
+          properties:
+            email_id:
+              type: string
+              description: The id of the email to select.
+          required:
+            - email_id
+    required:
+      - inputs
+  exec:
+    language: javascript

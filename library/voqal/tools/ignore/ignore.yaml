@@ -1,0 +1,18 @@
+type: function
+function:
+  name: ignore
+  description: Ignore the transcription
+  parameters:
+    type: object
+    properties:
+      transcription:
+        type: string
+        description: The transcription to ignore.
+      ignore_reason:
+        type: string
+        description: The reason for ignoring the transcription.
+    required:
+      - transcription
+      - ignore_reason
+  exec:
+    language: kotlin

@@ -1,0 +1,14 @@
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: mail.google.com
+  library:
+    gmail:
+      is_inside_email: true
+type: function
+function:
+  name: back_to_inbox
+  description: Go back to the inbox.
+  exec:
+    language: javascript

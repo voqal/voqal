@@ -1,0 +1,22 @@
+integration: vscode
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Code.exe
+type: function
+function:
+  name: open_file
+  description: |
+    Opens a particular file. Do not use this tool unless specifically requested to open something. 
+    Do not include file extension unless provided. Do not make up filenames.
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the file. Be as specific as you can. Do not make up file extensions.
+    required:
+      - name
+  exec:
+    language: javascript

@@ -1,0 +1,17 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - chrome.exe
+        - brave.exe
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: function
+function:
+  name: next_video
+  description: Go to the next video in the playlist.
+  exec:
+    language: javascript

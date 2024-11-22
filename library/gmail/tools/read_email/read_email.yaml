@@ -1,0 +1,23 @@
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: mail.google.com
+  library:
+    gmail:
+      is_inside_email: false
+type: function
+function:
+  name: read_email
+  description: Opens and returns the full email chain text of the specified email.
+  parameters:
+    type: object
+    properties:
+      email_id:
+        type: string
+        description: The id of the email to read.
+    required:
+      - email_id
+  exec:
+    language: javascript
+    manual_confirm: true

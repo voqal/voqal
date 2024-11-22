@@ -1,0 +1,10 @@
+integration: chrome #todo: use selector
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: mail.google.com
+  library:
+    gmail:
+      is_inside_email: true
+type: javascript

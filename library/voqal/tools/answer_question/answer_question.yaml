@@ -1,0 +1,15 @@
+type: function
+function:
+  name: answer_question
+  description: Speaks the given text. Use this to respond to the user with spoken text.
+  parameters:
+    type: object
+    properties:
+      text:
+        type: string
+        description: The text to speak
+    required:
+      - text
+  exec:
+    language: kotlin
+    preload: true

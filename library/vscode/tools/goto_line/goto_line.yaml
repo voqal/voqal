@@ -1,0 +1,20 @@
+integration: vscode
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Code.exe
+type: function
+function:
+  name: goto_line
+  description: Go to the specified line number.
+  parameters:
+    type: object
+    properties:
+      line_number:
+        type: integer
+        description: The line number to go to.
+    required:
+      - line_number
+  exec:
+    language: javascript

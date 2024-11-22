@@ -1,0 +1,26 @@
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: mail.google.com
+  library:
+    gmail:
+      is_inside_email: false
+type: function
+function:
+  name: mark_selected_emails
+  description: Marks the selected emails as read, unread, or deletes them.
+  parameters:
+    type: object
+    properties:
+      mark_type:
+        type: string
+        description: The type of mark to apply to the selected emails.
+        enum:
+          - unread
+          - read
+          - delete
+    required:
+      - mark_type
+  exec:
+    language: javascript

@@ -1,0 +1,17 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - chrome.exe
+        - brave.exe
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: function
+function:
+  name: previous_video
+  description: Go to the previous video in the playlist.
+  exec:
+    language: javascript

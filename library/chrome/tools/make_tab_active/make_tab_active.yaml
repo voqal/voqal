@@ -1,0 +1,20 @@
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - chrome.exe
+        - brave.exe
+type: function
+function:
+  name: make_tab_active
+  description: Make the tab active (i.e. switch to the tab).
+  parameters:
+    type: object
+    properties:
+      tab_id:
+        type: string
+        description: The tab id to make active.
+    required:
+      - tab_id
+  exec:
+    event: make_tab_active
