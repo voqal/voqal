@@ -7,6 +7,9 @@ promptSettings:
   separateInitialUserMessage: true
 
 selector:
+  integration:
+    vscode:
+      connected: true
   computer:
     activeApplication:
       processName:

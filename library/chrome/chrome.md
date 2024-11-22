@@ -6,6 +6,9 @@ promptSettings:
   separateInitialUserMessage: true
 
 selector:
+  integration:
+    chrome:
+      connected: true
   computer:
     activeApplication:
       processName:

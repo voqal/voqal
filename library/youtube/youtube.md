@@ -13,6 +13,7 @@ selector:
         - brave.exe
   integration:
     chrome:
+      connected: true
       activeTab:
         host: www.youtube.com
 

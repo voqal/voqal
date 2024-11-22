@@ -8,6 +8,9 @@ promptSettings:
   editMode: true
 
 selector:
+  integration:
+    vscode:
+      connected: true
   computer:
     activeApplication:
       processName:
