@@ -13,7 +13,7 @@ selector:
         - Code.exe
 
 tools:
-  - default/tools/*
+  - voqal/tools/*
   - vscode/tools/*
 ---
 

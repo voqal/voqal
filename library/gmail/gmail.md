@@ -17,7 +17,7 @@ selector:
         host: mail.google.com
 
 tools:
-  - default/tools/*
+  - voqal/tools/*
   - chrome/tools/*
   - gmail/tools/*
 ---

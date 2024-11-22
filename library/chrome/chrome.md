@@ -13,7 +13,7 @@ selector:
         - brave.exe
 
 tools:
-  - default/tools/*
+  - voqal/tools/*
   - chrome/tools/*
   - youtube/tools/*
 ---
