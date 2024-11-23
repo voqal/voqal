@@ -25,12 +25,12 @@ tools:
 
 # Latest Email
 
-- From: {{ integration.gmail.newEmail.headers.From }}
-- To: {{ integration.gmail.newEmail.headers.To }}
-- Date: {{ integration.gmail.newEmail.headers.Date }}
+- From: {{ event.email.headers.From }}
+- To: {{ event.email.headers.To }}
+- Date: {{ event.email.headers.Date }}
 
-## Subject: {{ integration.gmail.newEmail.headers.Subject }}
+## Subject: {{ event.email.headers.Subject }}
 
 ### Body
 
-{{ integration.gmail.newEmail.body }}
+{{ event.email.body }}
