@@ -1,0 +1,4 @@
+type: function
+function:
+  name: cancel
+  description: Cancel the current action

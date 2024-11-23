@@ -15,7 +15,13 @@ selector:
     activeApplication:
       processName:
         - Code.exe
-  mode: edit
+  user:
+    vscode:
+      edit_mode: true
+
+tools:
+  - voqal/tools/*
+  - vscode/tools/*
 ---
 
 # System
@@ -87,14 +93,14 @@ If the developer says looks good, respond with `{"accept": true}`.
 
 {% endif %}
 
-{% if ide.projectFileTree != null %}
+{% if library.vscode.project_file_tree != null %}
 
 ## Project Structure
 
 > The file structure of the current project.
 
 ```
-{{ ide.projectFileTree }}
+{{ library.vscode.project_file_tree }}
 ```
 
 {% endif %}
@@ -103,7 +109,7 @@ If the developer says looks good, respond with `{"accept": true}`.
 
 > The files the developer currently has open. May or may not be relevant to the developer's transcription.
 
-{% for file in developer.openFiles %}
+{% for file in library.vscode.open_files %}
 
 #### {{ file.filename }}
 

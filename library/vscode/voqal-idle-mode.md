@@ -1,8 +1,8 @@
 ---
 promptSettings:
-  languageModel: "SAMBANOVA"
-  editFormat: "FULL_TEXT"
+  languageModel: "VOQAL_PRO"
   functionCalling: "NATIVE"
+  streamCompletions: true
   toolChoice: "REQUIRED"
   separateInitialUserMessage: true
 

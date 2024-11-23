@@ -1,0 +1,4 @@
+type: function
+function:
+  name: looks_good
+  description: Looks good to me a.k.a. accept the changes

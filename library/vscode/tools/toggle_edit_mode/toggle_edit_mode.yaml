@@ -1,0 +1,15 @@
+type: function
+function:
+  name: toggle_edit_mode
+  parameters:
+    type: object
+    properties:
+      prompt:
+        type: string
+        description: The raw transcript of the user's speech
+    required:
+      - prompt
+  description: 'Pass transcription off to Voqal Edit Mode. Use this tool whenever
+    asked to edit the viewing code. That includes adding, removing, or modifying code
+    (e.g. renaming classes, changing variable names, adding functions, writing comments,
+    etc.) '
