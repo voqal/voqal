@@ -20,8 +20,8 @@ selector:
       edit_mode: true
 
 tools:
-  - voqal/tools/*
-  - vscode/tools/*
+  - vscode/tools/cancel
+  - vscode/tools/looks_good
 ---
 
 # System
