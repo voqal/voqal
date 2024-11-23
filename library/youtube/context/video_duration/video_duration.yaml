@@ -1,0 +1,7 @@
+integration: chrome #todo: use selector
+selector:
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: javascript

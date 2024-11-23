@@ -30,6 +30,7 @@ tools:
 ## Current Playback
 
 - Current timestamp: {{ library.youtube.current_time }} seconds
+- Total duration: {{ library.youtube.video_duration }}
 
 {% set segments = slurpUrl("https://sponsor.ajay.app/api/skipSegments?videoID=" + integration.chrome.activeTab.urlParams.v, "5m") %}
 {% if segments is not null and segments.size > 0 %}
