@@ -7,6 +7,9 @@ promptSettings:
 
 selector:
   enabled: false
+  integration:
+    gmail_api:
+      connected: true
   event:
     type: newEmail
     connection: gmail
