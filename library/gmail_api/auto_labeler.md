@@ -12,7 +12,7 @@ selector:
       connected: true
   event:
     type: newEmail
-    connection: gmail
+    connection: gmail_api
 
 tools:
   - gmail_api/tools/add_label
