@@ -17,7 +17,10 @@ selector:
 
 tools:
   - voqal/tools/*
-  - vscode/tools/*
+  - vscode/tools/close_file
+  - vscode/tools/goto_line
+  - vscode/tools/open_file
+  - vscode/tools/toggle_edit_mode
 ---
 
 {% if assistant.includeSystemPrompt %}
