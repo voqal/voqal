@@ -1,0 +1,14 @@
+type: function
+function:
+  name: make_draft
+  description: Creates a reply draft for the specified email.
+  parameters:
+    type: object
+    properties:
+      text:
+        type: string
+        description: The text of the draft email.
+    required:
+      - text
+  exec:
+    language: kotlin

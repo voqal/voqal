@@ -12,7 +12,7 @@ selector:
     connection: gmail
 
 tools:
-  - voqal/gmail/make_draft
+  - gmail_api/tools/make_draft
 ---
 
 # Assistant Instructions

@@ -1,0 +1,14 @@
+type: function
+function:
+  name: add_label
+  description: Adds a label to this email.
+  parameters:
+    type: object
+    properties:
+      label:
+        type: string
+        description: The label to add.
+    required:
+      - label
+  exec:
+    language: kotlin

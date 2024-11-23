@@ -12,7 +12,7 @@ selector:
     connection: gmail
 
 tools:
-  - voqal/gmail/add_label
+  - gmail_api/tools/add_label
 ---
 
 # Assistant Instructions
