@@ -9,7 +9,8 @@ const openFilesInfo = await Promise.all(
                 path: fsPath,
                 filename: fsPath.split('/').pop(),
                 language: doc.languageId,
-                code: doc.getText()
+                code: doc.getText(),
+                codeWithLineNumbers: doc.getText().split('\n').map((line, index) => `${index + 1}|${line}`).join('\n')
             };
         })
 );
