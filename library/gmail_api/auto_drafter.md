@@ -6,6 +6,7 @@ promptSettings:
   separateInitialUserMessage: false
 
 selector:
+  enabled: false
   event:
     type: newEmail
     connection: gmail
