@@ -6,7 +6,7 @@ promptSettings:
   separateInitialUserMessage: true
 
 tools:
-  - voqal/tools/*   
+  - voqal/tools/*
 ---
 
 ## Assistant Instructions
