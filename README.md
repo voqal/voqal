@@ -22,16 +22,7 @@ allowing you to customize your experience and control your data.
 
 ## Library
 
-### YouTube
+The Voqal Library is a collection of open-source scripts used to provide Voqal with the ability to interact with various
+applications and services.
 
-#### Context
-
-- [Current Time](./youtube/context/current_time) - The time at which the video is currently playing
-- [Video Duration](./youtube/context/video_duration) - The total duration of the video
-
-#### Tools
-
-- [Next Video](./youtube/tools/next_video) - Play the next video in the playlist
-- [Previous Video](./youtube/tools/previous_video) - Play the previous video in the playlist
-- [Search](./youtube/tools/search) - Search for a video
-- [Seek Video](./youtube/tools/seek_video) - Move to a specific time in the video
+For a complete list of contexts and tools, see the [Voqal Library](./library).
