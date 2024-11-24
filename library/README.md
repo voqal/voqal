@@ -48,7 +48,7 @@ service.
 - [Add Label](./gmail_api/tools/add_label) - Add a label to an email
 - [Make Draft](./gmail_api/tools/make_draft) - Create a draft email
 
-# Web
+# Websites
 
 ## Gmail
 
