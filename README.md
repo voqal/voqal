@@ -37,8 +37,8 @@ https://github.com/user-attachments/assets/c43e7bff-8a42-4522-b414-e74d1102a6e4
 
 # Library
 
-The Voqal Library is a collection of open-source scripts used to provide Voqal with the ability to interact with various
-applications and services.
+The Voqal Library is a collection of open-source scripts that provide Voqal with the ability to interact with various
+applications, services, and websites.
 
 For a complete list of applications, services, and websites that Voqal supports, please visit the
 [Voqal Library](./library/README.md).
