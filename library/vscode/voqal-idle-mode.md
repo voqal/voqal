@@ -161,7 +161,7 @@ To use a tool respond in the following format:
 
 ```{{ file.language }}
 
-{{ file.code }}
+{{ withLineNumbers(file.code) }}
 
 ```
 
