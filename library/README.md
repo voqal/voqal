@@ -5,30 +5,34 @@ and tools that can be used to interact with the application or service. Contexts
 state of the application or service, while tools provide the ability to perform actions within the application or
 service.
 
-## Chrome
+## Voqal (Default)
 
-### Tools
-
-- [Create Tab](./chrome/tools/create_tab) - Create a new tab in the browser
-- [Make Tab Active](./chrome/tools/make_tab_active) - Make a tab active in the browser
-
-## Gmail API
-
-### Tools
-
-- [Add Label](./gmail_api/tools/add_label) - Add a label to an email
-- [Make Draft](./gmail_api/tools/make_draft) - Create a draft email
-
-## Voqal
-
-### Tools
+#### Tools
 
 - [Answer Question](./voqal/tools/answer_question) - Answer a question
 - [Ignore](./voqal/tools/ignore) - Ignore a transcription
 
+## Applications
+
+### Chrome
+
+#### Tools
+
+- [Create Tab](./chrome/tools/create_tab) - Create a new tab in the browser
+- [Make Tab Active](./chrome/tools/make_tab_active) - Make a tab active in the browser
+
+## Services
+
+### Gmail API
+
+#### Tools
+
+- [Add Label](./gmail_api/tools/add_label) - Add a label to an email
+- [Make Draft](./gmail_api/tools/make_draft) - Create a draft email
+
 ## Visual Studio Code
 
-### Context
+#### Context
 
 - [Active Text Editor](./vscode/context/active_text_editor) - The active text editor in Visual Studio Code
 - [Open Files](./vscode/context/open_files) - The files that are currently open in Visual Studio Code
@@ -36,7 +40,7 @@ service.
 - [Project Root](./vscode/context/project_root) - The root directory of the current project in Visual Studio Code
 - [Workspace Files](./vscode/context/workspace_files) - The files in the current workspace in Visual Studio Code
 
-### Tools
+#### Tools
 
 - [Cancel](./vscode/tools/cancel) - Cancel the current operation
 - [Close File](./vscode/tools/close_file) - Close a file in Visual Studio Code
