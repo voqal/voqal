@@ -1,0 +1,25 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - chrome.exe
+        - brave.exe
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: function
+function:
+  name: search
+  description: Search for a video on YouTube.
+  parameters:
+    type: object
+    properties:
+      query:
+        type: string
+        description: The search query.
+    required:
+      - query
+  exec:
+    language: javascript
