@@ -3,14 +3,14 @@ and tools that can be used to interact with the application or service. Contexts
 state of the application or service, while tools provide the ability to perform actions within the application or
 service.
 
-### YouTube
+## YouTube
 
-#### Context
+### Context
 
 - [Current Time](./youtube/context/current_time) - The time at which the video is currently playing
 - [Video Duration](./youtube/context/video_duration) - The total duration of the video
 
-#### Tools
+### Tools
 
 - [Next Video](./youtube/tools/next_video) - Play the next video in the playlist
 - [Previous Video](./youtube/tools/previous_video) - Play the previous video in the playlist
