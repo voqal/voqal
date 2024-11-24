@@ -20,35 +20,18 @@ allowing you to customize your experience and control your data.
 
 <video src="https://github.com/user-attachments/assets/f9d93199-adc6-4081-8b33-daf9c7dc173b"></video>
 
-## Code Structure
+## Library
 
-The codebase is structured as follows:
+### YouTube
 
-- `assistant` internal logic which controls the assistant
-    - `context` data used to populate the prompts sent to the LLM
-    - `memory` holds the assistant's memory
-    - `processing` logic used to parse LLMs responses
-    - `template` extension functions for templating prompts
-    - `tool` contains the tools the assistant uses to interact with the IDE
-- `ide` contains IDE-specific implementations
-- `provider` interfaces with the supported AI providers
-- `services` contains the services used to interact with the assistant
-- `status` holds the status of the assistant
-- `utils` various utility functions
+#### Context
 
-## Benchmarks
+- [Current Time](./youtube/context/current_time) - The time at which the video is currently playing
+- [Video Duration](./youtube/context/video_duration) - The total duration of the video
 
-The following benchmarks were produced via these [suites](./src/test/kotlin/benchmark/suites).
+#### Tools
 
-|                                                       Idle Mode                                                       |                                                       Edit Mode                                                       |
-|:---------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|
-| ![](.github/media/benchmark/idle_dark.svg#gh-dark-mode-only) ![](.github/media/benchmark/idle.svg#gh-light-mode-only) | ![](.github/media/benchmark/edit_dark.svg#gh-dark-mode-only) ![](.github/media/benchmark/edit.svg#gh-light-mode-only) |
-
-> Legend: X-axis: Time (ms), Y-axis: Accuracy (%), Size: Cost ($)
-
-### Commentary
-
-The benchmarks show that the Voqal Coder works best with `Meta-Llama-3.1-405B-Instruct-Turbo` in Edit Mode
-and `gemini-1.5-flash-latest` in Idle Mode. Further work also needs to be done to improve the performance
-of the unified diff format-based editing as diff-based editing enables faster and more cost-effective editing.
-Diff-based editing is currently disabled as it is not yet production-ready.
+- [Next Video](./youtube/tools/next_video) - Play the next video in the playlist
+- [Previous Video](./youtube/tools/previous_video) - Play the previous video in the playlist
+- [Search](./youtube/tools/search) - Search for a video
+- [Seek Video](./youtube/tools/seek_video) - Move to a specific time in the video
