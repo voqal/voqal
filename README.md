@@ -12,9 +12,14 @@ allowing you to customize your experience and control your data.
 
 ## Features
 
-### Dynamic Prompt
+### Realtime Context
 
-https://github.com/user-attachments/assets/f444d916-a59a-4a4a-9a10-6a0fe04ba4ab
+https://github.com/user-attachments/assets/21b42acc-9bf1-4676-8dc1-0623adf65438
+
+### Prompt Editor
+
+https://github.com/user-attachments/assets/d1c7778c-03f4-4495-90b6-da8a6fac05d8
+
 
 # Library
 
