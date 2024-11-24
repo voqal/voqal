@@ -2,7 +2,7 @@ import java.io.File
 
 val fileLocation = context
     .getJsonObject("library").getJsonObject("vscode")
-    .getJsonObject("active_text_editor").getJsonObject("document").getString("fileName")
+    .getJsonObject("active_text_editor").getJsonObject("document").getString("path")
 log.info("File location: $fileLocation")
 
 val editText = toolArgs.getString("text")
