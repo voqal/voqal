@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/21b42acc-9bf1-4676-8dc1-0623adf65438
 
 https://github.com/user-attachments/assets/d1c7778c-03f4-4495-90b6-da8a6fac05d8
 
-### Context Aware Prompts
+### Context Aware
 
 https://github.com/user-attachments/assets/c43e7bff-8a42-4522-b414-e74d1102a6e4
 
