@@ -4,9 +4,9 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
 [![Discord](https://img.shields.io/discord/1171831108313301034)](https://discord.gg/KgTkR5Rffz)
 
-Voqal is a programming assistant built for software developers looking to enhance their productivity with natural speech
-programming. Using Voqal, you can navigate, write, run, and debug software in JetBrains IDEs using your voice. Write
-code faster, reduce repetitive strain injuries, and improve focus and productivity. Voqal
+Voqal is a voice-powered assistant that provides users an efficient and intuitive way to interact with their
+favorite applications, services, and websites using natural speech. Voqal is designed to be easy to use, customize,
+and extend, allowing users to create their own voice commands and workflows. Voqal
 is [promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
 allowing you to customize your experience and control your data.
 
