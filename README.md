@@ -10,6 +10,8 @@ and extend, allowing users to create their own voice commands and workflows. Voq
 is [fully-promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
 allowing you to customize your experience and control your data.
 
+https://github.com/user-attachments/assets/41da1a06-a83b-4f51-80a6-9d42f7e5b8af
+
 ## Integrations
 
 ### Applications
