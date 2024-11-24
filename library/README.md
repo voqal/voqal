@@ -3,6 +3,15 @@ and tools that can be used to interact with the application or service. Contexts
 state of the application or service, while tools provide the ability to perform actions within the application or
 service.
 
+- [Applications](#applications)
+    - [Chrome](#chrome)
+    - [Visual Studio Code](#visual-studio-code)
+- [Services](#services)
+    - [Gmail API](#gmail-api)
+- [Websites](#websites)
+    - [Gmail](#gmail)
+    - [YouTube](#youtube)
+
 # Voqal (Default)
 
 ### Tools
