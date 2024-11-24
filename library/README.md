@@ -21,16 +21,7 @@ service.
 - [Create Tab](./chrome/tools/create_tab) - Create a new tab in the browser
 - [Make Tab Active](./chrome/tools/make_tab_active) - Make a tab active in the browser
 
-## Services
-
-### Gmail API
-
-#### Tools
-
-- [Add Label](./gmail_api/tools/add_label) - Add a label to an email
-- [Make Draft](./gmail_api/tools/make_draft) - Create a draft email
-
-## Visual Studio Code
+### Visual Studio Code
 
 #### Context
 
@@ -49,6 +40,15 @@ service.
 - [Looks Good](./vscode/tools/looks_good) - Mark a transcription as "looks good"
 - [Open File](./vscode/tools/open_file) - Open a file in Visual Studio Code
 - [Toggle Edit Mode](./vscode/tools/toggle_edit_mode) - Toggle edit mode in the active text editor in Visual Studio Code
+
+## Services
+
+### Gmail API
+
+#### Tools
+
+- [Add Label](./gmail_api/tools/add_label) - Add a label to an email
+- [Make Draft](./gmail_api/tools/make_draft) - Create a draft email
 
 ## Web
 
