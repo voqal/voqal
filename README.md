@@ -25,4 +25,5 @@ allowing you to customize your experience and control your data.
 The Voqal Library is a collection of open-source scripts used to provide Voqal with the ability to interact with various
 applications and services.
 
-For a complete list of contexts and tools, see the [Voqal Library](./library).
+For a complete list of applications, services, and websites that Voqal supports, please visit the
+[Voqal Library](./library/README.md).
