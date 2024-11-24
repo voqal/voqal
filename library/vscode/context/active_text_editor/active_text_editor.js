@@ -6,8 +6,10 @@ if (editor) {
         result: {
             document: {
                 text: editor.document.getText(),
-                fileName: editor.document.fileName,
-                selectedText: selectedText
+                path: editor.document.fileName.replace(/\\/g, '/'),
+                filename: editor.document.fileName.replace(/\\/g, '/').split('/').pop(),
+                selectedText: selectedText,
+                language: editor.document.languageId
             }
         }
     };

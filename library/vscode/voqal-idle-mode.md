@@ -161,7 +161,7 @@ To use a tool respond in the following format:
 
 ```{{ file.language }}
 
-{{ withLineNumbers(file.code) }}
+{{ file.code }}
 
 ```
 
@@ -175,15 +175,15 @@ To use a tool respond in the following format:
 
 ### Viewing Code
 
-{% if developer.viewingCode != null %}
+{% if library.vscode.active_text_editor != null %}
 
 > The code the developer is currently viewing.
 
-#### {{ developer.viewingCode.filename }}
+#### {{ library.vscode.active_text_editor.document.filename }}
 
-```{{ developer.viewingCode.language }}
+```{{ library.vscode.active_text_editor.document.language }}
 
-{{ developer.viewingCode.codeWithLineNumbers }}
+{{ withLineNumbers(library.vscode.active_text_editor.document.text) }}
 
 ```
 
