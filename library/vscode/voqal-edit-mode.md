@@ -22,6 +22,7 @@ selector:
 tools:
   - vscode/tools/cancel
   - vscode/tools/looks_good
+  - vscode/tools/edit_text
 ---
 
 # System
@@ -137,13 +138,13 @@ If the developer says looks good, respond with `{"accept": true}`.
 
 {% else %}
 
-{% if developer.viewingFile %}
+{% if library.vscode.active_text_editor != null %}
 
-### {{ developer.viewingFile }}
+### {{ library.vscode.active_text_editor.document.filename }}
 
-```{{ developer.viewingCode.language }}
+```{{ library.vscode.active_text_editor.document.language }}
 
-{{ chunkText(developer.viewingCode, 200, "LINES").codeWithLineNumbers }}
+{{ withLineNumbers(library.vscode.active_text_editor.document.text) }}
 
 ```
 
