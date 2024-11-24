@@ -1,5 +1,4 @@
-The Voqal Library is a collection of open-source scripts used to provide Voqal with the ability to interact with various
-applications and services. The library is organized by application and service, with each containing a set of contexts
+The Voqal Library is organized by application and service, with each containing a set of contexts
 and tools that can be used to interact with the application or service. Contexts provide information about the current
 state of the application or service, while tools provide the ability to perform actions within the application or
 service.
