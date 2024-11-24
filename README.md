@@ -7,7 +7,7 @@
 Voqal is a voice-powered assistant that provides users an efficient and intuitive way to interact with their
 favorite applications, services, and websites using natural speech. Voqal is designed to be easy to use, customize,
 and extend, allowing users to create their own voice commands and workflows. Voqal
-is [promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
+is [fully-promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
 allowing you to customize your experience and control your data.
 
 ## Features
