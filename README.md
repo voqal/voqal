@@ -4,7 +4,7 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
 [![Discord](https://img.shields.io/discord/1171831108313301034)](https://discord.gg/KgTkR5Rffz)
 
-Voqal is a voice-powered assistant that provides users an efficient and intuitive way to interact with their
+Voqal is a voice-native AI agent providing users an efficient and intuitive way to interact with their
 favorite applications, services, and websites using natural speech. Voqal is designed to be easy to use, customize,
 and extend, allowing users to create their own voice commands and workflows. Voqal
 is [fully-promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
