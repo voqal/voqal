@@ -10,6 +10,17 @@ and extend, allowing users to create their own voice commands and workflows. Voq
 is [fully-promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
 allowing you to customize your experience and control your data.
 
+## Integrations
+
+### Applications
+
+- [Chrome](https://github.com/voqal/chrome-integration)
+- [Visual Studio Code](https://github.com/voqal/vscode-integration)
+
+### Services
+
+- [Gmail API](./library/README.md#gmail-api)
+
 ## Features
 
 ### Realtime Context
