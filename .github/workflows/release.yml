@@ -1,0 +1,62 @@
+name: Release Voqal
+
+on:
+  workflow_dispatch:
+
+jobs:
+  
+  get_asset:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: List Releases
+        run: gh release list --repo voqal/voqal-dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+
+      - name: Fetch Latest Release Tag
+        run: |
+          LATEST_RELEASE=$(gh release list --repo voqal/voqal-dev --limit 1 --json tagName --jq '.[0].tagName')
+          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+
+      - name: Fetch Latest Release Asset
+        run: gh release download --repo voqal/voqal-dev ${{ env.LATEST_RELEASE }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+
+      - name: List Downloaded Files
+        run: ls
+
+      - name: Upload Downloaded Assets as New Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dmg_files=$(ls *.dmg 2>/dev/null || echo "")
+          msi_file=$(ls *.msi 2>/dev/null || echo "")
+          deb_file=$(ls *.deb 2>/dev/null || echo "")
+
+          # Check if the files exist before proceeding
+          if [[ -z "$dmg_files" ]]; then
+            echo "No .dmg files found."
+            exit 1
+          fi
+
+          if [[ -z "$msi_file" ]]; then
+            echo "No .msi file found."
+            exit 1
+          fi
+
+          if [[ -z "$deb_file" ]]; then
+            echo "No .deb file found."
+            exit 1
+          fi
+
+          gh release create "${{ env.LATEST_RELEASE }}" $dmg_files "$msi_file" "$deb_file" \
+            -t "${{ env.LATEST_RELEASE }}" --draft --generate-notes
