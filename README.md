@@ -1,7 +1,7 @@
 <img src='.github/media/logo-horizontal-text.svg' width='275'>
 
-[![Version](https://img.shields.io/jetbrains/plugin/v/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/23086-voqal-coder.svg)](https://plugins.jetbrains.com/plugin/23086-voqal-coder)
+[![Version](https://img.shields.io/github/v/release/voqal/voqal?include_prereleases)](https://github.com/voqal/voqal/releases)
+[![Downloads](https://img.shields.io/github/downloads/voqal/voqal/total)](https://github.com/voqal/voqal/releases)
 [![Discord](https://img.shields.io/discord/1171831108313301034)](https://discord.gg/KgTkR5Rffz)
 
 Voqal is a voice-native AI agent providing users an efficient and intuitive way to interact with their
