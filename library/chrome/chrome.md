@@ -12,8 +12,15 @@ selector:
   computer:
     activeApplication:
       processName:
-        - chrome.exe
+        # Windows
         - brave.exe
+        - chrome.exe
+        # MacOs
+        - Brave Browser
+        - Google Chrome
+        # Linux
+        - brave
+        - chrome
 
 tools:
   - voqal/tools/*
