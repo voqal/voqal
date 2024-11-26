@@ -15,6 +15,7 @@ selector:
     activeApplication:
       processName:
         - Code.exe
+        - code
   user:
     vscode:
       edit_mode: true

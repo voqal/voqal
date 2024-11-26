@@ -14,6 +14,7 @@ selector:
     activeApplication:
       processName:
         - Code.exe
+        - code
 
 tools:
   - voqal/tools/*
