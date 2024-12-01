@@ -1,0 +1,32 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        # Windows
+        - brave.exe
+        - chrome.exe
+        # MacOs
+        - Brave Browser
+        - Google Chrome
+        # Linux
+        - brave
+        - chrome
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: function
+function:
+  name: play_video
+  description: Play/Pause the video.
+  parameters:
+    type: object
+    properties:
+      play:
+        type: boolean
+        description: True to play the video, false to pause the video.
+    required:
+      - play
+  exec:
+    language: javascript

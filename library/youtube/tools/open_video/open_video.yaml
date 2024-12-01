@@ -1,0 +1,32 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        # Windows
+        - brave.exe
+        - chrome.exe
+        # MacOs
+        - Brave Browser
+        - Google Chrome
+        # Linux
+        - brave
+        - chrome
+  integration:
+    chrome:
+      activeTab:
+        host: www.youtube.com
+type: function
+function:
+  name: open_video
+  description: Opens and plays a video by its ID.
+  parameters:
+    type: object
+    properties:
+      video_id:
+        type: string
+        description: The video ID.
+    required:
+      - video_id
+  exec:
+    language: javascript
