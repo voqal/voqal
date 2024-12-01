@@ -45,3 +45,29 @@ tools:
 {% endfor %}
 
 {% endif %}
+
+{% if library.youtube.search_results is not empty %}
+
+## Search Results
+
+{% for result in library.youtube.search_results %}
+
+- {{ result }}
+
+{% endfor %}
+
+{% endif %}
+
+{% if library.youtube.up_next is not empty %}
+
+## Up Next
+
+> If told to play something which matches a video in this list, use the open_video tool to play it.
+
+{% for result in library.youtube.up_next %}
+
+- {{ result }}
+
+{% endfor %}
+
+{% endif %}

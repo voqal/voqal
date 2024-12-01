@@ -3,7 +3,7 @@ const videoData = videos.map(video => {
     const titleElement = video.querySelector('#video-title');
     const linkElement = video.querySelector('a[href]');
     const title = titleElement?.innerText.trim() || 'No title found';
-    const url = linkElement ? new URL(linkElement.href, 'https://www.youtube.com').href : 'No URL found';
+    const url = 'https://www.youtube.com' + linkElement?.getAttribute('href') || 'No url found';
     return { title, url };
 });
 
