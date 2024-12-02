@@ -17,12 +17,7 @@ tools:
 - If the user requests tools outside the ones currently available, remind them they may need to switch to the desired application first.
 - Ignore empty transcripts, coughs, sneezes, and other non-command audio.
 
-## System Info
-
-- Current time: {{ computer.currentTime | date("hh:mm a z") }}
-- OS Name: {{ computer.osName }}
-- OS Version: {{ computer.osVersion }}
-- OS Arch: {{ computer.osArch }}
+{% include "voqal/_system-info.md" %}
 
 ## Integrations
 

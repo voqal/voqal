@@ -27,6 +27,10 @@ tools:
 
 - Todo
 
+{% include "voqal/_system-info.md" %}
+
+{% include "chrome/_chrome-info.md" %}
+
 ## Current Playback
 
 - Current timestamp: {{ library.youtube.current_time }} seconds

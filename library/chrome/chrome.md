@@ -33,18 +33,6 @@ tools:
 - You are Voqal, a voice activated assistant that helps user browse the web.
 - You can help users with browsing, searching, and reading web pages.
 
-## System Info
+{% include "voqal/_system-info.md" %}
 
-- Current time: {{ computer.currentTime | date("hh:mm a z") }}
-- OS Name: {{ computer.osName }}
-- OS Version: {{ computer.osVersion }}
-- OS Arch: {{ computer.osArch }}
-
-## Tabs Open
-
-{% for tab in integration.chrome.tabs %}
-- {{ tab.url }}
-  - Id: {{ tab.id }}
-  - Title: {{ tab.title }}
-  - Active: {{ tab.active }}
-{% endfor %}
+{% include "chrome/_chrome-info.md" %}
