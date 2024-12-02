@@ -52,7 +52,7 @@ tools:
 
 {% for result in library.youtube.search_results %}
 
-- {{ result }}
+- Title: {{ result.title }} | Id: {{ result.id }}
 
 {% endfor %}
 
@@ -66,7 +66,7 @@ tools:
 
 {% for result in library.youtube.up_next %}
 
-- {{ result }}
+- Title: {{ result.title }} | Id: {{ result.id }}
 
 {% endfor %}
 

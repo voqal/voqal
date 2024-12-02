@@ -4,7 +4,8 @@ const videoData = videos.map(video => {
     const linkElement = video.querySelector('a[href]');
     const title = titleElement?.innerText.trim() || 'No title found';
     const url = 'https://www.youtube.com' + linkElement?.getAttribute('href') || 'No url found';
-    return { title, url };
+    const id = url.split('v=')[1];
+    return { title, url, id };
 });
 
 videoData;
