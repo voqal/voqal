@@ -1,0 +1,32 @@
+integration: chrome
+selector:
+  computer:
+    activeApplication:
+      processName:
+        # Windows
+        - brave.exe
+        - chrome.exe
+        # MacOs
+        - Brave Browser
+        - Google Chrome
+        # Linux
+        - brave
+        - chrome
+  integration:
+    chrome:
+      activeTab:
+        host: www.amazon.com
+type: function
+function:
+  name: search_amazon
+  description: Search for a product on Amazon.
+  parameters:
+    type: object
+    properties:
+      query:
+        type: string
+        description: The search query.
+    required:
+      - query
+  exec:
+    language: javascript
