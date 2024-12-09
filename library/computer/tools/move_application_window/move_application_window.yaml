@@ -1,0 +1,24 @@
+type: function
+function:
+  name: move_application_window
+  description: Moves the specified application window in the specified direction.
+  parameters:
+    type: object
+    properties:
+      application_id:
+        type: string
+        description: The id of the application to move.
+      direction:
+        type: string
+        description: The direction to move the application window.
+        enum:
+          - "TOP"
+          - "BOTTOM"
+          - "LEFT"
+          - "RIGHT"
+          - "FULL_SCREEN"
+    required:
+      - application_id
+      - direction
+  exec:
+    language: kotlin

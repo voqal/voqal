@@ -1,0 +1,14 @@
+type: function
+function:
+  name: show_application
+  description: Brings the specified application to the foreground.
+  parameters:
+    type: object
+    properties:
+      application_id:
+        type: string
+        description: The id of the application to bring to the foreground.
+    required:
+      - application_id
+  exec:
+    language: kotlin

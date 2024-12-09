@@ -15,6 +15,7 @@
 
 - ID: {{ app.id }}
 - Process Name: {{ app.processName }}
+- Foreground: {{ app.foreground }}
 
 {% endfor %}
 
