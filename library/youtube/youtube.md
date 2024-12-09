@@ -27,7 +27,7 @@ tools:
 
 - Todo
 
-{% include "voqal/_system-info.md" %}
+{% include "computer/_computer-info.md" %}
 
 {% include "chrome/_chrome-info.md" %}
 

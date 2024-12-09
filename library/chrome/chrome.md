@@ -33,6 +33,6 @@ tools:
 - You are Voqal, a voice activated assistant that helps user browse the web.
 - You can help users with browsing, searching, and reading web pages.
 
-{% include "voqal/_system-info.md" %}
+{% include "computer/_computer-info.md" %}
 
 {% include "chrome/_chrome-info.md" %}

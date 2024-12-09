@@ -6,6 +6,7 @@ promptSettings:
   separateInitialUserMessage: true
 
 tools:
+  - computer/tools/*
   - voqal/tools/*
 ---
 
@@ -17,26 +18,4 @@ tools:
 - If the user requests tools outside the ones currently available, remind them they may need to switch to the desired application first.
 - Ignore empty transcripts, coughs, sneezes, and other non-command audio.
 
-{% include "voqal/_system-info.md" %}
-
-## Integrations
-
-### Available 
-
-> These integrations are currently connected and available for use. Remember they must be in the foreground to interact with them.
-
-{% for entry in integration %}
-{% if entry.value.connected %}
-  - {{ entry.key }}
-{% endif %}
-{% endfor %}
-
-### Unavailable
-
-> These integrations are supported but not connected. Tell the user to activate them if they want to use them.
-
-{% for entry in integration %}
-{% if not entry.value.connected %}
-  - {{ entry.key }}
-{% endif %}
-{% endfor %}
+{% include "computer/_computer-info.md" %}
