@@ -1,0 +1,12 @@
+integration: vscode
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Code.exe
+type: function
+function:
+  name: run_file
+  description: Run the file in the active editor.
+  exec:
+    language: javascript
