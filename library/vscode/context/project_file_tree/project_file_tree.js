@@ -1,4 +1,7 @@
-const files = await vscode.workspace.findFiles('**/*');
+const files = await vscode.workspace.findFiles(
+    '**/*',
+    '**/{node_modules,.venv,.idea,target}/**'
+);
 const namesAndType = await Promise.all(files.map(async (file) => {
     const path = file.path.replace(vscode.workspace.workspaceFolders[0].uri.path + '/', ''); // Relative path
     const type = (await vscode.workspace.fs.stat(file)).type;
