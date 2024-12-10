@@ -3,6 +3,7 @@ promptSettings:
   languageModel: "VOQAL_PRO"
   streamCompletions: true
   functionCalling: "NATIVE"
+  toolChoice: "REQUIRED"
   separateInitialUserMessage: true
 
 selector:
@@ -25,7 +26,6 @@ selector:
 tools:
   - voqal/tools/*
   - chrome/tools/*
-  - youtube/tools/*
 ---
 
 ## Assistant Instructions
