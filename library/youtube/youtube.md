@@ -18,6 +18,7 @@ selector:
         host: www.youtube.com
 
 tools:
+  - computer/tools/*
   - voqal/tools/*
   - chrome/tools/*
   - youtube/tools/*

@@ -24,6 +24,7 @@ selector:
         - chrome
 
 tools:
+  - computer/tools/*
   - voqal/tools/*
   - chrome/tools/*
 ---
