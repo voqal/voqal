@@ -16,6 +16,7 @@ if (!pythonExtension.isActive) {
 }
 
 await vscode.commands.executeCommand('python.execInTerminal');
+//java.debug.runJavaFile
 
 const response = {
     status: 'success',
