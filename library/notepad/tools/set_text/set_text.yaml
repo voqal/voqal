@@ -1,0 +1,20 @@
+integration: windows
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Notepad.exe
+type: function
+function:
+  name: set_text
+  description: Updates the text in the active Notepad window. Use answer_question if you want to communicate with the user.
+  parameters:
+    type: object
+    properties:
+      text:
+        type: string
+        description: The text to set in the Notepad window.
+    required:
+      - text
+  exec:
+    language: kotlin

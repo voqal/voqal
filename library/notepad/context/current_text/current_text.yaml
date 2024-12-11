@@ -1,0 +1,7 @@
+integration: windows #todo: use selector
+selector:
+  computer:
+    activeApplication:
+      processName:
+        - Notepad.exe
+type: javascript
