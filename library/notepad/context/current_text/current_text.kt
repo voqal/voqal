@@ -12,7 +12,6 @@ val documentText: String? = if (handle != null) {
         val application = Application(ElementBuilder(rootElement).handle(handle).attached(true))
         val window = Window(ElementBuilder(application.element))
         val theText = window.getDocument(Search.getBuilder(0).build()).text
-        log.info("Got text from Notepad: $theText")
         theText
     } catch (e: Exception) {
         log.warn("Failed to get text from Notepad")
