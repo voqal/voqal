@@ -1,7 +1,5 @@
-import mmarquee.automation.UIAutomation
 import mmarquee.automation.controls.Application
 import mmarquee.automation.controls.ElementBuilder
-import mmarquee.automation.controls.Search
 import mmarquee.automation.controls.Window
 import mmarquee.automation.pattern.Value
 
@@ -11,7 +9,11 @@ val documentText: String? = if (handle != null) {
     try {
         val application = Application(ElementBuilder(rootElement).handle(handle).attached(true))
         val window = Window(ElementBuilder(application.element))
-        val theText = window.getDocument(Search.getBuilder(0).build()).text
+        val theText = try {
+            window.getDocument(0).text //new notepad
+        } catch (_: IndexOutOfBoundsException) {
+            window.getEditBox(0).value //old notepad
+        }
         theText
     } catch (e: Exception) {
         log.warn("Failed to get text from Notepad")

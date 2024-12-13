@@ -1,7 +1,6 @@
-import mmarquee.automation.UIAutomation
+import mmarquee.automation.controls.AutomationBase
 import mmarquee.automation.controls.Application
 import mmarquee.automation.controls.ElementBuilder
-import mmarquee.automation.controls.Search
 import mmarquee.automation.controls.Window
 import mmarquee.automation.pattern.Value
 
@@ -10,11 +9,15 @@ val rootElement = automation.rootElement
 val handle = applicationManager.getWindowHandleByName("Notepad") //todo: pass window
 val application = Application(ElementBuilder(rootElement).handle(handle).attached(true))
 val window = Window(ElementBuilder(application.element))
-val document = try {
-    window.getDocument(Search.getBuilder(0).build())
+val document: AutomationBase? = try {
+    window.getDocument(0) //new notepad
 } catch (e: IndexOutOfBoundsException) {
-    log.error("Failed to get document", e)
-    null
+    try {
+        window.getEditBox(0) //old notepad
+    } catch (e: IndexOutOfBoundsException) {
+        log.error("Failed to get edit box") //todo: add exception
+        null
+    }
 }
 if (document?.isValuePatternAvailable == true) {
     val valuePattern = document.requestAutomationPattern<Value>(Value::class.java)
@@ -25,7 +28,7 @@ if (document?.isValuePatternAvailable == true) {
         try {
             valuePattern.setValue(text)
         } catch (e: Exception) {
-            log.error("Failed to set text", e)
+            log.error("Failed to set text") //todo: add exception
         }
     }
 } else if (document != null) {
