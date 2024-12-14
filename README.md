@@ -8,7 +8,7 @@ Voqal is a voice-native AI agent providing users an efficient and intuitive way 
 favorite applications, services, and websites using natural speech. Voqal is designed to be easy to use, customize,
 and extend, allowing users to create their own voice commands and workflows. Voqal
 is [fully-promptable](https://docs.voqal.dev/directing/overview) and [privacy-focused](https://docs.voqal.dev/privacy),
-allowing you to customize your experience and control your data.
+allowing you to tailor your experience and control your data.
 
 https://github.com/user-attachments/assets/41da1a06-a83b-4f51-80a6-9d42f7e5b8af
 
