@@ -15,7 +15,9 @@ val request = TtsProvider.SpeechStreamRequest(
 
 contextManager.registerContextListener {
     val text = it.context["text"] as String? ?: return@registerContextListener
-    if (aiProvider.isTtsProvider()) {
+    if (aiProvider.isStmProvider()) {
+        return@registerContextListener
+    } else if (aiProvider.isTtsProvider()) {
         val ttsProvider = aiProvider.asTtsProvider()
         if (ttsProvider.isTtsStreamable()) {
             val newText = text.substring(savedText.length)
